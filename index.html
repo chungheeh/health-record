@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>운동 & 식단 기록</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#667eea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="헬스기록">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 20px 24px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(102,126,234,0.4);
+    }
+    header h1 { font-size: 1.6rem; font-weight: 700; }
+    header p { font-size: 0.85rem; opacity: 0.85; margin-top: 4px; }
+
+    .tab-bar {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid #e8eaf6;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #888;
+      transition: all 0.2s;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+    }
+    .tab-btn.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .page { display: none; padding: 20px 16px; max-width: 640px; margin: 0 auto; }
+    .page.active { display: block; }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    }
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #444;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+    .form-row.full { grid-template-columns: 1fr; }
+
+    label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #666;
+      display: block;
+      margin-bottom: 4px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      background: #fafafa;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: #667eea; background: white; }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-submit:hover { opacity: 0.9; }
+    .btn-submit:active { transform: scale(0.98); }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    .filter-row input[type="date"] { flex: 1; }
+    .btn-clear-filter {
+      padding: 8px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: #888;
+      white-space: nowrap;
+    }
+
+    .record-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .record-item {
+      background: #f8f9ff;
+      border: 1.5px solid #e8eaf6;
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .record-info { flex: 1; min-width: 0; }
+    .record-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #2d2d5e;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .record-detail {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 4px;
+    }
+    .record-date {
+      font-size: 0.75rem;
+      color: #bbb;
+      margin-top: 3px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+    .badge-exercise { background: #e8f4fd; color: #1a73e8; }
+    .badge-meal { background: #fce8e6; color: #d93025; }
+    .badge-morning { background: #fff3e0; color: #e65100; }
+    .badge-lunch { background: #e8f5e9; color: #2e7d32; }
+    .badge-dinner { background: #ede7f6; color: #512da8; }
+    .badge-snack { background: #fce4ec; color: #c62828; }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #ccc;
+      font-size: 1.1rem;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-delete:hover { color: #e53935; }
+
+    .empty-msg {
+      text-align: center;
+      color: #bbb;
+      font-size: 0.9rem;
+      padding: 30px 0;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 0;
+    }
+    .summary-box {
+      background: #f0f2ff;
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+    }
+    .summary-box .num {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #667eea;
+    }
+    .summary-box .lbl {
+      font-size: 0.72rem;
+      color: #888;
+      margin-top: 2px;
+    }
+    .summary-box.diet .num { color: #e65100; }
+    .summary-box.diet { background: #fff3e0; }
+
+    @media (max-width: 400px) {
+      .form-row.triple { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>💪 운동 &amp; 🥗 식단 기록</h1>
+  <p>건강한 하루를 기록하세요</p>
+</header>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('exercise')">💪 운동</button>
+  <button class="tab-btn" onclick="switchTab('diet')">🥗 식단</button>
+  <button class="tab-btn" onclick="switchTab('history')">📋 기록</button>
+</div>
+
+<!-- 운동 탭 -->
+<div id="tab-exercise" class="page active">
+  <div class="card">
+    <h2>📊 오늘의 요약</h2>
+    <div class="summary-grid">
+      <div class="summary-box"><div class="num" id="today-exercise-count">0</div><div class="lbl">오늘 운동</div></div>
+      <div class="summary-box"><div class="num" id="total-exercise-count">0</div><div class="lbl">총 운동 기록</div></div>
+      <div class="summary-box diet"><div class="num" id="today-kcal">0</div><div class="lbl">오늘 칼로리</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>➕ 운동 추가</h2>
+    <div class="form-row">
+      <div>
+        <label>날짜</label>
+        <input type="date" id="ex-date">
+      </div>
+      <div>
+        <label>운동 종류</label>
+        <select id="ex-category">
+          <option value="근력">🏋️ 근력</option>
+          <option value="유산소">🏃 유산소</option>
+          <option value="유연성">🧘 유연성</option>
+          <option value="스포츠">⚽ 스포츠</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row full">
+      <div>
+        <label>운동명</label>
+        <input type="text" id="ex-name" placeholder="예: 벤치프레스, 달리기...">
+      </div>
+    </div>
+    <div class="form-row triple">
+      <div>
+        <label>세트</label>
+        <input type="number" id="ex-sets" placeholder="3" min="1">
+      </div>
+      <div>
+        <label>횟수 / 시간</label>
+        <input type="number" id="ex-reps" placeholder="10" min="1">
+      </div>
+      <div>
+        <label>무게 (kg)</label>
+        <input type="number" id="ex-weight" placeholder="0" min="0" step="0.5">
+      </div>
+    </div>
+    <div class="form-row full">
+      <div>
+        <label>메모</label>
+        <input type="text" id="ex-memo" placeholder="선택 사항">
+      </div>
+    </div>
+    <button class="btn-submit" onclick="addExercise()">운동 기록 추가</button>
+  </div>
+
+  <div class="card">
+    <h2>📅 최근 운동</h2>
+    <div id="exercise-list" class="record-list"></div>
+  </div>
+</div>
+
+<!-- 식단 탭 -->
+<div id="tab-diet" class="page">
+  <div class="card">
+    <h2>➕ 식단 추가</h2>
+    <div class="form-row">
+      <div>
+        <label>날짜</label>
+        <input type="date" id="diet-date">
+      </div>
+      <div>
+        <label>식사 종류</label>
+        <select id="diet-meal">
+          <option value="아침">🌅 아침</option>
+          <option value="점심">☀️ 점심</option>
+          <option value="저녁">🌙 저녁</option>
+          <option value="간식">🍎 간식</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row full">
+      <div>
+        <label>음식명</label>
+        <input type="text" id="diet-name" placeholder="예: 닭가슴살, 현미밥...">
+      </div>
+    </div>
+    <div class="form-row triple">
+      <div>
+        <label>칼로리 (kcal)</label>
+        <input type="number" id="diet-kcal" placeholder="0" min="0">
+      </div>
+      <div>
+        <label>단백질 (g)</label>
+        <input type="number" id="diet-protein" placeholder="0" min="0" step="0.1">
+      </div>
+      <div>
+        <label>탄수화물 (g)</label>
+        <input type="number" id="diet-carb" placeholder="0" min="0" step="0.1">
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>지방 (g)</label>
+        <input type="number" id="diet-fat" placeholder="0" min="0" step="0.1">
+      </div>
+      <div>
+        <label>메모</label>
+        <input type="text" id="diet-memo" placeholder="선택 사항">
+      </div>
+    </div>
+    <button class="btn-submit" onclick="addDiet()">식단 기록 추가</button>
+  </div>
+
+  <div class="card">
+    <h2>📅 최근 식단</h2>
+    <div id="diet-list" class="record-list"></div>
+  </div>
+</div>
+
+<!-- 기록 탭 -->
+<div id="tab-history" class="page">
+  <div class="card">
+    <h2>🔍 날짜 필터</h2>
+    <div class="filter-row">
+      <div style="flex:1">
+        <label>시작일</label>
+        <input type="date" id="filter-start">
+      </div>
+      <div style="flex:1">
+        <label>종료일</label>
+        <input type="date" id="filter-end">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-submit" style="margin-top:0" onclick="applyFilter()">필터 적용</button>
+      <button class="btn-clear-filter" onclick="clearFilter()">초기화</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💪 운동 기록 전체</h2>
+    <div id="history-exercise-list" class="record-list"></div>
+  </div>
+
+  <div class="card">
+    <h2>🥗 식단 기록 전체</h2>
+    <div id="history-diet-list" class="record-list"></div>
+  </div>
+</div>
+
+<script>
+  // --- Storage ---
+  function loadData(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || []; }
+    catch { return []; }
+  }
+  function saveData(key, data) {
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  let exercises = loadData('exercises');
+  let diets = loadData('diets');
+
+  // --- Tab ---
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', ['exercise','diet','history'][i] === tab);
+    });
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    if (tab === 'history') renderHistory();
+  }
+
+  // --- Date helpers ---
+  function today() {
+    return new Date().toISOString().slice(0,10);
+  }
+  function fmt(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T00:00:00');
+    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  // --- Init default dates ---
+  document.getElementById('ex-date').value = today();
+  document.getElementById('diet-date').value = today();
+
+  // --- Exercise ---
+  function addExercise() {
+    const name = document.getElementById('ex-name').value.trim();
+    if (!name) { alert('운동명을 입력하세요.'); return; }
+    const entry = {
+      id: Date.now(),
+      date: document.getElementById('ex-date').value || today(),
+      category: document.getElementById('ex-category').value,
+      name,
+      sets: document.getElementById('ex-sets').value || '',
+      reps: document.getElementById('ex-reps').value || '',
+      weight: document.getElementById('ex-weight').value || '',
+      memo: document.getElementById('ex-memo').value.trim(),
+    };
+    exercises.unshift(entry);
+    saveData('exercises', exercises);
+    ['ex-name','ex-sets','ex-reps','ex-weight','ex-memo'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('ex-date').value = today();
+    renderExerciseList();
+    updateSummary();
+  }
+
+  function deleteExercise(id) {
+    exercises = exercises.filter(e => e.id !== id);
+    saveData('exercises', exercises);
+    renderExerciseList();
+    renderHistory();
+    updateSummary();
+  }
+
+  function renderExerciseList() {
+    const el = document.getElementById('exercise-list');
+    const recent = exercises.slice(0, 10);
+    el.innerHTML = recent.length ? recent.map(e => exerciseCard(e, 'deleteExercise')).join('') : '<div class="empty-msg">운동 기록이 없습니다.</div>';
+  }
+
+  function exerciseCard(e, delFn) {
+    const detail = [e.sets && `${e.sets}세트`, e.reps && `${e.reps}회`, e.weight && `${e.weight}kg`].filter(Boolean).join(' · ');
+    return `<div class="record-item">
+      <div class="record-info">
+        <div class="record-name"><span class="badge badge-exercise">${e.category}</span>${e.name}</div>
+        ${detail ? `<div class="record-detail">${detail}</div>` : ''}
+        ${e.memo ? `<div class="record-detail">📝 ${e.memo}</div>` : ''}
+        <div class="record-date">${fmt(e.date)}</div>
+      </div>
+      <button class="btn-delete" onclick="${delFn}(${e.id})">✕</button>
+    </div>`;
+  }
+
+  // --- Diet ---
+  function addDiet() {
+    const name = document.getElementById('diet-name').value.trim();
+    if (!name) { alert('음식명을 입력하세요.'); return; }
+    const entry = {
+      id: Date.now(),
+      date: document.getElementById('diet-date').value || today(),
+      meal: document.getElementById('diet-meal').value,
+      name,
+      kcal: parseFloat(document.getElementById('diet-kcal').value) || 0,
+      protein: parseFloat(document.getElementById('diet-protein').value) || 0,
+      carb: parseFloat(document.getElementById('diet-carb').value) || 0,
+      fat: parseFloat(document.getElementById('diet-fat').value) || 0,
+      memo: document.getElementById('diet-memo').value.trim(),
+    };
+    diets.unshift(entry);
+    saveData('diets', diets);
+    ['diet-name','diet-kcal','diet-protein','diet-carb','diet-fat','diet-memo'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('diet-date').value = today();
+    renderDietList();
+    updateSummary();
+  }
+
+  function deleteDiet(id) {
+    diets = diets.filter(d => d.id !== id);
+    saveData('diets', diets);
+    renderDietList();
+    renderHistory();
+    updateSummary();
+  }
+
+  const mealBadgeClass = { '아침': 'badge-morning', '점심': 'badge-lunch', '저녁': 'badge-dinner', '간식': 'badge-snack' };
+
+  function dietCard(d, delFn) {
+    const macros = [d.kcal && `${d.kcal}kcal`, d.protein && `단백질 ${d.protein}g`, d.carb && `탄수 ${d.carb}g`, d.fat && `지방 ${d.fat}g`].filter(Boolean).join(' · ');
+    return `<div class="record-item">
+      <div class="record-info">
+        <div class="record-name"><span class="badge ${mealBadgeClass[d.meal] || ''}">${d.meal}</span>${d.name}</div>
+        ${macros ? `<div class="record-detail">${macros}</div>` : ''}
+        ${d.memo ? `<div class="record-detail">📝 ${d.memo}</div>` : ''}
+        <div class="record-date">${fmt(d.date)}</div>
+      </div>
+      <button class="btn-delete" onclick="${delFn}(${d.id})">✕</button>
+    </div>`;
+  }
+
+  function renderDietList() {
+    const el = document.getElementById('diet-list');
+    const recent = diets.slice(0, 10);
+    el.innerHTML = recent.length ? recent.map(d => dietCard(d, 'deleteDiet')).join('') : '<div class="empty-msg">식단 기록이 없습니다.</div>';
+  }
+
+  // --- Summary ---
+  function updateSummary() {
+    const t = today();
+    document.getElementById('today-exercise-count').textContent = exercises.filter(e => e.date === t).length;
+    document.getElementById('total-exercise-count').textContent = exercises.length;
+    const todayKcal = diets.filter(d => d.date === t).reduce((s, d) => s + (d.kcal || 0), 0);
+    document.getElementById('today-kcal').textContent = todayKcal;
+  }
+
+  // --- History ---
+  let filterStart = '', filterEnd = '';
+
+  function applyFilter() {
+    filterStart = document.getElementById('filter-start').value;
+    filterEnd = document.getElementById('filter-end').value;
+    renderHistory();
+  }
+  function clearFilter() {
+    filterStart = ''; filterEnd = '';
+    document.getElementById('filter-start').value = '';
+    document.getElementById('filter-end').value = '';
+    renderHistory();
+  }
+
+  function inRange(date) {
+    if (filterStart && date < filterStart) return false;
+    if (filterEnd && date > filterEnd) return false;
+    return true;
+  }
+
+  function renderHistory() {
+    const exList = document.getElementById('history-exercise-list');
+    const dList = document.getElementById('history-diet-list');
+    const filteredEx = exercises.filter(e => inRange(e.date));
+    const filteredD = diets.filter(d => inRange(d.date));
+    exList.innerHTML = filteredEx.length ? filteredEx.map(e => exerciseCard(e, 'deleteExercise')).join('') : '<div class="empty-msg">운동 기록이 없습니다.</div>';
+    dList.innerHTML = filteredD.length ? filteredD.map(d => dietCard(d, 'deleteDiet')).join('') : '<div class="empty-msg">식단 기록이 없습니다.</div>';
+  }
+
+  // --- Service Worker ---
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+
+  // --- Init ---
+  renderExerciseList();
+  renderDietList();
+  updateSummary();
+</script>
+</body>
+</html>
