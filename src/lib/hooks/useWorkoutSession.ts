@@ -4,9 +4,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { calculateOneRM } from '@/lib/utils/1rm'
 
+export type SetType = 'normal' | 'warmup' | 'dropset'
+
 export interface SetData {
   id?: string
   set_number: number
+  set_type: SetType
   weight_kg: number | null
   reps: number | null
   rest_seconds?: number | null
@@ -28,8 +31,8 @@ export interface WorkoutSessionState {
   startedAt: number | null  // timestamp ms
   exercises: WorkoutExercise[]
   restTimer: {
-    startAt: number    // timestamp ms
-    duration: number   // seconds
+    startAt: number
+    duration: number
     exerciseId: string
     setNumber: number
   } | null
@@ -69,7 +72,6 @@ export function useWorkoutSession() {
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
 
-  // 마운트 시 localStorage에서 복원
   useEffect(() => {
     const saved = loadFromStorage()
     if (saved?.workoutId) {
@@ -77,7 +79,6 @@ export function useWorkoutSession() {
     }
   }, [])
 
-  // state 변경 시 localStorage 동기화
   useEffect(() => {
     if (session.workoutId) {
       saveToStorage(session)
@@ -141,7 +142,7 @@ export function useWorkoutSession() {
       exercise_name: exerciseName,
       muscle_group: muscleGroup,
       order_index: orderIndex,
-      sets: [{ set_number: 1, weight_kg: null, reps: null, completed: false }],
+      sets: [{ set_number: 1, set_type: 'normal', weight_kg: null, reps: null, completed: false }],
     }
 
     setSession(prev => ({
@@ -150,7 +151,7 @@ export function useWorkoutSession() {
     }))
   }, [session.workoutId, session.exercises.length, supabase])
 
-  // 세트 업데이트 (입력 중)
+  // 세트 업데이트
   const updateSet = useCallback((
     exerciseIndex: number,
     setIndex: number,
@@ -168,7 +169,28 @@ export function useWorkoutSession() {
     })
   }, [])
 
-  // 세트 완료 (DB 저장 + 휴식 타이머 시작)
+  // 세트 수동 추가 (+ 세트 추가 버튼)
+  const addSet = useCallback((exerciseIndex: number) => {
+    setSession(prev => {
+      const exercises = [...prev.exercises]
+      const currentSets = exercises[exerciseIndex].sets
+      const lastSet = currentSets[currentSets.length - 1]
+      const newSet: SetData = {
+        set_number: currentSets.length + 1,
+        set_type: 'normal',
+        weight_kg: lastSet?.weight_kg ?? null,
+        reps: lastSet?.reps ?? null,
+        completed: false,
+      }
+      exercises[exerciseIndex] = {
+        ...exercises[exerciseIndex],
+        sets: [...currentSets, newSet],
+      }
+      return { ...prev, exercises }
+    })
+  }, [])
+
+  // 세트 완료 (DB 저장 + 휴식 타이머)
   const completeSet = useCallback(async (
     exerciseIndex: number,
     setIndex: number,
@@ -178,17 +200,16 @@ export function useWorkoutSession() {
     const set = exercise.sets[setIndex]
     if (!exercise.id) return
 
-    // 1RM 계산
     const oneRm = (set.weight_kg && set.reps)
       ? calculateOneRM(set.weight_kg, set.reps)
       : null
 
-    // DB 저장
     const { data, error } = await supabase
       .from('sets')
       .insert({
         workout_exercise_id: exercise.id,
         set_number: set.set_number,
+        set_type: set.set_type,
         weight_kg: set.weight_kg,
         reps: set.reps,
         one_rm: oneRm,
@@ -198,22 +219,12 @@ export function useWorkoutSession() {
 
     if (error) throw error
 
-    // 상태 업데이트: 세트 완료 + 새 세트 추가 + 휴식 타이머 시작
     setSession(prev => {
       const exercises = [...prev.exercises]
       const currentSets = exercises[exerciseIndex].sets
       const updatedSets = currentSets.map((s, i) =>
         i === setIndex ? { ...s, id: data.id, completed: true, one_rm: oneRm } : s
       )
-      // 다음 세트 추가
-      if (!currentSets.some((s, i) => i > setIndex && !s.completed)) {
-        updatedSets.push({
-          set_number: currentSets.length + 1,
-          weight_kg: set.weight_kg,  // 이전 무게 기본값
-          reps: set.reps,
-          completed: false,
-        })
-      }
       exercises[exerciseIndex] = { ...exercises[exerciseIndex], sets: updatedSets }
 
       return {
@@ -228,11 +239,8 @@ export function useWorkoutSession() {
       }
     })
 
-    // 진동 예약 (휴식 타이머 완료 시)
     if ('vibrate' in navigator) {
-      setTimeout(() => {
-        navigator.vibrate([200, 100, 200])
-      }, restDuration * 1000)
+      setTimeout(() => navigator.vibrate([200, 100, 200]), restDuration * 1000)
     }
   }, [session.exercises, supabase])
 
@@ -271,7 +279,7 @@ export function useWorkoutSession() {
     return workoutId
   }, [session.workoutId, session.startedAt, supabase])
 
-  // 세션 취소 (운동 삭제)
+  // 운동 취소
   const cancelWorkout = useCallback(async () => {
     if (!session.workoutId) return
     await supabase.from('workouts').delete().eq('id', session.workoutId)
@@ -280,17 +288,14 @@ export function useWorkoutSession() {
   }, [session.workoutId, supabase])
 
   const isActive = Boolean(session.workoutId)
-  const elapsedSeconds = session.startedAt
-    ? Math.floor((Date.now() - session.startedAt) / 1000)
-    : 0
 
   return {
     session,
     isActive,
     isLoading,
-    elapsedSeconds,
     startWorkout,
     addExercise,
+    addSet,
     updateSet,
     completeSet,
     cancelRestTimer,

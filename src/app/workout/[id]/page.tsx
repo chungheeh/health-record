@@ -16,12 +16,17 @@ function formatDuration(seconds: number | null): string {
   return `${s}초`
 }
 
+const SET_TYPE_LABEL: Record<string, string> = {
+  normal: '',
+  warmup: '🌡️ 웜업',
+  dropset: '🔻 드랍',
+}
+
 export default async function WorkoutDetailPage({ params }: PageProps) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return notFound()
 
-  // 워크아웃 데이터
   const { data: workout } = await supabase
     .from('workouts')
     .select(`
@@ -38,14 +43,14 @@ export default async function WorkoutDetailPage({ params }: PageProps) {
 
   if (!workout) return notFound()
 
-  // 총 볼륨 계산
-  type SetRow = { weight_kg: number | null; reps: number | null; one_rm: number | null; set_number: number }
+  type SetRow = { weight_kg: number | null; reps: number | null; one_rm: number | null; set_number: number; set_type?: string }
   type WorkoutExRow = { exercises: { name: string; muscle_group: string } | null; sets: SetRow[] }
 
   const workoutExercises = (workout.workout_exercises as WorkoutExRow[]) ?? []
   const totalVolume = workoutExercises.reduce((sum, we) => {
     return sum + we.sets.reduce((s, set) => s + ((set.weight_kg ?? 0) * (set.reps ?? 0)), 0)
   }, 0)
+  const totalSets = workoutExercises.reduce((sum, we) => sum + we.sets.filter(s => s.weight_kg && s.reps).length, 0)
 
   const workoutDate = new Date(workout.started_at).toLocaleDateString('ko-KR', {
     year: 'numeric', month: 'long', day: 'numeric', weekday: 'short',
@@ -55,28 +60,35 @@ export default async function WorkoutDetailPage({ params }: PageProps) {
     <main className="min-h-screen bg-[#0f0f0f]">
       {/* 헤더 */}
       <header className="sticky top-0 z-50 bg-[#0f0f0f] border-b border-[#2a2a2a] px-4 h-14 flex items-center gap-3">
-        <Link href="/" className="text-[#888888]">← 홈</Link>
-        <h1 className="font-semibold text-[#f0f0f0]">운동 완료</h1>
+        <h1 className="font-semibold text-[#f0f0f0]">🎉 운동 완료</h1>
       </header>
 
       <div className="px-4 pt-4 pb-24 space-y-4">
         {/* 요약 카드 */}
         <div className="bg-[#1a1a1a] rounded-[16px] p-5">
-          <p className="text-xs text-[#888888] mb-1">{workoutDate}</p>
-          <div className="grid grid-cols-3 gap-3 mt-3">
-            <div className="text-center">
+          <p className="text-xs text-[#888888] mb-3">{workoutDate}</p>
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="bg-[#242424] rounded-[12px] p-3 text-center">
               <p className="text-2xl font-bold text-[#C8FF00] tabular-nums">
                 {formatDuration(workout.total_seconds)}
               </p>
               <p className="text-xs text-[#888888] mt-1">운동 시간</p>
             </div>
-            <div className="text-center">
+            <div className="bg-[#242424] rounded-[12px] p-3 text-center">
               <p className="text-2xl font-bold text-[#f0f0f0] tabular-nums">
                 {workoutExercises.length}
               </p>
               <p className="text-xs text-[#888888] mt-1">종목 수</p>
             </div>
-            <div className="text-center">
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-[#242424] rounded-[12px] p-3 text-center">
+              <p className="text-2xl font-bold text-[#f0f0f0] tabular-nums">
+                {totalSets}
+              </p>
+              <p className="text-xs text-[#888888] mt-1">총 세트</p>
+            </div>
+            <div className="bg-[#242424] rounded-[12px] p-3 text-center">
               <p className="text-2xl font-bold text-[#f0f0f0] tabular-nums">
                 {Math.round(totalVolume).toLocaleString()}
               </p>
@@ -100,14 +112,18 @@ export default async function WorkoutDetailPage({ params }: PageProps) {
                 <span className="text-xs text-[#888888]">{we.exercises?.muscle_group}</span>
               </div>
               <div className="px-4 py-3">
-                <div className="grid grid-cols-[32px_1fr_1fr] gap-2 text-xs text-[#555555] mb-2">
+                <div className="grid grid-cols-[32px_1fr_1fr_1fr] gap-2 text-xs text-[#555555] mb-2">
                   <span className="text-center">세트</span>
+                  <span className="text-center">종류</span>
                   <span className="text-center">무게</span>
                   <span className="text-center">횟수</span>
                 </div>
                 {completedSets.sort((a, b) => a.set_number - b.set_number).map((set, si) => (
-                  <div key={si} className="grid grid-cols-[32px_1fr_1fr] gap-2 py-1.5 text-sm">
+                  <div key={si} className="grid grid-cols-[32px_1fr_1fr_1fr] gap-2 py-1.5 text-sm">
                     <span className="text-center text-[#888888] tabular-nums">{set.set_number}</span>
+                    <span className="text-center text-xs text-[#888888]">
+                      {set.set_type ? (SET_TYPE_LABEL[set.set_type] || '기본') : '기본'}
+                    </span>
                     <span className="text-center text-[#f0f0f0] tabular-nums">{set.weight_kg}kg</span>
                     <span className="text-center text-[#f0f0f0] tabular-nums">{set.reps}회</span>
                   </div>

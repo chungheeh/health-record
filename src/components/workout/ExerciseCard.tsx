@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2, Plus, Check } from 'lucide-react'
-import type { WorkoutExercise, SetData } from '@/lib/hooks/useWorkoutSession'
+import type { WorkoutExercise, SetData, SetType } from '@/lib/hooks/useWorkoutSession'
 
 interface ExerciseCardProps {
   exercise: WorkoutExercise
@@ -11,11 +11,29 @@ interface ExerciseCardProps {
   previousSets?: { weight_kg: number | null; reps: number | null }[]
   onUpdateSet: (exerciseIndex: number, setIndex: number, updates: Partial<SetData>) => void
   onCompleteSet: (exerciseIndex: number, setIndex: number, restDuration?: number) => Promise<void>
+  onAddSet: (exerciseIndex: number) => void
   onRemove: (exerciseIndex: number) => void
   restDuration?: number
 }
 
 const REST_OPTIONS = [30, 60, 90, 120, 180]
+
+const SET_TYPE_OPTIONS: { value: SetType; label: string; color: string }[] = [
+  { value: 'normal', label: '기본', color: '#888888' },
+  { value: 'warmup', label: '웜업', color: '#FFB74D' },
+  { value: 'dropset', label: '드랍', color: '#FF6B6B' },
+]
+
+const muscleGroupColor: Record<string, string> = {
+  '가슴': 'bg-blue-500/20 text-blue-300',
+  '등': 'bg-green-500/20 text-green-300',
+  '하체': 'bg-red-500/20 text-red-300',
+  '어깨': 'bg-yellow-500/20 text-yellow-300',
+  '팔': 'bg-purple-500/20 text-purple-300',
+  '복근': 'bg-orange-500/20 text-orange-300',
+  '유산소': 'bg-pink-500/20 text-pink-300',
+  '전신': 'bg-teal-500/20 text-teal-300',
+}
 
 export default function ExerciseCard({
   exercise,
@@ -23,6 +41,7 @@ export default function ExerciseCard({
   previousSets = [],
   onUpdateSet,
   onCompleteSet,
+  onAddSet,
   onRemove,
   restDuration = 90,
 }: ExerciseCardProps) {
@@ -41,16 +60,6 @@ export default function ExerciseCard({
     }
   }
 
-  const muscleGroupColor: Record<string, string> = {
-    '가슴': 'bg-blue-500/20 text-blue-300',
-    '등': 'bg-green-500/20 text-green-300',
-    '하체': 'bg-red-500/20 text-red-300',
-    '어깨': 'bg-yellow-500/20 text-yellow-300',
-    '팔': 'bg-purple-500/20 text-purple-300',
-    '복근': 'bg-orange-500/20 text-orange-300',
-    '유산소': 'bg-pink-500/20 text-pink-300',
-    '전신': 'bg-teal-500/20 text-teal-300',
-  }
   const badgeClass = muscleGroupColor[exercise.muscle_group] ?? 'bg-[#242424] text-[#888888]'
 
   return (
@@ -74,8 +83,9 @@ export default function ExerciseCard({
       {/* 세트 목록 */}
       <div className="px-4 py-3 space-y-2">
         {/* 컬럼 헤더 */}
-        <div className="grid grid-cols-[32px_1fr_1fr_40px] gap-2 text-xs text-[#555555] mb-1">
+        <div className="grid grid-cols-[44px_1fr_1fr_1fr_40px] gap-2 text-xs text-[#555555] mb-1">
           <span className="text-center">세트</span>
+          <span className="text-center">종류</span>
           <span className="text-center">무게(kg)</span>
           <span className="text-center">횟수</span>
           <span />
@@ -86,6 +96,7 @@ export default function ExerciseCard({
             const prevSet = previousSets[setIndex]
             const isCompleted = set.completed
             const isCompleting = completing === setIndex
+            const setTypeInfo = SET_TYPE_OPTIONS.find(o => o.value === set.set_type) ?? SET_TYPE_OPTIONS[0]
 
             return (
               <motion.div
@@ -94,12 +105,27 @@ export default function ExerciseCard({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
-                className={`grid grid-cols-[32px_1fr_1fr_40px] gap-2 items-center ${isCompleted ? 'opacity-50' : ''}`}
+                className={`grid grid-cols-[44px_1fr_1fr_1fr_40px] gap-2 items-center ${isCompleted ? 'opacity-50' : ''}`}
               >
                 {/* 세트 번호 */}
                 <span className="text-center text-sm text-[#888888] font-medium tabular-nums">
                   {set.set_number}
                 </span>
+
+                {/* 세트 종류 선택 */}
+                <select
+                  value={set.set_type}
+                  onChange={e => onUpdateSet(exerciseIndex, setIndex, { set_type: e.target.value as SetType })}
+                  disabled={isCompleted}
+                  className="bg-[#242424] border border-[#2a2a2a] rounded-[8px] py-2 text-center text-xs outline-none disabled:opacity-40 appearance-none cursor-pointer"
+                  style={{ color: setTypeInfo.color }}
+                >
+                  {SET_TYPE_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value} style={{ color: opt.color, backgroundColor: '#242424' }}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
 
                 {/* 무게 입력 */}
                 <div className="relative">
@@ -163,7 +189,7 @@ export default function ExerciseCard({
       </div>
 
       {/* 휴식 시간 선택 */}
-      <div className="px-4 pb-3">
+      <div className="px-4 pb-2">
         <button
           onClick={() => setShowRestPicker(!showRestPicker)}
           className="text-xs text-[#555555] hover:text-[#888888] transition-colors"
@@ -191,12 +217,8 @@ export default function ExerciseCard({
 
       {/* + 세트 추가 */}
       <button
-        onClick={() => {
-          const lastSet = exercise.sets[exercise.sets.length - 1]
-          // 마지막이 미완료면 추가 안 함
-          if (lastSet && !lastSet.completed) return
-        }}
-        className="w-full py-2.5 flex items-center justify-center gap-1 text-xs text-[#555555] hover:text-[#888888] border-t border-[#2a2a2a] transition-colors"
+        onClick={() => onAddSet(exerciseIndex)}
+        className="w-full py-2.5 flex items-center justify-center gap-1 text-xs text-[#555555] hover:text-[#C8FF00] border-t border-[#2a2a2a] transition-colors active:bg-[#242424]"
       >
         <Plus size={14} />
         세트 추가
