@@ -1,0 +1,75 @@
+'use client'
+
+import { createClient } from '@/lib/supabase/client'
+
+export default function LoginPage() {
+  const handleGoogleLogin = async () => {
+    const supabase = createClient()
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4">
+      <div className="w-full max-w-[430px] flex flex-col items-center gap-10">
+        {/* 로고 & 슬로건 */}
+        <div className="flex flex-col items-center gap-3 text-center">
+          <span className="text-[56px] font-black text-[#C8FF00] leading-none tracking-tight">
+            W.E
+          </span>
+          <p className="text-white text-[18px] font-semibold leading-snug whitespace-pre-line">
+            {'운동과 식단\n운동은 먹는 것까지다'}
+          </p>
+        </div>
+
+        {/* 구분선 */}
+        <div className="w-full border-t border-[#2a2a2a]" />
+
+        {/* Google 로그인 버튼 */}
+        <div className="w-full">
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-3 bg-white text-black font-semibold text-[16px] py-[14px] px-6 rounded-xl hover:bg-gray-100 active:bg-gray-200 transition-colors duration-150"
+          >
+            {/* Google SVG 아이콘 */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 48 48"
+              width="22"
+              height="22"
+              aria-hidden="true"
+            >
+              <path
+                fill="#4285F4"
+                d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"
+              />
+              <path
+                fill="#34A853"
+                d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"
+              />
+              <path
+                fill="#EA4335"
+                d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"
+              />
+            </svg>
+            Google로 계속하기
+          </button>
+        </div>
+
+        {/* 하단 푸터 */}
+        <p className="text-[#888888] text-[13px] text-center leading-relaxed">
+          개인 데이터는 귀하의 기기에만 저장됩니다
+        </p>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(curl -L \"https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/woff2/PretendardVariable.woff2\" -o \"C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\PretendardVariable.woff2\")",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/woff2/PretendardVariable.woff2'' -OutFile ''C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\PretendardVariable.woff2'' -UseBasicParsing; \\(Get-Item ''C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\PretendardVariable.woff2''\\).Length\")",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''https://github.com/orioncactus/pretendard/releases/download/v1.3.9/Pretendard-1.3.9.zip'' -OutFile ''C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\Pretendard.zip'' -UseBasicParsing; \\(Get-Item ''C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\Pretendard.zip''\\).Length\")",
+      "Bash(powershell -Command \"Expand-Archive -Path ''C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\Pretendard.zip'' -DestinationPath ''C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\pretendard-extracted'' -Force; Get-ChildItem ''C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\pretendard-extracted'' -Recurse -Filter ''*Variable*'' | Select-Object FullName\")",
+      "Bash(powershell -Command \"Copy-Item ''C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\pretendard-extracted\\\\web\\\\variable\\\\woff2\\\\PretendardVariable.woff2'' ''C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\PretendardVariable.woff2'' -Force; Remove-Item ''C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\Pretendard.zip''; Remove-Item ''C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\pretendard-extracted'' -Recurse -Force; \\(Get-Item ''C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\public\\\\fonts\\\\PretendardVariable.woff2''\\).Length\")",
+      "Bash(node scripts/gen-icons.mjs)",
+      "Bash(npx tsc:*)",
+      "mcp__070ec30a-31e5-4830-85a4-ceadea988639__execute_sql",
+      "mcp__070ec30a-31e5-4830-85a4-ceadea988639__generate_typescript_types",
+      "Bash(ls \"C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\src\\\\components\\\\ui\"\" && ls \"C:Users한충희Desktopw.esrcapponboarding\"\")",
+      "Bash(ls \"C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\src\\\\components\\\\ui\"\" 2>/dev/null && ls \"C:Users한충희Desktopw.esrcapponboarding\"\")",
+      "Bash(ls \"C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\src\\\\components\\\\ui\"\" 2>/dev/null && echo \"---UI완료---\" && ls \"C:Users한충희Desktopw.esrcapponboarding\"\")",
+      "Bash(ls \"C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\src\\\\components\\\\ui\"\" 2>/dev/null && echo \"UI완료\" || echo \"UI진행중\" && ls \"C:Users한충희Desktopw.esrcapponboarding\"\")",
+      "Bash(ls \"C:\\\\Users\\\\한충희\\\\Desktop\\\\w.e\\\\src\\\\components\\\\ui\"\" 2>/dev/null && echo \"---UI완료---\" ; ls \"C:Users한충희Desktopw.esrcapponboarding\"\")",
+      "mcp__070ec30a-31e5-4830-85a4-ceadea988639__get_project",
+      "mcp__070ec30a-31e5-4830-85a4-ceadea988639__get_publishable_keys",
+      "Bash(npm run:*)",
+      "Bash(Remove-Item next.config.ts)",
+      "mcp__d81d5551-4540-494e-85ab-db938447057c__deploy_to_vercel",
+      "Bash(npx vercel:*)",
+      "mcp__d81d5551-4540-494e-85ab-db938447057c__list_teams",
+      "mcp__d81d5551-4540-494e-85ab-db938447057c__list_projects"
+    ],
+    "defaultMode": "bypassPermissions"
+  },
+  "hooks": {
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '\"\\n### [\" + (now | strftime(\"%Y-%m-%d %H:%M\")) + \"] \" + .tool_name + \" 실패\\n- 입력: \" + (.tool_input | tostring)' >> CLAUDE_ERRORS.tmp 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}

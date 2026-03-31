@@ -1,0 +1,206 @@
+'use client'
+
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Trash2, Plus, Check } from 'lucide-react'
+import type { WorkoutExercise, SetData } from '@/lib/hooks/useWorkoutSession'
+
+interface ExerciseCardProps {
+  exercise: WorkoutExercise
+  exerciseIndex: number
+  previousSets?: { weight_kg: number | null; reps: number | null }[]
+  onUpdateSet: (exerciseIndex: number, setIndex: number, updates: Partial<SetData>) => void
+  onCompleteSet: (exerciseIndex: number, setIndex: number, restDuration?: number) => Promise<void>
+  onRemove: (exerciseIndex: number) => void
+  restDuration?: number
+}
+
+const REST_OPTIONS = [30, 60, 90, 120, 180]
+
+export default function ExerciseCard({
+  exercise,
+  exerciseIndex,
+  previousSets = [],
+  onUpdateSet,
+  onCompleteSet,
+  onRemove,
+  restDuration = 90,
+}: ExerciseCardProps) {
+  const [completing, setCompleting] = useState<number | null>(null)
+  const [selectedRest, setSelectedRest] = useState(restDuration)
+  const [showRestPicker, setShowRestPicker] = useState(false)
+
+  const handleComplete = async (setIndex: number) => {
+    const set = exercise.sets[setIndex]
+    if (!set.weight_kg || !set.reps) return
+    setCompleting(setIndex)
+    try {
+      await onCompleteSet(exerciseIndex, setIndex, selectedRest)
+    } finally {
+      setCompleting(null)
+    }
+  }
+
+  const muscleGroupColor: Record<string, string> = {
+    '가슴': 'bg-blue-500/20 text-blue-300',
+    '등': 'bg-green-500/20 text-green-300',
+    '하체': 'bg-red-500/20 text-red-300',
+    '어깨': 'bg-yellow-500/20 text-yellow-300',
+    '팔': 'bg-purple-500/20 text-purple-300',
+    '복근': 'bg-orange-500/20 text-orange-300',
+    '유산소': 'bg-pink-500/20 text-pink-300',
+    '전신': 'bg-teal-500/20 text-teal-300',
+  }
+  const badgeClass = muscleGroupColor[exercise.muscle_group] ?? 'bg-[#242424] text-[#888888]'
+
+  return (
+    <div className="bg-[#1a1a1a] rounded-[16px] overflow-hidden">
+      {/* 헤더 */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
+        <div className="flex items-center gap-2">
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeClass}`}>
+            {exercise.muscle_group}
+          </span>
+          <span className="font-semibold text-[#f0f0f0]">{exercise.exercise_name}</span>
+        </div>
+        <button
+          onClick={() => onRemove(exerciseIndex)}
+          className="text-[#555555] hover:text-[#FF4B4B] transition-colors p-1"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+
+      {/* 세트 목록 */}
+      <div className="px-4 py-3 space-y-2">
+        {/* 컬럼 헤더 */}
+        <div className="grid grid-cols-[32px_1fr_1fr_40px] gap-2 text-xs text-[#555555] mb-1">
+          <span className="text-center">세트</span>
+          <span className="text-center">무게(kg)</span>
+          <span className="text-center">횟수</span>
+          <span />
+        </div>
+
+        <AnimatePresence initial={false}>
+          {exercise.sets.map((set, setIndex) => {
+            const prevSet = previousSets[setIndex]
+            const isCompleted = set.completed
+            const isCompleting = completing === setIndex
+
+            return (
+              <motion.div
+                key={setIndex}
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.15 }}
+                className={`grid grid-cols-[32px_1fr_1fr_40px] gap-2 items-center ${isCompleted ? 'opacity-50' : ''}`}
+              >
+                {/* 세트 번호 */}
+                <span className="text-center text-sm text-[#888888] font-medium tabular-nums">
+                  {set.set_number}
+                </span>
+
+                {/* 무게 입력 */}
+                <div className="relative">
+                  {prevSet?.weight_kg && !set.weight_kg && (
+                    <span className="absolute inset-0 flex items-center justify-center text-sm text-[#333333] pointer-events-none tabular-nums">
+                      {prevSet.weight_kg}
+                    </span>
+                  )}
+                  <input
+                    type="number"
+                    value={set.weight_kg ?? ''}
+                    onChange={e => onUpdateSet(exerciseIndex, setIndex, { weight_kg: Number(e.target.value) || null })}
+                    disabled={isCompleted}
+                    placeholder={prevSet?.weight_kg?.toString() ?? '0'}
+                    className="w-full bg-[#242424] border border-[#2a2a2a] rounded-[10px] px-2 py-2 text-center text-sm text-[#f0f0f0] tabular-nums focus:border-[#C8FF00] outline-none disabled:opacity-40"
+                    inputMode="decimal"
+                    step="0.5"
+                  />
+                </div>
+
+                {/* 횟수 입력 */}
+                <div className="relative">
+                  {prevSet?.reps && !set.reps && (
+                    <span className="absolute inset-0 flex items-center justify-center text-sm text-[#333333] pointer-events-none tabular-nums">
+                      {prevSet.reps}
+                    </span>
+                  )}
+                  <input
+                    type="number"
+                    value={set.reps ?? ''}
+                    onChange={e => onUpdateSet(exerciseIndex, setIndex, { reps: Number(e.target.value) || null })}
+                    disabled={isCompleted}
+                    placeholder={prevSet?.reps?.toString() ?? '0'}
+                    className="w-full bg-[#242424] border border-[#2a2a2a] rounded-[10px] px-2 py-2 text-center text-sm text-[#f0f0f0] tabular-nums focus:border-[#C8FF00] outline-none disabled:opacity-40"
+                    inputMode="numeric"
+                  />
+                </div>
+
+                {/* 완료 버튼 */}
+                <motion.button
+                  whileTap={{ scale: 1.2 }}
+                  transition={{ duration: 0.15 }}
+                  onClick={() => !isCompleted && handleComplete(setIndex)}
+                  disabled={isCompleted || isCompleting || !set.weight_kg || !set.reps}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all
+                    ${isCompleted
+                      ? 'bg-[#C8FF00]/20 border border-[#C8FF00]/30'
+                      : 'bg-[#242424] border border-[#2a2a2a] active:bg-[#C8FF00]/10'
+                    } disabled:opacity-30`}
+                >
+                  <Check
+                    size={16}
+                    className={isCompleted ? 'text-[#C8FF00]' : 'text-[#555555]'}
+                    strokeWidth={isCompleted ? 3 : 2}
+                  />
+                </motion.button>
+              </motion.div>
+            )
+          })}
+        </AnimatePresence>
+      </div>
+
+      {/* 휴식 시간 선택 */}
+      <div className="px-4 pb-3">
+        <button
+          onClick={() => setShowRestPicker(!showRestPicker)}
+          className="text-xs text-[#555555] hover:text-[#888888] transition-colors"
+        >
+          휴식 {selectedRest}초 {showRestPicker ? '▲' : '▼'}
+        </button>
+        {showRestPicker && (
+          <div className="flex gap-2 mt-2">
+            {REST_OPTIONS.map(s => (
+              <button
+                key={s}
+                onClick={() => { setSelectedRest(s); setShowRestPicker(false) }}
+                className={`flex-1 py-1 rounded-[8px] text-xs font-medium transition-colors
+                  ${selectedRest === s
+                    ? 'bg-[#C8FF00] text-[#0f0f0f]'
+                    : 'bg-[#242424] text-[#888888]'
+                  }`}
+              >
+                {s >= 60 ? `${s / 60}분` : `${s}초`}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* + 세트 추가 */}
+      <button
+        onClick={() => {
+          const lastSet = exercise.sets[exercise.sets.length - 1]
+          // 마지막이 미완료면 추가 안 함
+          if (lastSet && !lastSet.completed) return
+        }}
+        className="w-full py-2.5 flex items-center justify-center gap-1 text-xs text-[#555555] hover:text-[#888888] border-t border-[#2a2a2a] transition-colors"
+      >
+        <Plus size={14} />
+        세트 추가
+      </button>
+    </div>
+  )
+}

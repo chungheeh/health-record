@@ -1,0 +1,30 @@
+{
+  "name": "W.E — Workout & Eat",
+  "short_name": "W.E",
+  "description": "운동과 식단 — 운동은 먹는 것까지다",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#C8FF00",
+  "orientation": "portrait",
+  "categories": ["health", "fitness"],
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

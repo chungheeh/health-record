@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Pretendard Variable Font */
+@font-face {
+  font-family: 'Pretendard Variable';
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/PretendardVariable.woff2') format('woff2-variations');
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    background-color: #0f0f0f;
+    color: #f0f0f0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* 스크롤바 스타일 */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #1a1a1a;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+    border-radius: 2px;
+  }
+
+  /* 입력 필드 자동완성 배경 제거 */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #242424 inset;
+    -webkit-text-fill-color: #f0f0f0;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* 숫자 폰트: 균일 너비 */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* 앱 컨테이너 */
+  .app-container {
+    @apply max-w-app mx-auto min-h-screen min-h-dvh relative;
+  }
+
+  /* 카드 */
+  .card {
+    @apply bg-bg-secondary rounded-card p-4;
+  }
+
+  /* 입력 필드 */
+  .input-field {
+    @apply bg-bg-tertiary rounded-input px-3 py-3 text-text-primary w-full
+           border border-we-border focus:border-accent focus:outline-none
+           transition-colors duration-150 text-sm;
+  }
+
+  /* 액션 버튼 (라임) */
+  .btn-primary {
+    @apply bg-accent text-bg-primary font-semibold rounded-input px-4 py-3
+           w-full active:scale-95 transition-transform duration-100;
+  }
+
+  /* 고스트 버튼 */
+  .btn-ghost {
+    @apply bg-transparent text-text-primary border border-we-border rounded-input px-4 py-3
+           w-full active:scale-95 transition-transform duration-100;
+  }
+
+  /* 위험 버튼 */
+  .btn-danger {
+    @apply bg-we-danger text-white font-semibold rounded-input px-4 py-3
+           active:scale-95 transition-transform duration-100;
+  }
+
+  /* 하단 네비게이션 높이만큼 패딩 */
+  .page-content {
+    @apply pb-20 pt-4 px-4;
+  }
+}
