@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import MealItemList from '@/components/diet/MealItemList'
 
 const MEAL_TYPES = ['아침', '점심', '저녁', '간식'] as const
 type MealType = typeof MEAL_TYPES[number]
@@ -131,9 +132,8 @@ export default async function DietPage({
         {/* 식사별 카드 */}
         {MEAL_TYPES.map(mealType => {
           const mealData = (meals ?? []).filter(m => m.meal_type === mealType)
-          const mealCals = mealData
-            .flatMap(m => m.meal_items)
-            .reduce((s, i) => s + (i.calories ?? 0), 0)
+          const mealItems = mealData.flatMap(m => m.meal_items)
+          const mealCals = mealItems.reduce((s, i) => s + (i.calories ?? 0), 0)
 
           return (
             <div key={mealType} className="bg-[#1a1a1a] rounded-[16px] overflow-hidden">
@@ -147,71 +147,23 @@ export default async function DietPage({
                   )}
                 </div>
                 <Link
-                  href={`/diet/add?date=${date}&meal=${mealType}`}
+                  href={`/diet/add?date=${date}&meal=${encodeURIComponent(mealType)}`}
                   className="bg-[#242424] text-[#C8FF00] rounded-full p-1.5"
                 >
                   <Plus size={14} />
                 </Link>
               </div>
 
-              {/* 음식 항목 */}
-              {mealData.length === 0 ? (
-                <div className="px-4 py-4 text-center">
-                  <Link
-                    href={`/diet/add?date=${date}&meal=${mealType}`}
-                    className="text-xs text-[#555555]"
-                  >
-                    + 음식 추가
-                  </Link>
-                </div>
-              ) : (
-                <div className="divide-y divide-[#2a2a2a]">
-                  {mealData.flatMap(m => m.meal_items).map(item => (
-                    <div key={item.id} className="px-4 py-3 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-[#f0f0f0]">{item.food_name}</p>
-                        {item.amount_g && (
-                          <p className="text-xs text-[#555555] mt-0.5 tabular-nums">{item.amount_g}g</p>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-[#f0f0f0] tabular-nums">
-                          {Math.round(item.calories ?? 0)}kcal
-                        </p>
-                        <p className="text-xs text-[#555555] tabular-nums">
-                          P{Math.round(item.protein_g ?? 0)} C{Math.round(item.carbs_g ?? 0)} F{Math.round(item.fat_g ?? 0)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {/* 음식 항목 — 수정/삭제 지원 */}
+              <MealItemList
+                items={mealItems}
+                date={date}
+                mealType={mealType}
+              />
             </div>
           )
         })}
       </div>
-
-      {/* 하단 네비게이션 */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-[#2a2a2a] h-16 z-50">
-        <div className="max-w-[430px] mx-auto h-full flex items-center justify-around px-2">
-          {[
-            { href: '/', icon: '🏠', label: '홈' },
-            { href: '/workout/new', icon: '💪', label: '운동' },
-            { href: '/diet', icon: '🥗', label: '식단', active: true },
-            { href: '/dashboard', icon: '📊', label: '통계' },
-            { href: '/my', icon: '👤', label: '마이' },
-          ].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex flex-col items-center gap-0.5 py-1 px-3 ${item.active ? 'text-[#C8FF00]' : 'text-[#555555]'}`}
-            >
-              <span className="text-lg">{item.icon}</span>
-              <span className="text-[10px]">{item.label}</span>
-            </Link>
-          ))}
-        </div>
-      </nav>
     </main>
   )
 }
