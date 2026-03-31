@@ -132,7 +132,7 @@ export default function SettingsPage() {
         <h1 className="font-semibold text-[#f0f0f0] flex-1">설정</h1>
       </header>
 
-      <div className="px-4 pt-4 pb-32 space-y-4">
+      <div className="px-4 pt-4 pb-44 space-y-4">
         {/* 목표 */}
         <div className="bg-[#1a1a1a] rounded-[16px] p-4 space-y-3">
           <p className="text-sm font-semibold text-[#f0f0f0]">운동 목표</p>
@@ -266,12 +266,12 @@ export default function SettingsPage() {
         )}
       </div>
 
-      {/* 저장 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-3 bg-gradient-to-t from-[#0f0f0f] to-transparent">
+      {/* 저장 버튼 — bottom-16 으로 BottomNav(h-16) 위에 위치 */}
+      <div className="fixed bottom-16 left-0 right-0 max-w-[430px] mx-auto px-4 pb-3 pt-3 bg-gradient-to-t from-[#0f0f0f] via-[#0f0f0f]/90 to-transparent z-40">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="w-full py-4 bg-[#C8FF00] text-[#0f0f0f] font-bold rounded-[16px] text-sm disabled:opacity-60 active:scale-[0.98] transition-transform"
+          className="w-full py-4 bg-[#C8FF00] text-[#0f0f0f] font-bold rounded-[16px] text-sm disabled:opacity-60 active:scale-[0.98] transition-transform shadow-lg"
         >
           {saving ? '저장 중...' : '변경사항 저장'}
         </button>

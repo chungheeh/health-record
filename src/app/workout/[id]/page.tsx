@@ -47,9 +47,13 @@ export default async function WorkoutDetailPage({ params }: PageProps) {
   type WorkoutExRow = { exercises: { name: string; muscle_group: string } | null; sets: SetRow[] }
 
   const workoutExercises = (workout.workout_exercises as WorkoutExRow[]) ?? []
+  // 총 볼륨: 기본 세트(normal)만 포함
   const totalVolume = workoutExercises.reduce((sum, we) => {
-    return sum + we.sets.reduce((s, set) => s + ((set.weight_kg ?? 0) * (set.reps ?? 0)), 0)
+    return sum + we.sets
+      .filter(s => (!s.set_type || s.set_type === 'normal') && s.weight_kg && s.reps)
+      .reduce((s, set) => s + ((set.weight_kg ?? 0) * (set.reps ?? 0)), 0)
   }, 0)
+  // 총 세트: 완료된 모든 세트
   const totalSets = workoutExercises.reduce((sum, we) => sum + we.sets.filter(s => s.weight_kg && s.reps).length, 0)
 
   const workoutDate = new Date(workout.started_at).toLocaleDateString('ko-KR', {
