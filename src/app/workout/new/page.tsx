@@ -149,11 +149,11 @@ export default function WorkoutNewPage() {
         />
       )}
 
-      {/* ── 준비 중 헤더 (타이머 미시작) ── */}
+      {/* ── 준비 중 헤더 ── */}
       {isSetup && (
-        <header className="sticky top-0 z-50 bg-[#1a1a1a] border-b border-[#2a2a2a] px-4 h-14 flex items-center justify-between">
-          <span className="text-sm font-semibold text-[#888888]">⚙️ 운동 준비 중</span>
-          <span className="text-xs text-[#555555]">종목 추가 후 타이머를 시작하세요</span>
+        <header className="sticky top-0 z-50 bg-[#0f0f0f] border-b border-[#2a2a2a] px-4 h-14 flex items-center justify-between">
+          <span className="text-sm font-semibold text-[#f0f0f0]">운동 준비</span>
+          <span className="text-xs text-[#555555]">종목을 추가하고 시작하세요</span>
         </header>
       )}
 
@@ -307,10 +307,10 @@ export default function WorkoutNewPage() {
           {isSetup && (
             <button
               onClick={handleBeginTimer}
-              className="flex-[2] bg-[#C8FF00] text-[#0f0f0f] font-bold rounded-[12px] py-3.5 text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+              className="flex-[2] bg-[#C8FF00] text-[#0f0f0f] font-bold rounded-[12px] py-3.5 text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg shadow-[#C8FF00]/25"
             >
-              <Play size={16} fill="#0f0f0f" />
-              운동 시작
+              <Play size={16} fill="#0f0f0f" strokeWidth={0} />
+              운동 시작 (타이머 시작)
             </button>
           )}
 
