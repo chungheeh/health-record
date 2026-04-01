@@ -2,9 +2,11 @@
  * AI 클라이언트 유틸
  * Anthropic 우선 → 크레딧 부족/인증 실패 시 Gemini 자동 폴백
  *
- * Gemini 모델 선택 기준:
- * - generateText  : gemini-2.5-pro   → 복잡한 JSON 추론·긴 출력에 최고 품질
- * - analyzeImage  : gemini-2.0-flash → 멀티모달 비전 최적화 + 빠른 응답
+ * Gemini 모델 선택 기준 (2025년 기준 stable 모델):
+ * - generateText  : gemini-1.5-pro   → 복잡한 JSON 추론·긴 출력에 최고 품질 (stable)
+ * - analyzeImage  : gemini-1.5-flash → 멀티모달 비전 최적화 + 빠른 응답 (stable)
+ *
+ * ※ gemini-2.0-flash / gemini-2.5-pro 는 신규 사용자에게 미제공 → stable 모델 사용
  */
 
 import Anthropic from '@anthropic-ai/sdk'
@@ -12,9 +14,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export type AIProvider = 'anthropic' | 'gemini'
 
-// 용도별 Gemini 모델
-const GEMINI_TEXT_MODEL  = 'gemini-2.5-pro'   // 루틴 생성 등 복잡한 추론·JSON 출력
-const GEMINI_VISION_MODEL = 'gemini-2.0-flash' // 사진 분석 등 이미지+텍스트 멀티모달
+// 용도별 Gemini 모델 (신규 사용자 안정 제공 모델)
+const GEMINI_TEXT_MODEL   = 'gemini-1.5-pro'   // 루틴 생성: 복잡한 추론·구조화 JSON
+const GEMINI_VISION_MODEL = 'gemini-1.5-flash' // 사진 분석: 멀티모달, 빠른 응답
 
 function isAnthropicCreditError(err: unknown): boolean {
   if (err instanceof Anthropic.APIError) {
@@ -38,8 +40,17 @@ function getGeminiClient() {
 }
 
 /**
+ * Gemini가 가끔 ```json ... ``` 마크다운으로 감싸는 경우 추출
+ */
+function extractJSON(raw: string): string {
+  // ```json ... ``` 또는 ``` ... ``` 블록 제거
+  const stripped = raw.replace(/```(?:json)?\s*([\s\S]*?)\s*```/g, '$1').trim()
+  return stripped
+}
+
+/**
  * 텍스트 생성
- * Anthropic claude-sonnet-4 → (폴백) Gemini 2.5 Pro
+ * Anthropic claude-sonnet-4 → (폴백) Gemini 1.5 Pro
  * 용도: 루틴 생성처럼 복잡한 구조화 JSON이 필요한 작업
  */
 export async function generateText(
@@ -65,23 +76,20 @@ export async function generateText(
     }
   }
 
-  // 2) Gemini 2.5 Pro 폴백 — 복잡한 추론에 최적
+  // 2) Gemini 1.5 Pro 폴백
   const genAI = getGeminiClient()
   const model = genAI.getGenerativeModel({
     model: GEMINI_TEXT_MODEL,
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 4000,
-    },
+    generationConfig: { temperature: 0.7, maxOutputTokens: 4000 },
   })
   const result = await model.generateContent(prompt)
-  const text = result.response.text()
-  return { text, provider: 'gemini' }
+  const raw = result.response.text()
+  return { text: extractJSON(raw), provider: 'gemini' }
 }
 
 /**
  * 이미지 + 텍스트 분석
- * Anthropic claude-sonnet-4 (vision) → (폴백) Gemini 2.0 Flash
+ * Anthropic claude-sonnet-4 (vision) → (폴백) Gemini 1.5 Flash
  * 용도: 음식 사진 분석처럼 빠른 멀티모달 인식이 필요한 작업
  */
 export async function analyzeImageWithText(
@@ -121,20 +129,15 @@ export async function analyzeImageWithText(
     }
   }
 
-  // 2) Gemini 2.0 Flash 폴백 — 멀티모달 비전 최적화
+  // 2) Gemini 1.5 Flash 폴백 — 멀티모달 비전 최적화
   const genAI = getGeminiClient()
   const model = genAI.getGenerativeModel({
     model: GEMINI_VISION_MODEL,
-    generationConfig: {
-      temperature: 0.4,   // 영양 수치는 일관성 중요 → 낮은 temperature
-      maxOutputTokens: 1024,
-    },
+    generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
   })
 
-  const imagePart = {
-    inlineData: { data: imageBase64, mimeType: mimeType || 'image/jpeg' },
-  }
+  const imagePart = { inlineData: { data: imageBase64, mimeType: mimeType || 'image/jpeg' } }
   const result = await model.generateContent([prompt, imagePart])
-  const text = result.response.text()
-  return { text, provider: 'gemini' }
+  const raw = result.response.text()
+  return { text: extractJSON(raw), provider: 'gemini' }
 }

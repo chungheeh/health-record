@@ -1,52 +1,109 @@
 /**
- * TDEE 계산 유틸
- * Harris-Benedict BMR + 활동계수
+ * 기초대사량(BMR) + 활동대사량(TDEE) 계산 유틸
+ *
+ * 알고리즘:
+ * - BMR: Mifflin-St Jeor (1990) — Harris-Benedict보다 현대인에게 더 정확
+ *   남성: 10W + 6.25H - 5A + 5
+ *   여성: 10W + 6.25H - 5A - 161
+ *
+ * - TDEE: BMR × PAL (Physical Activity Level)
+ *   sedentary    1.2   (거의 운동 안 함, 사무직)
+ *   moderate     1.375 (가벼운 운동 1-3일/주)
+ *   active       1.55  (중강도 운동 3-5일/주)
+ *   very_active  1.725 (고강도 운동 6-7일/주)
  */
 
-type ActivityLevel = '저활동' | '보통' | '활동적' | '매우활동적'
-type Gender = '남성' | '여성'
-type Goal = '다이어트' | '벌크업' | '유지' | '체력향상'
+export type ActivityLevel = 'sedentary' | 'moderate' | 'active' | 'very_active'
+export type Gender = '남성' | '여성'
+export type Goal = '다이어트' | '벌크업' | '유지' | '체력향상'
 
-const ACTIVITY_MULTIPLIERS: Record<ActivityLevel, number> = {
-  '저활동': 1.2,
-  '보통': 1.375,
-  '활동적': 1.55,
-  '매우활동적': 1.725,
+export interface BMRResult {
+  bmr: number
+  tdee: number
+  activityLabel: string
+  activityMultiplier: number
+  formula: string
+  breakdown: {
+    weightComponent: number
+    heightComponent: number
+    ageComponent: number
+    genderConstant: number
+  }
+}
+
+export const ACTIVITY_INFO: Record<ActivityLevel, { label: string; desc: string; multiplier: number }> = {
+  sedentary:   { label: '저활동',       desc: '거의 앉아서 생활 (사무직 등)',    multiplier: 1.200 },
+  moderate:    { label: '보통',         desc: '가벼운 운동 1-3회/주',           multiplier: 1.375 },
+  active:      { label: '활동적',       desc: '중강도 운동 3-5회/주',           multiplier: 1.550 },
+  very_active: { label: '매우 활동적',  desc: '고강도 운동 6-7회/주',           multiplier: 1.725 },
 }
 
 /**
- * Harris-Benedict BMR
+ * Mifflin-St Jeor BMR 계산
  */
-export function calculateBMR(
+export function calcBMR(
   gender: Gender,
   weightKg: number,
   heightCm: number,
   age: number
-): number {
-  if (gender === '남성') {
-    return 88.362 + 13.397 * weightKg + 4.799 * heightCm - 5.677 * age
-  } else {
-    return 447.593 + 9.247 * weightKg + 3.098 * heightCm - 4.330 * age
+): BMRResult {
+  const weightComponent = 10 * weightKg
+  const heightComponent = 6.25 * heightCm
+  const ageComponent    = 5 * age
+  const genderConstant  = gender === '남성' ? 5 : -161
+
+  const bmr = Math.round(weightComponent + heightComponent - ageComponent + genderConstant)
+
+  // Default to moderate if not specified
+  const activityLevel: ActivityLevel = 'moderate'
+  const { multiplier, label } = ACTIVITY_INFO[activityLevel]
+  const tdee = Math.round(bmr * multiplier)
+
+  return {
+    bmr,
+    tdee,
+    activityLabel: label,
+    activityMultiplier: multiplier,
+    formula: gender === '남성'
+      ? `10×${weightKg} + 6.25×${heightCm} - 5×${age} + 5`
+      : `10×${weightKg} + 6.25×${heightCm} - 5×${age} - 161`,
+    breakdown: { weightComponent, heightComponent, ageComponent, genderConstant },
   }
 }
 
 /**
- * TDEE = BMR × 활동계수
+ * 활동량 포함 TDEE 계산
  */
-export function calculateTDEE(
+export function calcTDEE(
   gender: Gender,
   weightKg: number,
   heightCm: number,
   age: number,
   activityLevel: ActivityLevel
-): number {
-  const bmr = calculateBMR(gender, weightKg, heightCm, age)
-  const multiplier = ACTIVITY_MULTIPLIERS[activityLevel] ?? 1.375
-  return Math.round(bmr * multiplier)
+): BMRResult {
+  const { multiplier, label } = ACTIVITY_INFO[activityLevel]
+  const weightComponent = 10 * weightKg
+  const heightComponent = 6.25 * heightCm
+  const ageComponent    = 5 * age
+  const genderConstant  = gender === '남성' ? 5 : -161
+
+  const bmr  = Math.round(weightComponent + heightComponent - ageComponent + genderConstant)
+  const tdee = Math.round(bmr * multiplier)
+
+  return {
+    bmr,
+    tdee,
+    activityLabel: label,
+    activityMultiplier: multiplier,
+    formula: gender === '남성'
+      ? `10×${weightKg} + 6.25×${heightCm} - 5×${age} + 5`
+      : `10×${weightKg} + 6.25×${heightCm} - 5×${age} - 161`,
+    breakdown: { weightComponent, heightComponent, ageComponent, genderConstant },
+  }
 }
 
 /**
- * 목표별 일일 칼로리 조정
+ * 목표별 권장 칼로리
  */
 export function adjustCaloriesForGoal(tdee: number, goal: Goal): number {
   switch (goal) {
@@ -56,4 +113,20 @@ export function adjustCaloriesForGoal(tdee: number, goal: Goal): number {
     case '체력향상': return Math.round(tdee + 100)
     default:         return tdee
   }
+}
+
+// ── 하위 호환 (기존 코드 유지) ────────────────────────────────────────────────
+
+export function calculateBMR(gender: Gender, weightKg: number, heightCm: number, age: number): number {
+  return calcBMR(gender, weightKg, heightCm, age).bmr
+}
+
+export function calculateTDEE(
+  gender: Gender,
+  weightKg: number,
+  heightCm: number,
+  age: number,
+  activityLevel: ActivityLevel
+): number {
+  return calcTDEE(gender, weightKg, heightCm, age, activityLevel).tdee
 }
