@@ -25,68 +25,51 @@ function buildPrompt(profile: UserProfile): string {
 
 ## 사용자 프로필
 - 목표: ${profile.goal}
-- 성별: ${profile.gender}, 나이: ${profile.age}세
-- 키: ${profile.heightCm}cm, 현재 체중: ${profile.currentWeight}kg
-- 목표 체중: ${profile.targetWeight}kg
-- 활동량: ${profile.activityLevel}
-- 주 운동 횟수: ${profile.workoutDays}일
+- 성별: ${profile.gender ?? '미입력'}, 나이: ${profile.age ?? '미입력'}세
+- 키: ${profile.heightCm ?? '미입력'}cm, 현재 체중: ${profile.currentWeight ?? '미입력'}kg
+- 목표 체중: ${profile.targetWeight ?? '미입력'}kg
+- 활동량: ${profile.activityLevel ?? '보통'}
+- 주 운동 횟수: ${profile.workoutDays ?? 3}일
 - 사용 가능 기구: ${profile.equipment?.join(', ') || '맨몸'}
 - 식이 제한: ${profile.dietaryRestrictions?.join(', ') || '없음'}
 
 ## 생성 기준 (반드시 준수)
-
-### 운동
 - 목표에 맞는 분할법 선택 (다이어트 → 상하체 + 유산소 병행)
-- 세트수/반복수/강도(RPE) 구체적으로 명시
-- 점진적 과부하 원칙 적용
-- 근피로 회복 고려한 요일 배치
-
-### 식단
+- 세트수/반복수 구체적으로 명시, 점진적 과부하 원칙 적용
 - Harris-Benedict + 활동계수로 TDEE 계산
-- 다이어트: TDEE - 300~500kcal / 벌크업: TDEE + 200~300kcal
-- 단백질: 체중 1kg당 1.6~2.2g
-- 탄수화물: 운동 전후 집중 배치
-- 지방: 총 칼로리 20~30%
-- 한국인 식단 기반 현실적 식품 사용
+- 다이어트: TDEE - 400kcal / 벌크업: TDEE + 250kcal / 유지: TDEE
+- 단백질: 체중 1kg당 1.8~2.2g, 한국인 식단 기반
 
 ## 응답 형식 (순수 JSON만 출력, 마크다운 코드블록 금지)
+아래 스키마를 정확히 따르세요:
 
 {
-  "tdee": 2300,
-  "daily_calories": 1800,
-  "macros": { "protein_g": 160, "carbs_g": 180, "fat_g": 50 },
-  "macro_rationale": "계산 근거 설명",
-  "weekly_schedule": [
+  "summary": {
+    "goal": "다이어트",
+    "tdee": 2300,
+    "target_calories": 1800,
+    "protein_g": 160,
+    "carbs_g": 180,
+    "fat_g": 50
+  },
+  "schedule": [
     {
       "day": 1,
       "day_name": "월요일",
-      "workout_type": "상체 (가슴/삼두)",
+      "focus": "상체 (가슴/삼두)",
       "exercises": [
         {
           "name": "벤치프레스",
-          "muscle_group": "가슴",
           "sets": 4,
           "reps": "8-10",
-          "intensity": "RPE 7-8",
-          "rest_seconds": 120,
+          "rest_sec": 120,
           "notes": "가슴 중앙 집중"
         }
-      ],
-      "cardio": {
-        "type": "LISS",
-        "duration_minutes": 20,
-        "notes": "심박수 120-130bpm 유지"
-      },
-      "meal_plan": {
-        "breakfast": { "foods": ["닭가슴살 100g", "현미밥 150g"], "calories": 450 },
-        "lunch": { "foods": ["돼지 안심 150g", "고구마 200g"], "calories": 520 },
-        "pre_workout": { "foods": ["바나나 1개", "단백질 쉐이크"], "calories": 250 },
-        "dinner": { "foods": ["연어 150g", "현미밥 100g"], "calories": 480 }
-      }
+      ]
     }
   ],
-  "weekly_progression": "매주 볼륨 5-10% 증가. 3주 후 디로드.",
-  "important_notes": ["충분한 수면(7-9시간)", "운동 전후 30분 내 단백질 섭취"]
+  "rest_days": [3, 6, 7],
+  "notes": "매주 볼륨 5-10% 증가. 충분한 수면(7-9시간) 권장."
 }`
 }
 

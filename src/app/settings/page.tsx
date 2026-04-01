@@ -101,11 +101,54 @@ export default function SettingsPage() {
   }
 
   const handleRegenerate = async () => {
+    // 먼저 저장
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
     setRegenerating(true)
     try {
-      await fetch('/api/generate-routine', { method: 'POST' })
-      setSavedMsg('루틴이 재생성되었습니다!')
-      setTimeout(() => setSavedMsg(''), 2500)
+      // 최신 프로필 먼저 저장
+      await supabase.from('user_profiles').upsert({
+        user_id: user.id,
+        goal: form.goal || null,
+        height_cm: form.height_cm ? Number(form.height_cm) : null,
+        current_weight_kg: form.current_weight_kg ? Number(form.current_weight_kg) : null,
+        target_weight_kg: form.target_weight_kg ? Number(form.target_weight_kg) : null,
+        activity_level: form.activity_level || null,
+        workout_days_per_week: form.workout_days_per_week ? Number(form.workout_days_per_week) : null,
+      }, { onConflict: 'user_id' })
+
+      // 프로필 데이터를 API에 전송
+      const profile = {
+        goal: form.goal || '유지',
+        gender: null,
+        age: null,
+        heightCm: form.height_cm ? Number(form.height_cm) : null,
+        currentWeight: form.current_weight_kg ? Number(form.current_weight_kg) : null,
+        targetWeight: form.target_weight_kg ? Number(form.target_weight_kg) : null,
+        activityLevel: form.activity_level || 'moderate',
+        workoutDays: form.workout_days_per_week ? Number(form.workout_days_per_week) : 3,
+        equipment: ['바벨', '덤벨', '머신'],
+        dietaryRestrictions: [],
+      }
+
+      const res = await fetch('/api/generate-routine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || '루틴 생성 실패')
+      }
+
+      setSavedMsg('✅ 루틴이 생성되었습니다! 루틴 탭에서 확인하세요.')
+      setTimeout(() => setSavedMsg(''), 3000)
+    } catch (e) {
+      setSavedMsg(`❌ ${e instanceof Error ? e.message : '루틴 생성 실패'}`)
+      setTimeout(() => setSavedMsg(''), 3000)
     } finally {
       setRegenerating(false)
     }

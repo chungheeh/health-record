@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     const base64 = Buffer.from(bytes).toString('base64')
     const mimeType = (file.type || 'image/jpeg') as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp'
 
-    const client = new Anthropic()
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
     const response = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
@@ -65,9 +65,10 @@ export async function POST(req: NextRequest) {
     const result = JSON.parse(match[0])
     return NextResponse.json(result)
   } catch (err) {
-    console.error('[analyze-food-photo]', err)
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[analyze-food-photo]', msg)
     return NextResponse.json(
-      { error: '분석에 실패했습니다. 다시 시도해주세요.' },
+      { error: `분석에 실패했습니다: ${msg}` },
       { status: 500 }
     )
   }
