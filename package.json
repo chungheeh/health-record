@@ -11,6 +11,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",
     "@ducanh2912/next-pwa": "^10.2.9",
+    "@google/generative-ai": "^0.24.1",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
     "framer-motion": "^11.15.0",

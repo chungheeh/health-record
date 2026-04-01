@@ -8,7 +8,9 @@ Next.js 14 (App Router) + Supabase + Claude API.
 ## 기술 스택
 - Frontend: Next.js 14 App Router, TypeScript, Tailwind CSS, Framer Motion, Recharts
 - Backend: Supabase (Auth + PostgreSQL + RLS) — 프로젝트 ID: `irfvzqrqnimhhfwetdgu`
-- AI: Claude API (`claude-sonnet-4-20250514`) — 루틴 추천 전용
+- AI: Claude API (`claude-sonnet-4-20250514`) 우선, 크레딧 부족 시 **Gemini (`gemini-1.5-flash`) 자동 폴백**
+  - 공통 유틸: `src/lib/utils/ai-client.ts` (`generateText`, `analyzeImageWithText`)
+  - 환경변수: `ANTHROPIC_API_KEY` + `GEMINI_API_KEY` (둘 다 Vercel에 설정 필요)
 - 차트: Recharts + react-calendar-heatmap
 - 배포: Vercel
 
