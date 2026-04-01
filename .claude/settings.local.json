@@ -23,7 +23,12 @@
       "mcp__d81d5551-4540-494e-85ab-db938447057c__deploy_to_vercel",
       "Bash(npx vercel:*)",
       "mcp__d81d5551-4540-494e-85ab-db938447057c__list_teams",
-      "mcp__d81d5551-4540-494e-85ab-db938447057c__list_projects"
+      "mcp__d81d5551-4540-494e-85ab-db938447057c__list_projects",
+      "Bash(powershell.exe -Command \"Get-Process -Id 23860 -ErrorAction SilentlyContinue | Select-Object Name, Id\")",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 23860 -Force\")",
+      "mcp__Claude_Preview__preview_start",
+      "mcp__d81d5551-4540-494e-85ab-db938447057c__list_deployments",
+      "mcp__d81d5551-4540-494e-85ab-db938447057c__get_deployment_build_logs"
     ],
     "defaultMode": "bypassPermissions"
   },

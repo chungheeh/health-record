@@ -23,8 +23,9 @@ const MOTIVATIONAL_MESSAGES = [
 export default function WorkoutNewPage() {
   const router = useRouter()
   const {
-    session, isActive, isLoading,
-    startWorkout, addExercise, addSet, updateSet,
+    session, isActive, isPaused, isLoading,
+    startWorkout, pauseWorkout, resumeWorkout,
+    addExercise, addSet, updateSet,
     completeSet, cancelRestTimer, removeExercise,
     finishWorkout, cancelWorkout,
   } = useWorkoutSession()
@@ -127,8 +128,13 @@ export default function WorkoutNewPage() {
       {isActive && (
         <WorkoutTimer
           startedAt={session.startedAt}
+          pausedAt={session.pausedAt}
+          totalPausedMs={session.totalPausedMs}
+          isPaused={isPaused}
           restTimer={session.restTimer}
           onFinish={handleFinish}
+          onPause={pauseWorkout}
+          onResume={resumeWorkout}
           onCancelRest={cancelRestTimer}
         />
       )}

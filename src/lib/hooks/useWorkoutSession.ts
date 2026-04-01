@@ -28,7 +28,9 @@ export interface WorkoutExercise {
 
 export interface WorkoutSessionState {
   workoutId: string | null
-  startedAt: number | null  // timestamp ms
+  startedAt: number | null       // timestamp ms — 운동 시작 절대 시각
+  pausedAt: number | null        // 일시정지 시작 시각 (null이면 진행 중)
+  totalPausedMs: number          // 누적 일시정지 시간 ms
   exercises: WorkoutExercise[]
   restTimer: {
     startAt: number
@@ -63,6 +65,8 @@ function clearStorage() {
 const initialState: WorkoutSessionState = {
   workoutId: null,
   startedAt: null,
+  pausedAt: null,
+  totalPausedMs: 0,
   exercises: [],
   restTimer: null,
 }
@@ -75,7 +79,11 @@ export function useWorkoutSession() {
   useEffect(() => {
     const saved = loadFromStorage()
     if (saved?.workoutId) {
-      setSession(saved)
+      setSession({
+        ...saved,
+        pausedAt: saved.pausedAt ?? null,
+        totalPausedMs: saved.totalPausedMs ?? 0,
+      })
     }
   }, [])
 
@@ -104,6 +112,8 @@ export function useWorkoutSession() {
       const newSession: WorkoutSessionState = {
         workoutId: data.id,
         startedAt: Date.now(),
+        pausedAt: null,
+        totalPausedMs: 0,
         exercises: [],
         restTimer: null,
       }
@@ -114,6 +124,27 @@ export function useWorkoutSession() {
       setIsLoading(false)
     }
   }, [supabase])
+
+  // 일시정지
+  const pauseWorkout = useCallback(() => {
+    setSession(prev => {
+      if (!prev.workoutId || prev.pausedAt !== null) return prev
+      return { ...prev, pausedAt: Date.now() }
+    })
+  }, [])
+
+  // 재개
+  const resumeWorkout = useCallback(() => {
+    setSession(prev => {
+      if (!prev.workoutId || prev.pausedAt === null) return prev
+      const pausedDuration = Date.now() - prev.pausedAt
+      return {
+        ...prev,
+        pausedAt: null,
+        totalPausedMs: prev.totalPausedMs + pausedDuration,
+      }
+    })
+  }, [])
 
   // 종목 추가
   const addExercise = useCallback(async (
@@ -169,7 +200,7 @@ export function useWorkoutSession() {
     })
   }, [])
 
-  // 세트 수동 추가 (+ 세트 추가 버튼)
+  // 세트 수동 추가
   const addSet = useCallback((exerciseIndex: number) => {
     setSession(prev => {
       const exercises = [...prev.exercises]
@@ -261,7 +292,11 @@ export function useWorkoutSession() {
   const finishWorkout = useCallback(async () => {
     if (!session.workoutId || !session.startedAt) return
 
-    const totalSeconds = Math.floor((Date.now() - session.startedAt) / 1000)
+    // 일시정지 상태면 resume된 것으로 계산
+    const pausedExtra = session.pausedAt ? (Date.now() - session.pausedAt) : 0
+    const totalSeconds = Math.floor(
+      (Date.now() - session.startedAt - session.totalPausedMs - pausedExtra) / 1000
+    )
 
     const { error } = await supabase
       .from('workouts')
@@ -277,7 +312,7 @@ export function useWorkoutSession() {
     clearStorage()
     setSession(initialState)
     return workoutId
-  }, [session.workoutId, session.startedAt, supabase])
+  }, [session, supabase])
 
   // 운동 취소
   const cancelWorkout = useCallback(async () => {
@@ -288,12 +323,16 @@ export function useWorkoutSession() {
   }, [session.workoutId, supabase])
 
   const isActive = Boolean(session.workoutId)
+  const isPaused = Boolean(session.pausedAt !== null && session.workoutId)
 
   return {
     session,
     isActive,
+    isPaused,
     isLoading,
     startWorkout,
+    pauseWorkout,
+    resumeWorkout,
     addExercise,
     addSet,
     updateSet,

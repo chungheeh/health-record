@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { Trash2, ChevronRight } from 'lucide-react'
+import { Trash2, ChevronRight, ChevronDown } from 'lucide-react'
 
 interface WorkoutSummary {
   id: string
@@ -24,10 +24,13 @@ function formatDuration(seconds: number | null): string {
   return `${seconds}초`
 }
 
+const INITIAL_SHOW = 3
+
 export default function TodayWorkouts({ date }: { date: string }) {
   const [workouts, setWorkouts] = useState<WorkoutSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [showAll, setShowAll] = useState(false)
 
   const fetchWorkouts = useCallback(async () => {
     setLoading(true)
@@ -107,9 +110,12 @@ export default function TodayWorkouts({ date }: { date: string }) {
     )
   }
 
+  const displayed = showAll ? workouts : workouts.slice(0, INITIAL_SHOW)
+  const hiddenCount = workouts.length - INITIAL_SHOW
+
   return (
     <div className="space-y-3">
-      {workouts.map((w) => (
+      {displayed.map((w) => (
         <div key={w.id} className="bg-[#1a1a1a] rounded-[16px] overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
             <span className="text-xs text-[#888888]">
@@ -167,6 +173,20 @@ export default function TodayWorkouts({ date }: { date: string }) {
           </Link>
         </div>
       ))}
+
+      {/* 더보기 / 접기 버튼 */}
+      {workouts.length > INITIAL_SHOW && (
+        <button
+          onClick={() => setShowAll(prev => !prev)}
+          className="w-full flex items-center justify-center gap-1.5 py-3 bg-[#1a1a1a] rounded-[16px] text-xs text-[#888888] border border-[#2a2a2a] active:bg-[#242424] transition-colors"
+        >
+          <ChevronDown
+            size={14}
+            className={`transition-transform duration-200 ${showAll ? 'rotate-180' : ''}`}
+          />
+          {showAll ? '접기' : `${hiddenCount}개 더보기`}
+        </button>
+      )}
     </div>
   )
 }

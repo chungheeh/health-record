@@ -1,15 +1,20 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X, Pause, Play } from 'lucide-react'
 
 interface WorkoutTimerProps {
-  startedAt: number | null    // timestamp ms
+  startedAt: number | null       // timestamp ms
+  pausedAt: number | null        // 일시정지 시작 시각
+  totalPausedMs: number          // 누적 일시정지 ms
+  isPaused: boolean
   restTimer: {
     startAt: number
     duration: number
   } | null
   onFinish: () => void
+  onPause: () => void
+  onResume: () => void
   onCancelRest?: () => void
 }
 
@@ -21,18 +26,34 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-export default function WorkoutTimer({ startedAt, restTimer, onFinish, onCancelRest }: WorkoutTimerProps) {
+export default function WorkoutTimer({
+  startedAt, pausedAt, totalPausedMs, isPaused,
+  restTimer, onFinish, onPause, onResume, onCancelRest,
+}: WorkoutTimerProps) {
   const [elapsed, setElapsed] = useState(0)
   const [restRemaining, setRestRemaining] = useState(0)
 
   // 경과 시간 타이머
   useEffect(() => {
     if (!startedAt) return
-    const tick = () => setElapsed(Math.floor((Date.now() - startedAt) / 1000))
-    tick()
-    const id = setInterval(tick, 1000)
+
+    const computeElapsed = () => {
+      if (isPaused && pausedAt !== null) {
+        // 일시정지 중: 마지막 멈춘 시각 기준으로 고정
+        return Math.floor((pausedAt - startedAt - totalPausedMs) / 1000)
+      }
+      return Math.floor((Date.now() - startedAt - totalPausedMs) / 1000)
+    }
+
+    setElapsed(Math.max(0, computeElapsed()))
+
+    if (isPaused) return // 일시정지 중에는 interval 불필요
+
+    const id = setInterval(() => {
+      setElapsed(Math.max(0, computeElapsed()))
+    }, 1000)
     return () => clearInterval(id)
-  }, [startedAt])
+  }, [startedAt, pausedAt, totalPausedMs, isPaused])
 
   // 휴식 타이머
   useEffect(() => {
@@ -55,15 +76,36 @@ export default function WorkoutTimer({ startedAt, restTimer, onFinish, onCancelR
       {/* 경과 시간 행 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#C8FF00] font-semibold">🔥 운동 중</span>
-          <span className="tabular-nums text-lg font-bold text-[#f0f0f0]">{formatTime(elapsed)}</span>
+          <span className="text-xs font-semibold" style={{ color: isPaused ? '#888888' : '#C8FF00' }}>
+            {isPaused ? '⏸ 일시정지' : '🔥 운동 중'}
+          </span>
+          <span
+            className="tabular-nums text-lg font-bold"
+            style={{ color: isPaused ? '#888888' : '#f0f0f0' }}
+          >
+            {formatTime(elapsed)}
+          </span>
         </div>
-        <button
-          onClick={onFinish}
-          className="bg-[#242424] text-[#f0f0f0] text-xs font-medium px-3 py-1.5 rounded-[8px] border border-[#2a2a2a] active:scale-95 transition-transform"
-        >
-          운동 종료
-        </button>
+
+        <div className="flex items-center gap-2">
+          {/* 일시정지 / 재개 버튼 */}
+          <button
+            onClick={isPaused ? onResume : onPause}
+            className="flex items-center gap-1 bg-[#242424] border border-[#2a2a2a] text-xs font-medium px-3 py-1.5 rounded-[8px] active:scale-95 transition-transform"
+            style={{ color: isPaused ? '#C8FF00' : '#888888' }}
+          >
+            {isPaused ? <Play size={12} /> : <Pause size={12} />}
+            {isPaused ? '재개' : '일시정지'}
+          </button>
+
+          {/* 종료 버튼 */}
+          <button
+            onClick={onFinish}
+            className="bg-[#242424] text-[#f0f0f0] text-xs font-medium px-3 py-1.5 rounded-[8px] border border-[#2a2a2a] active:scale-95 transition-transform"
+          >
+            종료
+          </button>
+        </div>
       </div>
 
       {/* 휴식 타이머 행 */}
