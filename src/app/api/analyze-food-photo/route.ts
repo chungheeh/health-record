@@ -2,7 +2,30 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 
+function getAnthropicErrorMessage(err: unknown): { msg: string; status: number } {
+  if (err instanceof Anthropic.APIError) {
+    const s = err.status
+    const body = err.message ?? ''
+    if (s === 400 && body.includes('credit balance')) {
+      return { msg: 'AI 크레딧이 부족합니다. console.anthropic.com에서 충전해 주세요.', status: 402 }
+    }
+    if (s === 401) return { msg: 'API 키가 유효하지 않습니다.', status: 401 }
+    if (s === 429) return { msg: '요청 한도 초과. 잠시 후 다시 시도해 주세요.', status: 429 }
+    return { msg: `AI 오류 (${s}): ${body}`, status: s }
+  }
+  const msg = err instanceof Error ? err.message : String(err)
+  return { msg, status: 500 }
+}
+
 export async function POST(req: NextRequest) {
+  // API 키 체크
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json(
+      { error: 'AI 기능이 설정되지 않았습니다. 관리자에게 문의하세요.' },
+      { status: 503 }
+    )
+  }
+
   try {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -60,16 +83,13 @@ export async function POST(req: NextRequest) {
 
     const text = response.content[0].type === 'text' ? response.content[0].text : ''
     const match = text.match(/\{[\s\S]*\}/)
-    if (!match) throw new Error('응답 파싱 실패')
+    if (!match) throw new Error('AI 응답 파싱 실패')
 
     const result = JSON.parse(match[0])
     return NextResponse.json(result)
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
+    const { msg, status } = getAnthropicErrorMessage(err)
     console.error('[analyze-food-photo]', msg)
-    return NextResponse.json(
-      { error: `분석에 실패했습니다: ${msg}` },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: msg }, { status })
   }
 }

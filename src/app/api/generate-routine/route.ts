@@ -3,8 +3,23 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: process.env.ANTHROPIC_API_KEY ?? '',
 })
+
+function getAnthropicErrorMessage(error: unknown): string {
+  if (error instanceof Anthropic.APIError) {
+    const status = error.status
+    const body = error.message ?? ''
+    if (status === 400 && body.includes('credit balance')) {
+      return 'AI 크레딧이 부족합니다. console.anthropic.com에서 충전해 주세요.'
+    }
+    if (status === 401) return 'API 키가 유효하지 않습니다. Vercel 환경변수를 확인해 주세요.'
+    if (status === 429) return 'API 요청 한도를 초과했습니다. 잠시 후 다시 시도해 주세요.'
+    if (status === 529) return 'Anthropic 서버가 과부하 상태입니다. 잠시 후 다시 시도해 주세요.'
+    return `AI 오류 (${status}): ${body}`
+  }
+  return error instanceof Error ? error.message : '알 수 없는 오류'
+}
 
 interface UserProfile {
   goal: string
@@ -133,9 +148,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ routine, id: savedRoutine.id })
   } catch (error) {
     console.error('루틴 생성 오류:', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : '서버 오류' },
-      { status: 500 }
-    )
+    const msg = getAnthropicErrorMessage(error)
+    const status = error instanceof Anthropic.APIError ? error.status : 500
+    return NextResponse.json({ error: msg }, { status })
   }
 }

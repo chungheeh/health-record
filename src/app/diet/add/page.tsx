@@ -243,9 +243,8 @@ function DietAddContent() {
       const form = new FormData()
       form.append('image', file)
       const res = await fetch('/api/analyze-food-photo', { method: 'POST', body: form })
-      if (!res.ok) throw new Error('분석 실패')
       const data = await res.json()
-      if (data.error) throw new Error(data.error)
+      if (!res.ok || data.error) throw new Error(data.error ?? '분석 실패')
       setSelected({
         name: data.food_name ?? '분석된 음식',
         per100: {

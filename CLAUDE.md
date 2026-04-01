@@ -109,6 +109,30 @@ src/
 - **해결**: create-next-app 대신 `package.json`, `tsconfig.json`, `next.config.ts` 등 설정 파일을 **수동으로 직접 작성** 후 `npm install` 실행
 - **교훈**: 기존 파일이 있는 디렉토리에서는 create-next-app 사용 불가 → 수동 스캐폴딩
 
+### [2026-04-01] Anthropic API 크레딧 부족 오류 (AI 루틴/사진 분석 실패)
+- **문제**: Vercel 배포 환경에서 `{"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low..."}}` 오류 발생
+- **원인 1**: Vercel 환경변수에 `ANTHROPIC_API_KEY`가 미설정이거나, 설정된 키의 크레딧 소진
+- **원인 2**: API 에러 메시지를 catch하지 않아 사용자에게 모호한 "분석 실패" 메시지만 노출
+- **해결**:
+  1. Vercel 대시보드 → Settings → Environment Variables → `ANTHROPIC_API_KEY` 재확인/재설정
+  2. https://console.anthropic.com/settings/billing 에서 크레딧 충전
+  3. API route에서 Anthropic 오류 응답을 파싱해 사용자에게 명확한 메시지 전달
+  4. 크레딧 부족 시 "AI 기능을 사용하려면 크레딧이 필요합니다" 안내 문구 표시
+- **교훈**:
+  - Vercel 환경변수는 `.env.local`과 **별도**로 반드시 Vercel 대시보드에서 직접 설정해야 함
+  - AI API 호출 전 `ANTHROPIC_API_KEY` 존재 여부를 미리 체크하고 없으면 500 대신 명확한 메시지 반환
+  - Anthropic SDK의 `APIError` 타입으로 에러 세분화 처리 필요
+
+### [2026-04-01] generate-routine API 응답 스키마 불일치
+- **문제**: Claude API 응답 JSON 스키마(`weekly_schedule`, `macros`)와 루틴 페이지가 읽는 스키마(`schedule`, `summary`)가 달라 루틴이 표시 안 됨
+- **해결**: API 프롬프트의 응답 형식을 페이지 타입 정의와 일치시킴 (`summary`, `schedule`, `rest_days`)
+- **교훈**: AI 프롬프트의 JSON 스키마 예시와 프론트엔드 타입 정의를 항상 동기화할 것. 변경 시 둘 다 수정.
+
+### [2026-04-01] settings 페이지 루틴 재생성 버튼 — profile 데이터 미전송
+- **문제**: `handleRegenerate`가 `fetch('/api/generate-routine', { method: 'POST' })` 빈 body 전송 → API에서 `profile` 없어 즉시 400 반환
+- **해결**: form 상태를 profile 객체로 변환해 body에 포함
+- **교훈**: POST API 호출 시 항상 body 내용 확인. 특히 AI API는 입력 없이 호출 불가.
+
 ---
 
 ## 🔧 개발 워크플로우 규칙
