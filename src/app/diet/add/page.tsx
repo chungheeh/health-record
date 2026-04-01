@@ -87,13 +87,8 @@ function DietAddContent() {
     setIsSearching(true)
     const supabase = createClient()
 
-    const [dbResult, histResult] = await Promise.all([
-      supabase
-        .from('foods')
-        .select('id,name,brand,category,calories_per_100g,protein_per_100g,carbs_per_100g,fat_per_100g,serving_size_g,serving_unit')
-        .or(`name.ilike.%${q}%,brand.ilike.%${q}%`)
-        .order('brand', { ascending: true, nullsFirst: false })
-        .limit(30),
+    const [foodRes, histResult] = await Promise.all([
+      fetch(`/api/search-foods?q=${encodeURIComponent(q)}`).then(r => r.json()).catch(() => ({ results: [] })),
       supabase
         .from('meal_items')
         .select('food_name,calories,protein_g,carbs_g,fat_g,amount_g')
@@ -105,9 +100,9 @@ function DietAddContent() {
 
     const combined: SearchResult[] = []
 
-    // DB 결과
-    for (const f of dbResult.data ?? []) {
-      combined.push({ type: 'db', data: f as FoodItem })
+    // DB + API 결과 (서버에서 병합됨)
+    for (const f of (foodRes.results ?? []) as FoodItem[]) {
+      combined.push({ type: 'db', data: f })
     }
 
     // 히스토리 (중복 제거)

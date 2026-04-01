@@ -295,7 +295,7 @@ export default function WorkoutNewPage() {
 
       {/* ── 하단 바 ── */}
       {isActive && (
-        <div className="fixed bottom-0 left-0 right-0 bg-[#0f0f0f] border-t border-[#2a2a2a] px-4 py-3 flex gap-3 z-40">
+        <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-[#0f0f0f] border-t border-[#2a2a2a] px-4 py-3 flex gap-3 z-50">
           <button
             onClick={handleCancel}
             className="flex-1 bg-[#242424] text-[#888888] font-medium rounded-[12px] py-3.5 text-sm"

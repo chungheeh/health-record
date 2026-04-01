@@ -105,10 +105,14 @@ export default function ExerciseCard({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
-                className={`grid grid-cols-[44px_1fr_1fr_1fr_40px] gap-2 items-center ${isCompleted ? 'opacity-50' : ''}`}
+                className={`grid grid-cols-[44px_1fr_1fr_1fr_40px] gap-2 items-center transition-all duration-200 ${
+                  isCompleted
+                    ? 'bg-[#C8FF00]/5 rounded-[10px] px-0'
+                    : ''
+                }`}
               >
                 {/* 세트 번호 */}
-                <span className="text-center text-sm text-[#888888] font-medium tabular-nums">
+                <span className={`text-center text-sm font-medium tabular-nums ${isCompleted ? 'text-[#C8FF00]/60' : 'text-[#888888]'}`}>
                   {set.set_number}
                 </span>
 
@@ -170,17 +174,29 @@ export default function ExerciseCard({
                   transition={{ duration: 0.15 }}
                   onClick={() => !isCompleted && handleComplete(setIndex)}
                   disabled={isCompleted || isCompleting || !set.weight_kg || !set.reps}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all
-                    ${isCompleted
-                      ? 'bg-[#C8FF00]/20 border border-[#C8FF00]/30'
-                      : 'bg-[#242424] border border-[#2a2a2a] active:bg-[#C8FF00]/10'
-                    } disabled:opacity-30`}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
+                    isCompleted
+                      ? 'bg-[#C8FF00] shadow-lg shadow-[#C8FF00]/30'           /* 완료: 라임 솔리드 */
+                      : (set.weight_kg && set.reps)
+                        ? 'bg-[#2a2a2a] border-2 border-[#555555] hover:border-[#C8FF00]/60 active:bg-[#C8FF00]/20'  /* 입력됨: 밝은 테두리 */
+                        : 'bg-[#1e1e1e] border border-[#2a2a2a]'              /* 미입력: 흐린 */
+                  }`}
                 >
-                  <Check
-                    size={16}
-                    className={isCompleted ? 'text-[#C8FF00]' : 'text-[#555555]'}
-                    strokeWidth={isCompleted ? 3 : 2}
-                  />
+                  {isCompleting ? (
+                    <div className="w-3.5 h-3.5 border-2 border-[#888888] border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Check
+                      size={15}
+                      strokeWidth={isCompleted ? 3 : 2.5}
+                      className={
+                        isCompleted
+                          ? 'text-[#0f0f0f]'           /* 완료: 검은 체크 (라임 배경) */
+                          : (set.weight_kg && set.reps)
+                            ? 'text-[#888888]'           /* 입력됨: 밝은 회색 체크 */
+                            : 'text-[#3a3a3a]'           /* 미입력: 아주 흐림 */
+                      }
+                    />
+                  )}
                 </motion.button>
               </motion.div>
             )
