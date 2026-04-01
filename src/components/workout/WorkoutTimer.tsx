@@ -103,7 +103,7 @@ export default function WorkoutTimer({
           <button
             onClick={onFinish}
             className="text-xs font-semibold px-3 py-1.5 rounded-[8px] active:scale-95 transition-all"
-            style={{ backgroundColor: '#2a2a2a', border: '1.5px solid #3a3a3a', color: '#f0f0f0' }}
+            style={{ backgroundColor: 'rgba(255,75,75,0.15)', border: '1.5px solid rgba(255,75,75,0.4)', color: '#FF4B4B' }}
           >
             종료
           </button>

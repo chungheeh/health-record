@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, X, Dumbbell, Play } from 'lucide-react'
+import { Search, X, Dumbbell, Plus, ChevronDown } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useWorkoutSession } from '@/lib/hooks/useWorkoutSession'
 import WorkoutTimer from '@/components/workout/WorkoutTimer'
@@ -19,6 +19,8 @@ const MOTIVATIONAL_MESSAGES = [
   { emoji: '⚡', msg: '파워풀!', sub: '오늘 운동도 완료! 내일이 기대됩니다!' },
   { emoji: '🌟', msg: '빛나고 있어요!', sub: '꾸준히 하는 당신이 멋있습니다!' },
 ]
+
+const MUSCLE_GROUPS = ['가슴', '등', '하체', '어깨', '팔', '복근', '유산소', '전신']
 
 export default function WorkoutNewPage() {
   const router = useRouter()
@@ -39,6 +41,16 @@ export default function WorkoutNewPage() {
     MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)]
   )
 
+  // 직접 추가 폼 상태
+  const [showCustomForm, setShowCustomForm] = useState(false)
+  const [customName, setCustomName] = useState('')
+  const [customMuscle, setCustomMuscle] = useState('가슴')
+  const [customEquipment, setCustomEquipment] = useState('바벨')
+  const [customAdding, setCustomAdding] = useState(false)
+
+  // 준비 중 = 워크아웃 생성됐지만 타이머 미시작
+  const isSetup = isActive && !isTimerRunning
+
   // 운동 종목 검색
   useEffect(() => {
     const supabase = createClient()
@@ -51,23 +63,50 @@ export default function WorkoutNewPage() {
     search()
   }, [searchQuery])
 
-  // 1단계: 준비 화면으로 진입 (타이머 시작 안함)
   const handleStart = async () => {
     await startWorkout()
-  }
-
-  // 2단계: 실제 타이머 시작
-  const handleBeginTimer = () => {
-    beginTimer()
   }
 
   const handleAddExercise = async (ex: Exercise) => {
     await addExercise(ex.id, ex.name, ex.muscle_group)
     setShowSearch(false)
     setSearchQuery('')
+    setShowCustomForm(false)
   }
 
-  // 운동 종료 — 확인 다이얼로그 포함
+  // 커스텀 운동 직접 추가
+  const handleAddCustom = async () => {
+    if (!customName.trim()) return
+    setCustomAdding(true)
+    try {
+      const supabase = createClient()
+      // exercises 마스터 테이블에 저장
+      const { data, error } = await supabase
+        .from('exercises')
+        .insert({
+          name: customName.trim(),
+          muscle_group: customMuscle,
+          equipment: customEquipment,
+          description: null,
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      if (data) {
+        await addExercise(data.id, data.name, data.muscle_group)
+      }
+      setShowSearch(false)
+      setSearchQuery('')
+      setShowCustomForm(false)
+      setCustomName('')
+    } catch {
+      alert('운동 추가에 실패했습니다.')
+    } finally {
+      setCustomAdding(false)
+    }
+  }
+
   const handleFinish = async () => {
     if (finishing || session.exercises.length === 0) return
     if (!confirm('운동을 종료하시겠습니까?')) return
@@ -93,9 +132,6 @@ export default function WorkoutNewPage() {
 
   // 부위별 그룹핑
   const muscleGroups = Array.from(new Set(exercises.map(e => e.muscle_group)))
-
-  // 준비 중 = 워크아웃 생성됐지만 타이머 미시작
-  const isSetup = isActive && !isTimerRunning
 
   return (
     <div className="min-h-screen bg-[#0f0f0f]">
@@ -134,7 +170,7 @@ export default function WorkoutNewPage() {
         )}
       </AnimatePresence>
 
-      {/* ── 타이머 바 (타이머 가동 중일 때만) ── */}
+      {/* ── 타이머 헤더 (타이머 가동 중) — WorkoutTimer가 헤더 역할 ── */}
       {isTimerRunning && (
         <WorkoutTimer
           startedAt={session.startedAt}
@@ -149,11 +185,31 @@ export default function WorkoutNewPage() {
         />
       )}
 
-      {/* ── 준비 중 헤더 ── */}
+      {/* ── 준비 중 헤더 (버튼 포함) ── */}
       {isSetup && (
         <header className="sticky top-0 z-50 bg-[#0f0f0f] border-b border-[#2a2a2a] px-4 h-14 flex items-center justify-between">
-          <span className="text-sm font-semibold text-[#f0f0f0]">운동 준비</span>
-          <span className="text-xs text-[#555555]">종목을 추가하고 시작하세요</span>
+          {/* 왼쪽: 상태 */}
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-[#f0f0f0]">운동 준비</span>
+            <span className="text-[10px] text-[#555555]">종목을 추가하고 시작하세요</span>
+          </div>
+
+          {/* 오른쪽: 취소 + 운동 시작 */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCancel}
+              className="px-3 py-1.5 rounded-[8px] text-xs font-medium text-[#888888] bg-[#242424] active:scale-95 transition-transform"
+            >
+              취소
+            </button>
+            <button
+              onClick={beginTimer}
+              disabled={session.exercises.length === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-bold bg-[#C8FF00] text-[#0f0f0f] disabled:opacity-40 active:scale-95 transition-transform shadow-md shadow-[#C8FF00]/20"
+            >
+              ▶ 운동 시작
+            </button>
+          </div>
         </header>
       )}
 
@@ -178,9 +234,9 @@ export default function WorkoutNewPage() {
         </div>
       )}
 
-      {/* ── 운동 중 화면 (준비 or 타이머 중) ── */}
+      {/* ── 운동 중 화면 ── */}
       {isActive && (
-        <div className="px-4 pt-4 pb-32">
+        <div className="px-4 pt-4 pb-8">
           {session.exercises.length === 0 ? (
             <div className="text-center py-16 text-[#555555]">
               <p className="text-4xl mb-3">🏋️</p>
@@ -214,8 +270,19 @@ export default function WorkoutNewPage() {
               onClick={() => setShowSearch(true)}
               className="mt-4 w-full bg-[#1a1a1a] border border-dashed border-[#2a2a2a] rounded-[16px] py-4 text-[#888888] text-sm flex items-center justify-center gap-2 active:bg-[#242424] transition-colors"
             >
-              <Search size={16} />
+              <Plus size={16} />
               종목 추가하기
+            </button>
+          )}
+
+          {/* 타이머 중 종료 버튼 — 하단 고정 */}
+          {isTimerRunning && (
+            <button
+              onClick={handleFinish}
+              disabled={finishing || session.exercises.length === 0}
+              className="mt-6 w-full bg-[#1a1a1a] border border-[#2a2a2a] text-[#888888] font-medium rounded-[12px] py-3 text-sm active:scale-[0.98] transition-transform disabled:opacity-40"
+            >
+              {finishing ? '저장 중...' : '운동 종료하기'}
             </button>
           )}
         </div>
@@ -229,24 +296,29 @@ export default function WorkoutNewPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/70 z-50 flex flex-col justify-end"
-            onClick={e => { if (e.target === e.currentTarget) setShowSearch(false) }}
+            onClick={e => { if (e.target === e.currentTarget) { setShowSearch(false); setShowCustomForm(false) } }}
           >
             <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="bg-[#1a1a1a] rounded-t-[24px] max-h-[85vh] flex flex-col"
+              className="bg-[#1a1a1a] rounded-t-[24px] max-h-[90vh] flex flex-col"
             >
+              {/* 핸들 */}
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-10 h-1 bg-[#2a2a2a] rounded-full" />
               </div>
+
+              {/* 헤더 */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
                 <h3 className="font-semibold text-[#f0f0f0]">운동 선택</h3>
-                <button onClick={() => setShowSearch(false)} className="text-[#555555] p-1">
+                <button onClick={() => { setShowSearch(false); setShowCustomForm(false) }} className="text-[#555555] p-1">
                   <X size={20} />
                 </button>
               </div>
+
+              {/* 검색창 */}
               <div className="px-4 py-3">
                 <div className="flex items-center gap-2 bg-[#242424] rounded-[12px] px-3 border border-[#2a2a2a] focus-within:border-[#C8FF00]">
                   <Search size={16} className="text-[#555555]" />
@@ -254,7 +326,7 @@ export default function WorkoutNewPage() {
                     type="text"
                     placeholder="운동 이름 검색..."
                     value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
+                    onChange={e => { setSearchQuery(e.target.value); setShowCustomForm(false) }}
                     className="flex-1 bg-transparent py-3 text-sm text-[#f0f0f0] outline-none placeholder:text-[#555555]"
                     autoFocus
                   />
@@ -265,7 +337,23 @@ export default function WorkoutNewPage() {
                   )}
                 </div>
               </div>
-              <div className="overflow-y-auto flex-1 pb-6">
+
+              {/* 목록 */}
+              <div className="overflow-y-auto flex-1 pb-2">
+                {/* 검색 결과가 없을 때 or 직접 추가 유도 */}
+                {searchQuery && exercises.length === 0 && !showCustomForm && (
+                  <div className="px-4 py-6 text-center">
+                    <p className="text-sm text-[#555555] mb-3">"{searchQuery}" 검색 결과가 없어요</p>
+                    <button
+                      onClick={() => { setCustomName(searchQuery); setShowCustomForm(true) }}
+                      className="bg-[#C8FF00] text-[#0f0f0f] font-bold px-5 py-2.5 rounded-[10px] text-sm active:scale-95 transition-transform"
+                    >
+                      + "{searchQuery}" 직접 추가하기
+                    </button>
+                  </div>
+                )}
+
+                {/* 검색 결과 목록 */}
                 {muscleGroups.map(group => {
                   const groupExercises = exercises.filter(e => e.muscle_group === group)
                   if (!groupExercises.length) return null
@@ -287,45 +375,96 @@ export default function WorkoutNewPage() {
                     </div>
                   )
                 })}
+
+                {/* 하단: 직접 추가하기 버튼 (항상 노출) */}
+                {!showCustomForm && (
+                  <button
+                    onClick={() => { setCustomName(searchQuery); setShowCustomForm(true) }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-4 text-sm text-[#555555] hover:text-[#C8FF00] transition-colors border-t border-[#2a2a2a] mt-2"
+                  >
+                    <Plus size={15} />
+                    찾는 운동이 없나요? 직접 추가하기
+                  </button>
+                )}
+
+                {/* 직접 추가 폼 */}
+                <AnimatePresence>
+                  {showCustomForm && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="mx-4 my-3 bg-[#242424] rounded-[14px] p-4 border border-[#2a2a2a]"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-semibold text-[#f0f0f0]">운동 직접 추가</span>
+                        <button onClick={() => setShowCustomForm(false)} className="text-[#555555]">
+                          <X size={16} />
+                        </button>
+                      </div>
+
+                      {/* 운동 이름 */}
+                      <div className="mb-3">
+                        <label className="text-xs text-[#888888] mb-1 block">운동 이름 *</label>
+                        <input
+                          type="text"
+                          value={customName}
+                          onChange={e => setCustomName(e.target.value)}
+                          placeholder="예) 케이블 크런치"
+                          className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-[8px] px-3 py-2.5 text-sm text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]"
+                          autoFocus
+                        />
+                      </div>
+
+                      {/* 근육 부위 */}
+                      <div className="mb-3">
+                        <label className="text-xs text-[#888888] mb-1 block">근육 부위 *</label>
+                        <div className="relative">
+                          <select
+                            value={customMuscle}
+                            onChange={e => setCustomMuscle(e.target.value)}
+                            className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-[8px] px-3 py-2.5 text-sm text-[#f0f0f0] outline-none focus:border-[#C8FF00] appearance-none"
+                          >
+                            {MUSCLE_GROUPS.map(m => (
+                              <option key={m} value={m} style={{ backgroundColor: '#1a1a1a' }}>{m}</option>
+                            ))}
+                          </select>
+                          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555555] pointer-events-none" />
+                        </div>
+                      </div>
+
+                      {/* 기구 */}
+                      <div className="mb-4">
+                        <label className="text-xs text-[#888888] mb-1 block">기구</label>
+                        <div className="relative">
+                          <select
+                            value={customEquipment}
+                            onChange={e => setCustomEquipment(e.target.value)}
+                            className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-[8px] px-3 py-2.5 text-sm text-[#f0f0f0] outline-none focus:border-[#C8FF00] appearance-none"
+                          >
+                            {['바벨', '덤벨', '케이블', '머신', '맨몸', '기타'].map(e => (
+                              <option key={e} value={e} style={{ backgroundColor: '#1a1a1a' }}>{e}</option>
+                            ))}
+                          </select>
+                          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555555] pointer-events-none" />
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleAddCustom}
+                        disabled={!customName.trim() || customAdding}
+                        className="w-full bg-[#C8FF00] text-[#0f0f0f] font-bold py-3 rounded-[10px] text-sm active:scale-95 transition-transform disabled:opacity-40"
+                      >
+                        {customAdding ? '추가 중...' : '추가하고 세트 기록하기'}
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* ── 하단 바 ── */}
-      {isActive && (
-        <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-[#0f0f0f] border-t border-[#2a2a2a] px-4 py-3 flex gap-3 z-50">
-          <button
-            onClick={handleCancel}
-            className="flex-1 bg-[#242424] text-[#888888] font-medium rounded-[12px] py-3.5 text-sm"
-          >
-            취소
-          </button>
-
-          {/* 준비 중: 타이머 시작 버튼 */}
-          {isSetup && (
-            <button
-              onClick={handleBeginTimer}
-              className="flex-[2] bg-[#C8FF00] text-[#0f0f0f] font-bold rounded-[12px] py-3.5 text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg shadow-[#C8FF00]/25"
-            >
-              <Play size={16} fill="#0f0f0f" strokeWidth={0} />
-              운동 시작 (타이머 시작)
-            </button>
-          )}
-
-          {/* 타이머 가동 중: 종료 버튼 */}
-          {isTimerRunning && (
-            <button
-              onClick={handleFinish}
-              disabled={finishing || session.exercises.length === 0}
-              className="flex-[2] bg-[#C8FF00] text-[#0f0f0f] font-bold rounded-[12px] py-3.5 text-sm active:scale-[0.98] transition-transform disabled:opacity-50"
-            >
-              {finishing ? '저장 중...' : '운동 종료'}
-            </button>
-          )}
-        </div>
-      )}
     </div>
   )
 }
