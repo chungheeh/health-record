@@ -28,9 +28,9 @@ export interface WorkoutExercise {
 
 export interface WorkoutSessionState {
   workoutId: string | null
-  startedAt: number | null       // timestamp ms — 운동 시작 절대 시각
-  pausedAt: number | null        // 일시정지 시작 시각 (null이면 진행 중)
-  totalPausedMs: number          // 누적 일시정지 시간 ms
+  startedAt: number | null       // null = 준비 중 (타이머 미시작), 숫자 = 타이머 시작 시각 ms
+  pausedAt: number | null        // 일시정지 시작 시각
+  totalPausedMs: number          // 누적 일시정지 ms
   exercises: WorkoutExercise[]
   restTimer: {
     startAt: number
@@ -93,7 +93,7 @@ export function useWorkoutSession() {
     }
   }, [session])
 
-  // 운동 시작
+  // ── 1단계: 준비 (DB 워크아웃 생성, 타이머는 아직 시작 안함) ──
   const startWorkout = useCallback(async () => {
     setIsLoading(true)
     try {
@@ -111,7 +111,7 @@ export function useWorkoutSession() {
 
       const newSession: WorkoutSessionState = {
         workoutId: data.id,
-        startedAt: Date.now(),
+        startedAt: null,       // 타이머 아직 미시작
         pausedAt: null,
         totalPausedMs: 0,
         exercises: [],
@@ -124,6 +124,16 @@ export function useWorkoutSession() {
       setIsLoading(false)
     }
   }, [supabase])
+
+  // ── 2단계: 타이머 시작 ──
+  const beginTimer = useCallback(() => {
+    setSession(prev => {
+      if (!prev.workoutId || prev.startedAt !== null) return prev
+      const updated = { ...prev, startedAt: Date.now() }
+      saveToStorage(updated)
+      return updated
+    })
+  }, [])
 
   // 일시정지
   const pauseWorkout = useCallback(() => {
@@ -290,13 +300,16 @@ export function useWorkoutSession() {
 
   // 운동 종료
   const finishWorkout = useCallback(async () => {
-    if (!session.workoutId || !session.startedAt) return
+    if (!session.workoutId) return
 
-    // 일시정지 상태면 resume된 것으로 계산
-    const pausedExtra = session.pausedAt ? (Date.now() - session.pausedAt) : 0
-    const totalSeconds = Math.floor(
-      (Date.now() - session.startedAt - session.totalPausedMs - pausedExtra) / 1000
-    )
+    // 타이머가 시작됐으면 실제 경과 시간, 아니면 0초
+    let totalSeconds = 0
+    if (session.startedAt) {
+      const pausedExtra = session.pausedAt ? (Date.now() - session.pausedAt) : 0
+      totalSeconds = Math.floor(
+        (Date.now() - session.startedAt - session.totalPausedMs - pausedExtra) / 1000
+      )
+    }
 
     const { error } = await supabase
       .from('workouts')
@@ -322,15 +335,18 @@ export function useWorkoutSession() {
     setSession(initialState)
   }, [session.workoutId, supabase])
 
-  const isActive = Boolean(session.workoutId)
+  const isActive = Boolean(session.workoutId)                         // 준비 중 or 운동 중
+  const isTimerRunning = Boolean(session.workoutId && session.startedAt) // 타이머 실제 가동 중
   const isPaused = Boolean(session.pausedAt !== null && session.workoutId)
 
   return {
     session,
     isActive,
+    isTimerRunning,
     isPaused,
     isLoading,
     startWorkout,
+    beginTimer,
     pauseWorkout,
     resumeWorkout,
     addExercise,

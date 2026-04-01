@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, X, Dumbbell } from 'lucide-react'
+import { Search, X, Dumbbell, Play } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useWorkoutSession } from '@/lib/hooks/useWorkoutSession'
 import WorkoutTimer from '@/components/workout/WorkoutTimer'
@@ -23,8 +23,8 @@ const MOTIVATIONAL_MESSAGES = [
 export default function WorkoutNewPage() {
   const router = useRouter()
   const {
-    session, isActive, isPaused, isLoading,
-    startWorkout, pauseWorkout, resumeWorkout,
+    session, isActive, isTimerRunning, isPaused, isLoading,
+    startWorkout, beginTimer, pauseWorkout, resumeWorkout,
     addExercise, addSet, updateSet,
     completeSet, cancelRestTimer, removeExercise,
     finishWorkout, cancelWorkout,
@@ -51,8 +51,14 @@ export default function WorkoutNewPage() {
     search()
   }, [searchQuery])
 
+  // 1단계: 준비 화면으로 진입 (타이머 시작 안함)
   const handleStart = async () => {
     await startWorkout()
+  }
+
+  // 2단계: 실제 타이머 시작
+  const handleBeginTimer = () => {
+    beginTimer()
   }
 
   const handleAddExercise = async (ex: Exercise) => {
@@ -61,12 +67,13 @@ export default function WorkoutNewPage() {
     setSearchQuery('')
   }
 
+  // 운동 종료 — 확인 다이얼로그 포함
   const handleFinish = async () => {
     if (finishing || session.exercises.length === 0) return
+    if (!confirm('운동을 종료하시겠습니까?')) return
     setFinishing(true)
     try {
       const workoutId = await finishWorkout()
-      // 동기부여 팝업 먼저 보여주고 이동
       setShowMotivation(true)
       setTimeout(() => {
         setShowMotivation(false)
@@ -87,10 +94,13 @@ export default function WorkoutNewPage() {
   // 부위별 그룹핑
   const muscleGroups = Array.from(new Set(exercises.map(e => e.muscle_group)))
 
+  // 준비 중 = 워크아웃 생성됐지만 타이머 미시작
+  const isSetup = isActive && !isTimerRunning
+
   return (
     <div className="min-h-screen bg-[#0f0f0f]">
 
-      {/* ────────── 동기부여 팝업 ────────── */}
+      {/* ── 동기부여 팝업 ── */}
       <AnimatePresence>
         {showMotivation && (
           <motion.div
@@ -124,8 +134,8 @@ export default function WorkoutNewPage() {
         )}
       </AnimatePresence>
 
-      {/* ────────── 워크아웃 타이머 (운동 중) ────────── */}
-      {isActive && (
+      {/* ── 타이머 바 (타이머 가동 중일 때만) ── */}
+      {isTimerRunning && (
         <WorkoutTimer
           startedAt={session.startedAt}
           pausedAt={session.pausedAt}
@@ -139,7 +149,15 @@ export default function WorkoutNewPage() {
         />
       )}
 
-      {/* ────────── 시작 전 화면 ────────── */}
+      {/* ── 준비 중 헤더 (타이머 미시작) ── */}
+      {isSetup && (
+        <header className="sticky top-0 z-50 bg-[#1a1a1a] border-b border-[#2a2a2a] px-4 h-14 flex items-center justify-between">
+          <span className="text-sm font-semibold text-[#888888]">⚙️ 운동 준비 중</span>
+          <span className="text-xs text-[#555555]">종목 추가 후 타이머를 시작하세요</span>
+        </header>
+      )}
+
+      {/* ── 시작 전 화면 ── */}
       {!isActive && (
         <div className="flex flex-col items-center justify-center min-h-screen px-6 gap-6">
           <div className="text-center">
@@ -154,24 +172,24 @@ export default function WorkoutNewPage() {
             disabled={isLoading}
             className="w-full max-w-xs bg-[#C8FF00] text-[#0f0f0f] font-bold text-lg rounded-[16px] py-5 active:scale-95 transition-transform disabled:opacity-50"
           >
-            {isLoading ? '준비 중...' : '운동 시작하기'}
+            {isLoading ? '준비 중...' : '운동 준비하기'}
           </button>
           <button onClick={() => router.back()} className="text-[#555555] text-sm">취소</button>
         </div>
       )}
 
-      {/* ────────── 운동 중 화면 ────────── */}
+      {/* ── 운동 중 화면 (준비 or 타이머 중) ── */}
       {isActive && (
-        <div className="px-4 pt-4 pb-28">
+        <div className="px-4 pt-4 pb-32">
           {session.exercises.length === 0 ? (
             <div className="text-center py-16 text-[#555555]">
               <p className="text-4xl mb-3">🏋️</p>
-              <p className="text-sm mb-4">아래 버튼으로 운동을 추가해보세요</p>
+              <p className="text-sm mb-4">운동 종목을 추가해보세요</p>
               <button
                 onClick={() => setShowSearch(true)}
                 className="bg-[#C8FF00] text-[#0f0f0f] font-bold px-6 py-3 rounded-[12px] text-sm active:scale-95 transition-transform"
               >
-                운동 추가하기
+                종목 추가하기
               </button>
             </div>
           ) : (
@@ -190,20 +208,20 @@ export default function WorkoutNewPage() {
             </div>
           )}
 
-          {/* 운동 추가 버튼 */}
+          {/* 종목 추가 버튼 */}
           {session.exercises.length > 0 && (
             <button
               onClick={() => setShowSearch(true)}
               className="mt-4 w-full bg-[#1a1a1a] border border-dashed border-[#2a2a2a] rounded-[16px] py-4 text-[#888888] text-sm flex items-center justify-center gap-2 active:bg-[#242424] transition-colors"
             >
               <Search size={16} />
-              운동 추가하기
+              종목 추가하기
             </button>
           )}
         </div>
       )}
 
-      {/* ────────── 운동 검색 모달 ────────── */}
+      {/* ── 운동 검색 모달 ── */}
       <AnimatePresence>
         {showSearch && (
           <motion.div
@@ -220,20 +238,15 @@ export default function WorkoutNewPage() {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className="bg-[#1a1a1a] rounded-t-[24px] max-h-[85vh] flex flex-col"
             >
-              {/* 모달 핸들 */}
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-10 h-1 bg-[#2a2a2a] rounded-full" />
               </div>
-
-              {/* 모달 헤더 */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
                 <h3 className="font-semibold text-[#f0f0f0]">운동 선택</h3>
                 <button onClick={() => setShowSearch(false)} className="text-[#555555] p-1">
                   <X size={20} />
                 </button>
               </div>
-
-              {/* 검색창 */}
               <div className="px-4 py-3">
                 <div className="flex items-center gap-2 bg-[#242424] rounded-[12px] px-3 border border-[#2a2a2a] focus-within:border-[#C8FF00]">
                   <Search size={16} className="text-[#555555]" />
@@ -252,8 +265,6 @@ export default function WorkoutNewPage() {
                   )}
                 </div>
               </div>
-
-              {/* 운동 목록 */}
               <div className="overflow-y-auto flex-1 pb-6">
                 {muscleGroups.map(group => {
                   const groupExercises = exercises.filter(e => e.muscle_group === group)
@@ -282,7 +293,7 @@ export default function WorkoutNewPage() {
         )}
       </AnimatePresence>
 
-      {/* ────────── 운동 종료 하단 바 ────────── */}
+      {/* ── 하단 바 ── */}
       {isActive && (
         <div className="fixed bottom-0 left-0 right-0 bg-[#0f0f0f] border-t border-[#2a2a2a] px-4 py-3 flex gap-3 z-40">
           <button
@@ -291,13 +302,28 @@ export default function WorkoutNewPage() {
           >
             취소
           </button>
-          <button
-            onClick={handleFinish}
-            disabled={finishing || session.exercises.length === 0}
-            className="flex-[2] bg-[#C8FF00] text-[#0f0f0f] font-bold rounded-[12px] py-3.5 text-sm active:scale-[0.98] transition-transform disabled:opacity-50"
-          >
-            {finishing ? '저장 중...' : '운동 종료'}
-          </button>
+
+          {/* 준비 중: 타이머 시작 버튼 */}
+          {isSetup && (
+            <button
+              onClick={handleBeginTimer}
+              className="flex-[2] bg-[#C8FF00] text-[#0f0f0f] font-bold rounded-[12px] py-3.5 text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+            >
+              <Play size={16} fill="#0f0f0f" />
+              운동 시작
+            </button>
+          )}
+
+          {/* 타이머 가동 중: 종료 버튼 */}
+          {isTimerRunning && (
+            <button
+              onClick={handleFinish}
+              disabled={finishing || session.exercises.length === 0}
+              className="flex-[2] bg-[#C8FF00] text-[#0f0f0f] font-bold rounded-[12px] py-3.5 text-sm active:scale-[0.98] transition-transform disabled:opacity-50"
+            >
+              {finishing ? '저장 중...' : '운동 종료'}
+            </button>
+          )}
         </div>
       )}
     </div>
