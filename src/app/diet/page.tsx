@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -69,6 +71,37 @@ export default async function DietPage({
   const targetCal = profile?.target_calories ?? 2000
   const calProgress = Math.min((total.calories / targetCal) * 100, 100)
 
+  // 식단 추천 — 남은 영양소 기반 규칙 추천
+  const remainCal = targetCal - total.calories
+  const remainProtein = (profile?.target_protein_g ?? 120) - total.protein
+  const today = new Date().toISOString().split('T')[0]
+  const isToday = date === today
+
+  type Tip = { emoji: string; text: string; sub: string }
+  const tips: Tip[] = []
+
+  if (isToday && total.calories > 0) {
+    if (remainCal > 600) {
+      tips.push({ emoji: '🍚', text: '탄수화물이 부족해요', sub: `${Math.round(remainCal)}kcal 남았어요. 현미밥, 고구마, 바나나를 추가해보세요.` })
+    } else if (remainCal < -200) {
+      tips.push({ emoji: '🥗', text: '칼로리 초과 주의', sub: `목표보다 ${Math.round(-remainCal)}kcal 초과했어요. 야채 위주로 드세요.` })
+    } else if (remainCal > 0) {
+      tips.push({ emoji: '✅', text: '칼로리 잘 조절 중', sub: `목표까지 약 ${Math.round(remainCal)}kcal 남았어요. 가볍게 채워보세요.` })
+    }
+
+    if (remainProtein > 50) {
+      tips.push({ emoji: '💪', text: '단백질이 부족해요', sub: `약 ${Math.round(remainProtein)}g 더 필요해요. 닭가슴살, 계란, 두부, 그릭요거트를 드세요.` })
+    }
+
+    if (total.fat > (profile?.target_fat_g ?? 60) * 1.2) {
+      tips.push({ emoji: '⚠️', text: '지방 섭취가 높아요', sub: '튀긴 음식보다 삶거나 구운 음식을 선택해보세요.' })
+    }
+
+    if (tips.length === 0 && total.calories > targetCal * 0.8) {
+      tips.push({ emoji: '🌟', text: '오늘 식단 완벽해요!', sub: '목표 영양소를 균형있게 섭취하고 있어요. 잘 하고 있습니다!' })
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#0f0f0f]">
       {/* 헤더 */}
@@ -125,6 +158,21 @@ export default async function DietPage({
             ))}
           </div>
         </div>
+
+        {/* 식단 추천 카드 */}
+        {tips.length > 0 && (
+          <div className="space-y-2">
+            {tips.map((tip, i) => (
+              <div key={i} className="bg-[#1a1a1a] rounded-[14px] px-4 py-3 flex items-start gap-3">
+                <span className="text-lg shrink-0 mt-0.5">{tip.emoji}</span>
+                <div>
+                  <p className="text-sm font-semibold text-[#f0f0f0]">{tip.text}</p>
+                  <p className="text-xs text-[#888888] mt-0.5 leading-relaxed">{tip.sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* 식사별 카드 */}
         {MEAL_TYPES.map(mealType => {

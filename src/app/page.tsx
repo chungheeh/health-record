@@ -222,7 +222,7 @@ export default async function HomePage({
           activeRoutine ? (
             <div className="bg-[#1a1a1a] rounded-[16px] p-5">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-semibold text-[#f0f0f0]">내 루틴</h2>
+                <h2 className="text-sm font-semibold text-[#f0f0f0]">🤖 AI 맞춤 루틴</h2>
                 <Link href="/routine" className="text-xs text-[#C8FF00]">자세히 →</Link>
               </div>
               <p className="text-xs text-[#888888] mb-2">목표: {activeRoutine.goal}</p>

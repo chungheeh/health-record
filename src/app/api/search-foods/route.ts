@@ -3,30 +3,32 @@ import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
+// data.go.kr 식품영양성분 DB (FoodNtrCpntDbInfo02)
+// AMT_NUM1=에너지(kcal), AMT_NUM3=단백질(g), AMT_NUM4=지방(g), AMT_NUM6=탄수화물(g)
 interface ApiRow {
   FOOD_CD: string
-  DESC_KOR: string
-  MAKER_NM: string
-  GROUP_NAME: string
-  NUTR_CONT1: string  // calories
-  NUTR_CONT2: string  // carbs
-  NUTR_CONT3: string  // protein
-  NUTR_CONT4: string  // fat
-  SERVING_WT: string  // serving size g
-  SERVING_SIZE: string
+  FOOD_NM_KR: string
+  MAKER_NM: string | null
+  FOOD_CAT1_NM: string | null
+  AMT_NUM1: string  // 에너지(kcal)
+  AMT_NUM3: string  // 단백질(g)
+  AMT_NUM4: string  // 지방(g)
+  AMT_NUM6: string  // 탄수화물(g)
+  SERVING_SIZE: string // e.g. "100g"
 }
 
 function mapApiRow(row: ApiRow) {
+  const servingG = parseFloat(row.SERVING_SIZE) || 100
   return {
-    name: row.DESC_KOR,
+    name: row.FOOD_NM_KR,
     brand: row.MAKER_NM || null,
-    category: row.GROUP_NAME || null,
-    calories_per_100g: parseFloat(row.NUTR_CONT1) || 0,
-    carbs_per_100g:    parseFloat(row.NUTR_CONT2) || 0,
-    protein_per_100g:  parseFloat(row.NUTR_CONT3) || 0,
-    fat_per_100g:      parseFloat(row.NUTR_CONT4) || 0,
-    serving_size_g:    parseFloat(row.SERVING_WT) || 100,
-    serving_unit:      row.SERVING_SIZE || 'g',
+    category: row.FOOD_CAT1_NM || null,
+    calories_per_100g: parseFloat(row.AMT_NUM1) || 0,
+    protein_per_100g:  parseFloat(row.AMT_NUM3) || 0,
+    fat_per_100g:      parseFloat(row.AMT_NUM4) || 0,
+    carbs_per_100g:    parseFloat(row.AMT_NUM6) || 0,
+    serving_size_g:    servingG,
+    serving_unit:      'g',
   }
 }
 
@@ -54,11 +56,11 @@ export async function GET(req: NextRequest) {
     if (apiKey) {
       try {
         const encoded = encodeURIComponent(q)
-        const url = `https://openapi.foodsafetykorea.go.kr/api/${apiKey}/I2790/json/1/30?DESC_KOR=${encoded}`
+        const url = `https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02/getFoodNtrCpntDbInq02?serviceKey=${encodeURIComponent(apiKey)}&pageNo=1&numOfRows=30&type=json&FOOD_NM_KR=${encoded}`
         const res = await fetch(url, { next: { revalidate: 3600 } })
         if (res.ok) {
           const json = await res.json()
-          const rows: ApiRow[] = json?.I2790?.row ?? []
+          const rows: ApiRow[] = json?.body?.items ?? []
           apiMapped = rows.map(mapApiRow)
 
           // Cache to local DB (fire-and-forget, ignore errors)
