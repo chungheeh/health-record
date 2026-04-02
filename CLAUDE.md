@@ -8,9 +8,10 @@ Next.js 14 (App Router) + Supabase + Claude API.
 ## 기술 스택
 - Frontend: Next.js 14 App Router, TypeScript, Tailwind CSS, Framer Motion, Recharts
 - Backend: Supabase (Auth + PostgreSQL + RLS) — 프로젝트 ID: `irfvzqrqnimhhfwetdgu`
-- AI: Claude API (`claude-sonnet-4-20250514`) 우선, 크레딧 부족 시 **Gemini (`gemini-1.5-flash`) 자동 폴백**
+- AI: Claude API (`claude-sonnet-4-20250514`) 우선, 크레딧 부족 시 **Gemini (`gemini-2.5-flash`) 자동 폴백**
   - 공통 유틸: `src/lib/utils/ai-client.ts` (`generateText`, `analyzeImageWithText`)
-  - 환경변수: `ANTHROPIC_API_KEY` + `GEMINI_API_KEY` (둘 다 Vercel에 설정 필요)
+  - 환경변수: `ANTHROPIC_API_KEY` + `GEMINI_API_KEY` (둘 다 Vercel에 설정 완료)
+  - **Gemini 사용 가능 모델 (2025-04 확인)**: `gemini-2.5-flash`, `gemini-2.5-flash-lite` — 1.5/2.0 계열은 이 키에서 404
 - 차트: Recharts + react-calendar-heatmap
 - 배포: Vercel
 
@@ -134,6 +135,24 @@ src/
 - **문제**: `handleRegenerate`가 `fetch('/api/generate-routine', { method: 'POST' })` 빈 body 전송 → API에서 `profile` 없어 즉시 400 반환
 - **해결**: form 상태를 profile 객체로 변환해 body에 포함
 - **교훈**: POST API 호출 시 항상 body 내용 확인. 특히 AI API는 입력 없이 호출 불가.
+
+### [2026-04-02] Gemini 1.5 모델 404 — 이 API 키에서 사용 불가
+- **문제**: `gemini-1.5-flash`, `gemini-1.5-pro`, `gemini-2.0-flash`, `gemini-2.0-flash-001` 모두 `[404 Not Found] models/... is not found`
+- **원인**: 이 Gemini API 키(`AIzaSy...`)는 최신 모델만 제공 — 1.5/2.0 계열 미지원
+- **해결**: `GEMINI_TEXT_MODEL` = `gemini-2.5-flash`, `GEMINI_VISION_MODEL` = `gemini-2.5-flash` 로 변경 (`src/lib/utils/ai-client.ts`)
+- **교훈**: Gemini 모델 변경 전 반드시 `node -e "..."` 로 직접 호출 테스트 후 CLAUDE.md 기록
+
+### [2026-04-02] 식품안전나라 API 키 인증 실패
+- **문제**: `https://openapi.foodsafetykorea.go.kr/api/{KEY}/I2790/...` 호출 시 `"인증키가 유효하지 않습니다"` 스크립트 반환
+- **원인**: `.env.local`의 `FOOD_SAFETY_API_KEY=6f74b95bd3764ba1ba8d` 키가 만료/무효
+- **해결 방법**: https://www.data.go.kr 에서 I2790 서비스 재신청 → 새 키 발급 → `.env.local` + Vercel 환경변수 업데이트
+- **임시 대응**: 로컬 Supabase foods 테이블에 기본 식품 38개 직접 추가 (삶은 계란, 닭가슴살, 흰쌀밥 등)
+- **교훈**: 외부 API 키는 정기적으로 유효성 검증 필요. 키 무효 시 `search-foods` route는 로컬 DB만 사용(graceful degradation)
+
+### [2026-04-02] 운동 완료 후 시작 화면 플래시
+- **문제**: `finishWorkout()` 호출 시 session 상태 초기화 → `isActive=false` → 운동 시작 화면이 2200ms 동안 표시된 후 완료 페이지 이동
+- **해결**: `redirecting` 상태 추가 → `!isActive && !redirecting` 조건으로 시작 화면 렌더 차단
+- **교훈**: 비동기 상태 초기화 후 router.push 전 화면 전환이 있는 경우 별도 `redirecting` flag 필요
 
 ---
 

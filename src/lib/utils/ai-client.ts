@@ -2,11 +2,13 @@
  * AI 클라이언트 유틸
  * Anthropic 우선 → 크레딧 부족/인증 실패 시 Gemini 자동 폴백
  *
- * Gemini 모델 선택 기준 (2025년 기준 stable 모델):
- * - generateText  : gemini-1.5-pro   → 복잡한 JSON 추론·긴 출력에 최고 품질 (stable)
- * - analyzeImage  : gemini-1.5-flash → 멀티모달 비전 최적화 + 빠른 응답 (stable)
+ * Gemini 모델 선택 기준 (2025-04 실제 확인된 사용 가능 모델):
+ * - generateText  : gemini-2.5-flash → 복잡한 JSON 추론·루틴 생성 최적
+ * - analyzeImage  : gemini-2.5-flash → 멀티모달 비전 + 빠른 응답 지원
  *
- * ※ gemini-2.0-flash / gemini-2.5-pro 는 신규 사용자에게 미제공 → stable 모델 사용
+ * ※ gemini-1.5-flash / gemini-1.5-pro → 이 API 키에서 404 Not Found
+ * ※ gemini-2.0-flash / gemini-2.0-flash-001 → 이 API 키에서 404 Not Found
+ * ※ gemini-2.5-flash, gemini-2.5-flash-lite → 정상 작동 확인
  */
 
 import Anthropic from '@anthropic-ai/sdk'
@@ -14,9 +16,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export type AIProvider = 'anthropic' | 'gemini'
 
-// 용도별 Gemini 모델 (신규 사용자 안정 제공 모델)
-const GEMINI_TEXT_MODEL   = 'gemini-1.5-pro'   // 루틴 생성: 복잡한 추론·구조화 JSON
-const GEMINI_VISION_MODEL = 'gemini-1.5-flash' // 사진 분석: 멀티모달, 빠른 응답
+// 용도별 Gemini 모델 (2025-04 실제 작동 확인)
+const GEMINI_TEXT_MODEL   = 'gemini-2.5-flash' // 루틴 생성: 복잡한 추론·구조화 JSON
+const GEMINI_VISION_MODEL = 'gemini-2.5-flash' // 사진 분석: 멀티모달 비전 지원
 
 function isAnthropicCreditError(err: unknown): boolean {
   if (err instanceof Anthropic.APIError) {
