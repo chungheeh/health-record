@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import MealItemList from '@/components/diet/MealItemList'
+import DietDateNav from '@/components/diet/DietDateNav'
+import MealTemplatePanel from '@/components/diet/MealTemplatePanel'
 
 const MEAL_TYPES = ['아침', '점심', '저녁', '간식'] as const
 type MealType = typeof MEAL_TYPES[number]
@@ -67,17 +69,12 @@ export default async function DietPage({
   const targetCal = profile?.target_calories ?? 2000
   const calProgress = Math.min((total.calories / targetCal) * 100, 100)
 
-  // 날짜 포맷
-  const dateLabel = new Date(date + 'T12:00:00').toLocaleDateString('ko-KR', {
-    month: 'long', day: 'numeric', weekday: 'short',
-  })
-
   return (
     <main className="min-h-screen bg-[#0f0f0f]">
       {/* 헤더 */}
       <header className="sticky top-0 z-50 bg-[#0f0f0f] border-b border-[#2a2a2a] px-4 h-14 flex items-center justify-between">
         <h1 className="font-semibold text-[#f0f0f0]">식단 기록</h1>
-        <span className="text-sm text-[#888888]">{dateLabel}</span>
+        <DietDateNav date={date} />
       </header>
 
       <div className="px-4 pt-4 pb-24 space-y-4">
@@ -146,12 +143,19 @@ export default async function DietPage({
                     <span className="text-xs text-[#888888] tabular-nums">{Math.round(mealCals)}kcal</span>
                   )}
                 </div>
-                <Link
-                  href={`/diet/add?date=${date}&meal=${encodeURIComponent(mealType)}`}
-                  className="bg-[#242424] text-[#C8FF00] rounded-full p-1.5"
-                >
-                  <Plus size={14} />
-                </Link>
+                <div className="flex items-center gap-2">
+                  <MealTemplatePanel
+                    mealType={mealType}
+                    date={date}
+                    currentItems={mealItems}
+                  />
+                  <Link
+                    href={`/diet/add?date=${date}&meal=${encodeURIComponent(mealType)}`}
+                    className="bg-[#242424] text-[#C8FF00] rounded-full p-1.5"
+                  >
+                    <Plus size={14} />
+                  </Link>
+                </div>
               </div>
 
               {/* 음식 항목 — 수정/삭제 지원 */}
