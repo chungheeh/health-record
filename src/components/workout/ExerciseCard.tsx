@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trash2, Plus, Check } from 'lucide-react'
+import { Trash2, Plus, Check, Minus } from 'lucide-react'
 import type { WorkoutExercise, SetData, SetType } from '@/lib/hooks/useWorkoutSession'
 
 interface ExerciseCardProps {
@@ -12,6 +12,7 @@ interface ExerciseCardProps {
   onUpdateSet: (exerciseIndex: number, setIndex: number, updates: Partial<SetData>) => void
   onCompleteSet: (exerciseIndex: number, setIndex: number, restDuration?: number) => Promise<void>
   onAddSet: (exerciseIndex: number) => void
+  onRemoveSet: (exerciseIndex: number, setIndex: number) => void
   onRemove: (exerciseIndex: number) => void
   restDuration?: number
 }
@@ -42,6 +43,7 @@ export default function ExerciseCard({
   onUpdateSet,
   onCompleteSet,
   onAddSet,
+  onRemoveSet,
   onRemove,
   restDuration = 90,
 }: ExerciseCardProps) {
@@ -83,11 +85,12 @@ export default function ExerciseCard({
       {/* 세트 목록 */}
       <div className="px-4 py-3 space-y-2">
         {/* 컬럼 헤더 */}
-        <div className="grid grid-cols-[44px_1fr_1fr_1fr_40px] gap-2 text-xs text-[#555555] mb-1">
+        <div className="grid grid-cols-[44px_1fr_1fr_1fr_40px_28px] gap-2 text-xs text-[#555555] mb-1">
           <span className="text-center">세트</span>
           <span className="text-center">종류</span>
           <span className="text-center">무게(kg)</span>
           <span className="text-center">횟수</span>
+          <span />
           <span />
         </div>
 
@@ -105,7 +108,7 @@ export default function ExerciseCard({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
-                className={`grid grid-cols-[44px_1fr_1fr_1fr_40px] gap-2 items-center transition-all duration-200 ${
+                className={`grid grid-cols-[44px_1fr_1fr_1fr_40px_28px] gap-2 items-center transition-all duration-200 ${
                   isCompleted
                     ? 'bg-[#C8FF00]/5 rounded-[10px] px-0'
                     : ''
@@ -176,10 +179,10 @@ export default function ExerciseCard({
                   disabled={isCompleted || isCompleting || !set.weight_kg || !set.reps}
                   className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
                     isCompleted
-                      ? 'bg-[#C8FF00] shadow-lg shadow-[#C8FF00]/30'           /* 완료: 라임 솔리드 */
+                      ? 'bg-[#C8FF00] shadow-lg shadow-[#C8FF00]/30'
                       : (set.weight_kg && set.reps)
-                        ? 'bg-[#2a2a2a] border-2 border-[#555555] hover:border-[#C8FF00]/60 active:bg-[#C8FF00]/20'  /* 입력됨: 밝은 테두리 */
-                        : 'bg-[#1e1e1e] border border-[#2a2a2a]'              /* 미입력: 흐린 */
+                        ? 'bg-[#2a2a2a] border-2 border-[#555555] hover:border-[#C8FF00]/60 active:bg-[#C8FF00]/20'
+                        : 'bg-[#1e1e1e] border border-[#2a2a2a]'
                   }`}
                 >
                   {isCompleting ? (
@@ -190,14 +193,25 @@ export default function ExerciseCard({
                       strokeWidth={isCompleted ? 3 : 2.5}
                       className={
                         isCompleted
-                          ? 'text-[#0f0f0f]'           /* 완료: 검은 체크 (라임 배경) */
+                          ? 'text-[#0f0f0f]'
                           : (set.weight_kg && set.reps)
-                            ? 'text-[#888888]'           /* 입력됨: 밝은 회색 체크 */
-                            : 'text-[#3a3a3a]'           /* 미입력: 아주 흐림 */
+                            ? 'text-[#888888]'
+                            : 'text-[#3a3a3a]'
                       }
                     />
                   )}
                 </motion.button>
+
+                {/* 세트 삭제 버튼 */}
+                {!isCompleted && exercise.sets.length > 1 && (
+                  <button
+                    onClick={() => onRemoveSet(exerciseIndex, setIndex)}
+                    className="w-6 h-6 flex items-center justify-center text-[#444444] hover:text-[#FF4B4B] transition-colors"
+                  >
+                    <Minus size={13} />
+                  </button>
+                )}
+                {(isCompleted || exercise.sets.length <= 1) && <span />}
               </motion.div>
             )
           })}

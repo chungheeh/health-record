@@ -28,7 +28,7 @@ export default function WorkoutNewPage() {
     session, isActive, isTimerRunning, isPaused, isLoading,
     startWorkout, beginTimer, pauseWorkout, resumeWorkout,
     addExercise, addSet, updateSet,
-    completeSet, cancelRestTimer, removeExercise,
+    completeSet, cancelRestTimer, removeSet, removeExercise,
     finishWorkout, cancelWorkout,
   } = useWorkoutSession()
 
@@ -36,10 +36,14 @@ export default function WorkoutNewPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
   const [finishing, setFinishing] = useState(false)
+  const [redirecting, setRedirecting] = useState(false)
   const [showMotivation, setShowMotivation] = useState(false)
   const [motivationMsg] = useState(() =>
     MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)]
   )
+
+  // 다중 선택 상태
+  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([])
 
   // 직접 추가 폼 상태
   const [showCustomForm, setShowCustomForm] = useState(false)
@@ -67,11 +71,22 @@ export default function WorkoutNewPage() {
     await startWorkout()
   }
 
-  const handleAddExercise = async (ex: Exercise) => {
-    await addExercise(ex.id, ex.name, ex.muscle_group)
+  const toggleSelectExercise = (ex: Exercise) => {
+    setSelectedExercises(prev =>
+      prev.some(e => e.id === ex.id)
+        ? prev.filter(e => e.id !== ex.id)
+        : [...prev, ex]
+    )
+  }
+
+  const handleAddSelected = async () => {
+    for (const ex of selectedExercises) {
+      await addExercise(ex.id, ex.name, ex.muscle_group)
+    }
     setShowSearch(false)
     setSearchQuery('')
     setShowCustomForm(false)
+    setSelectedExercises([])
   }
 
   // 커스텀 운동 직접 추가
@@ -113,9 +128,9 @@ export default function WorkoutNewPage() {
     setFinishing(true)
     try {
       const workoutId = await finishWorkout()
+      setRedirecting(true)
       setShowMotivation(true)
       setTimeout(() => {
-        setShowMotivation(false)
         router.push(`/workout/${workoutId}`)
       }, 2200)
     } catch {
@@ -214,7 +229,7 @@ export default function WorkoutNewPage() {
       )}
 
       {/* ── 시작 전 화면 ── */}
-      {!isActive && (
+      {!isActive && !redirecting && (
         <div className="flex flex-col items-center justify-center min-h-screen px-6 gap-6">
           <div className="text-center">
             <div className="w-20 h-20 rounded-full bg-[#C8FF00]/10 border-2 border-[#C8FF00]/30 flex items-center justify-center mx-auto mb-4">
@@ -258,6 +273,7 @@ export default function WorkoutNewPage() {
                   onUpdateSet={updateSet}
                   onCompleteSet={completeSet}
                   onAddSet={addSet}
+                  onRemoveSet={removeSet}
                   onRemove={removeExercise}
                 />
               ))}
@@ -296,7 +312,7 @@ export default function WorkoutNewPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/70 z-50 flex flex-col justify-end"
-            onClick={e => { if (e.target === e.currentTarget) { setShowSearch(false); setShowCustomForm(false) } }}
+            onClick={e => { if (e.target === e.currentTarget) { setShowSearch(false); setShowCustomForm(false); setSelectedExercises([]) } }}
           >
             <motion.div
               initial={{ y: '100%' }}
@@ -312,8 +328,13 @@ export default function WorkoutNewPage() {
 
               {/* 헤더 */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
-                <h3 className="font-semibold text-[#f0f0f0]">운동 선택</h3>
-                <button onClick={() => { setShowSearch(false); setShowCustomForm(false) }} className="text-[#555555] p-1">
+                <div>
+                  <h3 className="font-semibold text-[#f0f0f0]">운동 선택</h3>
+                  {selectedExercises.length > 0 && (
+                    <p className="text-xs text-[#C8FF00]">{selectedExercises.length}개 선택됨</p>
+                  )}
+                </div>
+                <button onClick={() => { setShowSearch(false); setShowCustomForm(false); setSelectedExercises([]) }} className="text-[#555555] p-1">
                   <X size={20} />
                 </button>
               </div>
@@ -362,16 +383,23 @@ export default function WorkoutNewPage() {
                       <p className="px-4 py-2 text-xs font-semibold text-[#555555] bg-[#242424] sticky top-0">
                         {group} ({groupExercises.length})
                       </p>
-                      {groupExercises.map(ex => (
-                        <button
-                          key={ex.id}
-                          onClick={() => handleAddExercise(ex)}
-                          className="w-full flex items-center justify-between px-4 py-3.5 border-b border-[#2a2a2a] hover:bg-[#242424] active:bg-[#242424] transition-colors text-left"
-                        >
-                          <span className="text-sm text-[#f0f0f0]">{ex.name}</span>
-                          <span className="text-xs text-[#555555]">{ex.equipment}</span>
-                        </button>
-                      ))}
+                      {groupExercises.map(ex => {
+                        const isSelected = selectedExercises.some(e => e.id === ex.id)
+                        return (
+                          <button
+                            key={ex.id}
+                            onClick={() => toggleSelectExercise(ex)}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 border-b border-[#2a2a2a] transition-colors text-left ${isSelected ? 'bg-[#C8FF00]/10' : 'hover:bg-[#242424] active:bg-[#242424]'}`}
+                          >
+                            {/* 체크박스 */}
+                            <div className={`w-5 h-5 rounded-[6px] flex items-center justify-center flex-shrink-0 border-2 transition-all ${isSelected ? 'bg-[#C8FF00] border-[#C8FF00]' : 'border-[#444444]'}`}>
+                              {isSelected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="#0f0f0f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                            </div>
+                            <span className="flex-1 text-sm text-[#f0f0f0]">{ex.name}</span>
+                            <span className="text-xs text-[#555555]">{ex.equipment}</span>
+                          </button>
+                        )
+                      })}
                     </div>
                   )
                 })}
@@ -385,6 +413,18 @@ export default function WorkoutNewPage() {
                     <Plus size={15} />
                     찾는 운동이 없나요? 직접 추가하기
                   </button>
+                )}
+
+                {/* 선택된 종목 일괄 추가 버튼 */}
+                {selectedExercises.length > 0 && (
+                  <div className="sticky bottom-0 px-4 pb-4 pt-2 bg-gradient-to-t from-[#1a1a1a] to-transparent">
+                    <button
+                      onClick={handleAddSelected}
+                      className="w-full bg-[#C8FF00] text-[#0f0f0f] font-bold py-3.5 rounded-[14px] text-sm active:scale-[0.98] transition-transform shadow-lg shadow-[#C8FF00]/20"
+                    >
+                      {selectedExercises.length}개 종목 추가하기
+                    </button>
+                  </div>
                 )}
 
                 {/* 직접 추가 폼 */}

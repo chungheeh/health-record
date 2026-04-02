@@ -290,6 +290,17 @@ export function useWorkoutSession() {
     setSession(prev => ({ ...prev, restTimer: null }))
   }, [])
 
+  // 세트 삭제
+  const removeSet = useCallback((exerciseIndex: number, setIndex: number) => {
+    setSession(prev => {
+      const exercises = [...prev.exercises]
+      const currentSets = exercises[exerciseIndex].sets.filter((_, i) => i !== setIndex)
+      const renumbered = currentSets.map((s, i) => ({ ...s, set_number: i + 1 }))
+      exercises[exerciseIndex] = { ...exercises[exerciseIndex], sets: renumbered }
+      return { ...prev, exercises }
+    })
+  }, [])
+
   // 종목 삭제
   const removeExercise = useCallback((exerciseIndex: number) => {
     setSession(prev => ({
@@ -354,6 +365,7 @@ export function useWorkoutSession() {
     updateSet,
     completeSet,
     cancelRestTimer,
+    removeSet,
     removeExercise,
     finishWorkout,
     cancelWorkout,
