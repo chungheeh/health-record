@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MessageSquarePlus } from 'lucide-react'
 import TodayWorkouts from '@/components/home/TodayWorkouts'
 
 function addDays(dateStr: string, days: number): string {
@@ -123,6 +123,13 @@ export default async function HomePage({
             }`}
           >
             <ChevronRight size={18} />
+          </Link>
+          <Link
+            href="/suggestions"
+            className="w-8 h-8 flex items-center justify-center rounded-full text-[#888888] hover:text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors"
+            title="건의사항"
+          >
+            <MessageSquarePlus size={17} />
           </Link>
         </div>
       </header>

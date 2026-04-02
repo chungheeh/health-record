@@ -61,7 +61,7 @@ export default function WorkoutNewPage() {
     const search = async () => {
       let query = supabase.from('exercises').select('*').order('muscle_group').order('name')
       if (searchQuery) query = query.ilike('name', `%${searchQuery}%`)
-      const { data } = await query.limit(50)
+      const { data } = await query.limit(300)
       setExercises(data ?? [])
     }
     search()
@@ -219,8 +219,7 @@ export default function WorkoutNewPage() {
             </button>
             <button
               onClick={beginTimer}
-              disabled={session.exercises.length === 0}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-bold bg-[#C8FF00] text-[#0f0f0f] disabled:opacity-40 active:scale-95 transition-transform shadow-md shadow-[#C8FF00]/20"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-bold bg-[#C8FF00] text-[#0f0f0f] active:scale-95 transition-transform shadow-md shadow-[#C8FF00]/20"
             >
               ▶ 운동 시작
             </button>

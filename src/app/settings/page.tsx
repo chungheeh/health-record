@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { ChevronLeft, RefreshCw } from 'lucide-react'
+import { ChevronLeft, RefreshCw, ShieldCheck } from 'lucide-react'
 
 interface ProfileForm {
   goal: string
@@ -43,6 +43,7 @@ export default function SettingsPage() {
   const [regenerating, setRegenerating] = useState(false)
   const [savedMsg, setSavedMsg] = useState('')
   const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -68,6 +69,7 @@ export default function SettingsPage() {
           target_carbs_g: profile.target_carbs_g?.toString() ?? '',
           target_fat_g: profile.target_fat_g?.toString() ?? '',
         })
+        setIsAdmin((profile as { is_admin?: boolean }).is_admin === true)
       }
       setLoading(false)
     }
@@ -306,6 +308,17 @@ export default function SettingsPage() {
 
         {savedMsg && (
           <p className="text-center text-sm text-[#C8FF00]">{savedMsg}</p>
+        )}
+
+        {/* 관리자 버튼 — is_admin인 경우만 표시 */}
+        {isAdmin && (
+          <button
+            onClick={() => router.push('/admin')}
+            className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#1a1a1a] border border-[#C8FF00]/30 rounded-[16px] text-sm text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors"
+          >
+            <ShieldCheck size={16} />
+            관리자 페이지
+          </button>
         )}
       </div>
 
