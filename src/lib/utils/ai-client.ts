@@ -42,12 +42,31 @@ function getGeminiClient() {
 }
 
 /**
- * Gemini가 가끔 ```json ... ``` 마크다운으로 감싸는 경우 추출
+ * 중첩 {} 구조를 정확히 매칭해서 JSON 객체만 추출
+ * Gemini가 마크다운/설명 텍스트를 섞어 반환해도 안전하게 파싱
  */
 function extractJSON(raw: string): string {
-  // ```json ... ``` 또는 ``` ... ``` 블록 제거
-  const stripped = raw.replace(/```(?:json)?\s*([\s\S]*?)\s*```/g, '$1').trim()
-  return stripped
+  // responseMimeType=application/json 사용 시 이미 순수 JSON이지만 방어적으로 처리
+  const start = raw.indexOf('{')
+  if (start === -1) return raw
+
+  // 중첩 괄호를 카운트해서 완전한 JSON 객체 범위 찾기
+  let depth = 0
+  let inString = false
+  let escaped = false
+  for (let i = start; i < raw.length; i++) {
+    const ch = raw[i]
+    if (escaped) { escaped = false; continue }
+    if (ch === '\\' && inString) { escaped = true; continue }
+    if (ch === '"') { inString = !inString; continue }
+    if (inString) continue
+    if (ch === '{') depth++
+    else if (ch === '}') {
+      depth--
+      if (depth === 0) return raw.slice(start, i + 1)
+    }
+  }
+  return raw.slice(start)
 }
 
 /**
@@ -78,11 +97,15 @@ export async function generateText(
     }
   }
 
-  // 2) Gemini 1.5 Pro 폴백
+  // 2) Gemini 폴백 — responseMimeType으로 순수 JSON 강제
   const genAI = getGeminiClient()
   const model = genAI.getGenerativeModel({
     model: GEMINI_TEXT_MODEL,
-    generationConfig: { temperature: 0.7, maxOutputTokens: 4000 },
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 8192,
+      responseMimeType: 'application/json',
+    },
   })
   const result = await model.generateContent(prompt)
   const raw = result.response.text()
@@ -131,11 +154,15 @@ export async function analyzeImageWithText(
     }
   }
 
-  // 2) Gemini 1.5 Flash 폴백 — 멀티모달 비전 최적화
+  // 2) Gemini 폴백 — 멀티모달 비전, responseMimeType으로 순수 JSON 강제
   const genAI = getGeminiClient()
   const model = genAI.getGenerativeModel({
     model: GEMINI_VISION_MODEL,
-    generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens: 1024,
+      responseMimeType: 'application/json',
+    },
   })
 
   const imagePart = { inlineData: { data: imageBase64, mimeType: mimeType || 'image/jpeg' } }
