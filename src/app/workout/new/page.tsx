@@ -180,7 +180,7 @@ export default function WorkoutNewPage() {
   }
 
   const handleFinish = async () => {
-    if (finishing || session.exercises.length === 0) return
+    if (finishing) return
     if (!confirm('운동을 종료하시겠습니까?')) return
     setFinishing(true)
     try {
@@ -326,7 +326,7 @@ export default function WorkoutNewPage() {
 
           {isTimerRunning && (
             <button onClick={handleFinish}
-              disabled={finishing || session.exercises.length === 0}
+              disabled={finishing}
               className="mt-6 w-full bg-[#1a1a1a] border border-[#2a2a2a] text-[#888888] font-medium rounded-[12px] py-3 text-sm active:scale-[0.98] transition-transform disabled:opacity-40">
               {finishing ? '저장 중...' : '운동 종료하기'}
             </button>
