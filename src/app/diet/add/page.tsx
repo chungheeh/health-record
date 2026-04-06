@@ -335,6 +335,13 @@ function DietAddContent() {
               )}
             </div>
 
+            {/* 검색 결과 없음 */}
+            {query.length > 0 && results.length === 0 && !isSearching && (
+              <p className="mt-3 px-1 text-xs text-[#555555]">
+                &quot;{query}&quot;에 대한 검색 결과가 없습니다
+              </p>
+            )}
+
             {/* 직접 입력 버튼 */}
             {query.length > 0 && results.length === 0 && !isSearching && (
               <button

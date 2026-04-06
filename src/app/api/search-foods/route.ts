@@ -57,7 +57,10 @@ export async function GET(req: NextRequest) {
       try {
         const encoded = encodeURIComponent(q)
         const url = `https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02/getFoodNtrCpntDbInq02?serviceKey=${encodeURIComponent(apiKey)}&pageNo=1&numOfRows=30&type=json&FOOD_NM_KR=${encoded}`
-        const res = await fetch(url, { next: { revalidate: 3600 } })
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000)
+        const res = await fetch(url, { signal: controller.signal, next: { revalidate: 3600 } })
+        clearTimeout(timeoutId)
         if (res.ok) {
           const json = await res.json()
           const rows: ApiRow[] = json?.body?.items ?? []

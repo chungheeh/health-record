@@ -204,10 +204,10 @@ export default function SettingsPage() {
         <div className="bg-[#1a1a1a] rounded-[16px] p-4 space-y-3">
           <p className="text-sm font-semibold text-[#f0f0f0]">신체 정보</p>
           {([
-            { key: 'height_cm', label: '키', unit: 'cm', placeholder: '170' },
-            { key: 'current_weight_kg', label: '현재 체중', unit: 'kg', placeholder: '70' },
-            { key: 'target_weight_kg', label: '목표 체중', unit: 'kg', placeholder: '65' },
-          ] as const).map(({ key, label, unit, placeholder }) => (
+            { key: 'height_cm', label: '키', unit: 'cm', placeholder: '170', min: '100', max: '250' },
+            { key: 'current_weight_kg', label: '현재 체중', unit: 'kg', placeholder: '70', min: '20', max: '300' },
+            { key: 'target_weight_kg', label: '목표 체중', unit: 'kg', placeholder: '65', min: '20', max: '300' },
+          ] as const).map(({ key, label, unit, placeholder, min, max }) => (
             <div key={key} className="flex items-center gap-3">
               <span className="text-xs text-[#888888] w-20 shrink-0">{label}</span>
               <div className="flex-1 bg-[#242424] border border-[#2a2a2a] rounded-[10px] flex items-center px-3 focus-within:border-[#C8FF00]">
@@ -215,6 +215,8 @@ export default function SettingsPage() {
                   type="number"
                   inputMode="decimal"
                   placeholder={placeholder}
+                  min={min}
+                  max={max}
                   value={form[key]}
                   onChange={e => set(key)(e.target.value)}
                   className="flex-1 bg-transparent py-2.5 text-sm text-[#f0f0f0] outline-none"
@@ -285,6 +287,7 @@ export default function SettingsPage() {
                     type="number"
                     inputMode="numeric"
                     placeholder="—"
+                    min="0"
                     value={form[key]}
                     onChange={e => set(key)(e.target.value)}
                     className="flex-1 bg-transparent text-sm text-[#f0f0f0] outline-none tabular-nums w-full"

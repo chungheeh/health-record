@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { ChevronLeft, Plus } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -26,6 +26,7 @@ export default function BodyPage() {
   const [saving, setSaving] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const fetchStats = useCallback(async () => {
     const supabase = createClient()
@@ -62,6 +63,17 @@ export default function BodyPage() {
       await fetchStats()
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id)
+    try {
+      const supabase = createClient()
+      await supabase.from('body_stats').delete().eq('id', id)
+      await fetchStats()
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -228,6 +240,34 @@ export default function BodyPage() {
                 />
               </LineChart>
             </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* 기록 목록 */}
+        {stats.length > 0 && (
+          <div className="bg-[#1a1a1a] rounded-[16px] overflow-hidden">
+            <p className="px-4 py-3 text-xs font-semibold text-[#888888] border-b border-[#2a2a2a]">측정 기록</p>
+            {[...stats].reverse().map(stat => (
+              <div key={stat.id} className="flex items-center justify-between px-4 py-3 border-b border-[#1e1e1e] last:border-b-0">
+                <div>
+                  <p className="text-xs text-[#888888]">
+                    {new Date(stat.recorded_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                  <p className="text-sm text-[#f0f0f0] mt-0.5">
+                    {stat.weight_kg != null && <span className="mr-2 text-[#C8FF00]">{stat.weight_kg}kg</span>}
+                    {stat.body_fat_pct != null && <span className="mr-2 text-[#FF6B6B]">{stat.body_fat_pct}%</span>}
+                    {stat.skeletal_muscle_kg != null && <span className="text-[#4FC3F7]">{stat.skeletal_muscle_kg}kg</span>}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleDelete(stat.id)}
+                  disabled={deletingId === stat.id}
+                  className="p-2 text-[#555555] hover:text-[#FF4B4B] transition-colors disabled:opacity-40"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
           </div>
         )}
 

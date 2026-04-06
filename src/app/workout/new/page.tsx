@@ -23,6 +23,7 @@ const MOTIVATIONAL_MESSAGES = [
 const MUSCLE_GROUPS = ['가슴', '등', '하체', '어깨', '팔', '복근', '유산소', '전신']
 
 const MACHINE_BRANDS = [
+  '전체',
   'Hammer Strength', 'Life Fitness', 'Nautilus', 'Cybex',
   'Technogym', 'Matrix Fitness', 'Panatta', 'Newtech',
   'Atlantis', 'Arsenal Strength', 'Watson', 'Precor',
@@ -81,7 +82,10 @@ export default function WorkoutNewPage() {
         query = query.neq('category', 'machine')
       } else {
         // machine 탭
-        query = query.eq('category', 'machine').eq('brand', selectedBrand)
+        query = query.eq('category', 'machine')
+        if (selectedBrand !== '전체') {
+          query = query.eq('brand', selectedBrand)
+        }
       }
 
       const { data } = await query.limit(300)

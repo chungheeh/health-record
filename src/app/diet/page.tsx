@@ -60,7 +60,7 @@ export default async function DietPage({
     .maybeSingle()
 
   // 총 영양소 계산
-  const allItems = (meals ?? []).flatMap(m => m.meal_items)
+  const allItems = (meals ?? []).flatMap(m => m.meal_items ?? [])
   const total = {
     calories: allItems.reduce((s, i) => s + (i.calories ?? 0), 0),
     protein: allItems.reduce((s, i) => s + (i.protein_g ?? 0), 0),

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { BookmarkPlus, BookOpen, X, Check, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -38,6 +39,7 @@ interface MealTemplatePanelProps {
 }
 
 export default function MealTemplatePanel({ mealType, date, currentItems }: MealTemplatePanelProps) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(false)
@@ -149,8 +151,7 @@ export default function MealTemplatePanel({ mealType, date, currentItems }: Meal
 
     setLoadingId(null)
     setOpen(false)
-    // 페이지 리로드로 새 항목 반영
-    window.location.reload()
+    router.refresh()
   }
 
   const handleDeleteTemplate = async (id: string, name: string) => {
