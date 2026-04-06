@@ -51,6 +51,18 @@ export default function ExerciseCard({
   const [selectedRest, setSelectedRest] = useState(restDuration)
   const [showRestPicker, setShowRestPicker] = useState(false)
 
+  const fillPreviousSets = () => {
+    previousSets.forEach((prevSet, i) => {
+      if (i < exercise.sets.length && !exercise.sets[i].completed) {
+        if (prevSet.weight_kg) onUpdateSet(exerciseIndex, i, { weight_kg: prevSet.weight_kg })
+        if (prevSet.reps) onUpdateSet(exerciseIndex, i, { reps: prevSet.reps })
+      }
+    })
+  }
+
+  const hasPrevious = previousSets.length > 0
+  const hasUnfilled = exercise.sets.some(s => !s.completed && (!s.weight_kg || !s.reps))
+
   const handleComplete = async (setIndex: number) => {
     const set = exercise.sets[setIndex]
     if (!set.weight_kg || !set.reps) return
@@ -74,12 +86,22 @@ export default function ExerciseCard({
           </span>
           <span className="font-semibold text-[#f0f0f0]">{exercise.exercise_name}</span>
         </div>
-        <button
-          onClick={() => onRemove(exerciseIndex)}
-          className="text-[#555555] hover:text-[#FF4B4B] transition-colors p-1"
-        >
-          <Trash2 size={16} />
-        </button>
+        <div className="flex items-center gap-1">
+          {hasPrevious && hasUnfilled && (
+            <button
+              onClick={fillPreviousSets}
+              className="text-[10px] text-[#C8FF00] bg-[#C8FF00]/10 border border-[#C8FF00]/20 px-2 py-1 rounded-[6px] font-medium whitespace-nowrap"
+            >
+              이전 기록 채우기
+            </button>
+          )}
+          <button
+            onClick={() => onRemove(exerciseIndex)}
+            className="text-[#555555] hover:text-[#FF4B4B] transition-colors p-1"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
       </div>
 
       {/* 세트 목록 */}

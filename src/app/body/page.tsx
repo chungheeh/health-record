@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { ChevronLeft, Plus, Trash2 } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, Camera, X, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -28,6 +28,12 @@ export default function BodyPage() {
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
+  // 눈바디 갤러리
+  const [photos, setPhotos] = useState<{ name: string; url: string; date: string }[]>([])
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
+  const photoInputRef = useRef<HTMLInputElement>(null)
+
   const fetchStats = useCallback(async () => {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -42,7 +48,57 @@ export default function BodyPage() {
     setLoading(false)
   }, [])
 
-  useEffect(() => { fetchStats() }, [fetchStats])
+  const fetchPhotos = useCallback(async () => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase.storage.from('body-photos').list(`${user.id}/`, {
+      limit: 50, sortBy: { column: 'created_at', order: 'desc' },
+    })
+    if (!data) return
+    const withUrls = await Promise.all(
+      data.map(async (file) => {
+        const { data: urlData } = await supabase.storage
+          .from('body-photos').createSignedUrl(`${user.id}/${file.name}`, 3600)
+        return {
+          name: file.name,
+          url: urlData?.signedUrl ?? '',
+          date: file.name.split('_')[0] ?? '',
+        }
+      })
+    )
+    setPhotos(withUrls.filter(p => p.url))
+  }, [])
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingPhoto(true)
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const dateStr = new Date().toISOString().split('T')[0]
+      const fileName = `${dateStr}_${Date.now()}.${ext}`
+      await supabase.storage.from('body-photos').upload(`${user.id}/${fileName}`, file)
+      await fetchPhotos()
+    } finally {
+      setUploadingPhoto(false)
+      if (photoInputRef.current) photoInputRef.current.value = ''
+    }
+  }
+
+  const handlePhotoDelete = async (name: string) => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await supabase.storage.from('body-photos').remove([`${user.id}/${name}`])
+    setSelectedPhoto(null)
+    await fetchPhotos()
+  }
+
+  useEffect(() => { fetchStats(); fetchPhotos() }, [fetchStats, fetchPhotos])
 
   const handleSave = async () => {
     if (!form.weight && !form.bodyFat && !form.muscleMass) return
@@ -109,6 +165,11 @@ export default function BodyPage() {
           <ChevronLeft size={24} />
         </Link>
         <h1 className="font-semibold text-[#f0f0f0] flex-1">신체 기록</h1>
+        <input ref={photoInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoUpload} />
+        <button onClick={() => photoInputRef.current?.click()} disabled={uploadingPhoto}
+          className="p-2 text-[#888888] hover:text-[#C8FF00] transition-colors disabled:opacity-40">
+          {uploadingPhoto ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+        </button>
         <button
           onClick={() => setShowForm(!showForm)}
           className="bg-[#C8FF00] text-[#0f0f0f] rounded-full p-1.5"
@@ -240,6 +301,50 @@ export default function BodyPage() {
                 />
               </LineChart>
             </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* 눈바디 갤러리 */}
+        {(photos.length > 0 || uploadingPhoto) && (
+          <div className="bg-[#1a1a1a] rounded-[16px] overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
+              <p className="text-xs font-semibold text-[#888888]">눈바디 갤러리</p>
+              <button onClick={() => photoInputRef.current?.click()} className="text-[#C8FF00] text-xs">+ 추가</button>
+            </div>
+            <div className="grid grid-cols-3 gap-0.5 p-0.5">
+              {photos.map((photo) => (
+                <button key={photo.name} onClick={() => setSelectedPhoto(photo.url)}
+                  className="aspect-square overflow-hidden relative group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photo.url} alt={photo.date} className="w-full h-full object-cover" />
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 py-0.5 px-1">
+                    <p className="text-[9px] text-white text-center">{photo.date}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 사진 전체보기 모달 */}
+        {selectedPhoto && (
+          <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center"
+            onClick={() => setSelectedPhoto(null)}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={selectedPhoto} alt="눈바디" className="max-w-full max-h-[80vh] object-contain rounded-[12px]" onClick={e => e.stopPropagation()} />
+            <div className="flex gap-4 mt-6">
+              <button onClick={() => setSelectedPhoto(null)} className="px-6 py-3 bg-[#242424] text-[#f0f0f0] rounded-[12px] text-sm">
+                닫기
+              </button>
+              <button
+                onClick={() => {
+                  const name = photos.find(p => p.url === selectedPhoto)?.name
+                  if (name) handlePhotoDelete(name)
+                }}
+                className="px-6 py-3 bg-[#FF4B4B]/20 text-[#FF4B4B] border border-[#FF4B4B]/30 rounded-[12px] text-sm flex items-center gap-2">
+                <Trash2 size={14} /> 삭제
+              </button>
+            </div>
           </div>
         )}
 

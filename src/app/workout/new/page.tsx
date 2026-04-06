@@ -56,6 +56,9 @@ export default function WorkoutNewPage() {
   const [categoryTab, setCategoryTab] = useState<'free' | 'machine'>('free')
   const [selectedBrand, setSelectedBrand] = useState<string>(MACHINE_BRANDS[0])
 
+  // 이전 기록 맵 (exercise_id → 이전 세트들)
+  const [previousSetsMap, setPreviousSetsMap] = useState<Record<string, { weight_kg: number | null; reps: number | null }[]>>({})
+
   // 직접 추가 폼
   const [showCustomForm, setShowCustomForm] = useState(false)
   const [customName, setCustomName] = useState('')
@@ -94,6 +97,36 @@ export default function WorkoutNewPage() {
     search()
   }, [searchQuery, categoryTab, selectedBrand])
 
+  const fetchPreviousSets = async (exerciseId: string) => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+    const { data: recentWorkouts } = await supabase
+      .from('workouts')
+      .select('id')
+      .eq('user_id', user.id)
+      .not('finished_at', 'is', null)
+      .order('started_at', { ascending: false })
+      .limit(10)
+    if (!recentWorkouts?.length) return []
+    const workoutIds = recentWorkouts.map(w => w.id)
+    const { data: we } = await supabase
+      .from('workout_exercises')
+      .select('id')
+      .eq('exercise_id', exerciseId)
+      .in('workout_id', workoutIds)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (!we) return []
+    const { data: sets } = await supabase
+      .from('sets')
+      .select('set_number, weight_kg, reps')
+      .eq('workout_exercise_id', we.id)
+      .order('set_number')
+    return sets ?? []
+  }
+
   const handleStart = async () => { await startWorkout() }
 
   const toggleSelectExercise = (ex: Exercise) => {
@@ -107,6 +140,10 @@ export default function WorkoutNewPage() {
   const handleAddSelected = async () => {
     for (const ex of selectedExercises) {
       await addExercise(ex.id, ex.name, ex.muscle_group)
+      const prevSets = await fetchPreviousSets(ex.id)
+      if (prevSets.length > 0) {
+        setPreviousSetsMap(prev => ({ ...prev, [ex.id]: prevSets }))
+      }
     }
     setShowSearch(false)
     setSearchQuery('')
@@ -269,6 +306,7 @@ export default function WorkoutNewPage() {
                   key={ex.id ?? exIdx}
                   exercise={ex}
                   exerciseIndex={exIdx}
+                  previousSets={previousSetsMap[ex.exercise_id] ?? []}
                   onUpdateSet={updateSet}
                   onCompleteSet={completeSet}
                   onAddSet={addSet}

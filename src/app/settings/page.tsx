@@ -3,10 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { ChevronLeft, RefreshCw, ShieldCheck } from 'lucide-react'
+import { ChevronLeft, RefreshCw, ShieldCheck, Zap } from 'lucide-react'
+import { calcTDEE, adjustCaloriesForGoal, type ActivityLevel, type Gender, type Goal } from '@/lib/utils/tdee'
 
 interface ProfileForm {
   goal: string
+  gender: string
+  age: string
   height_cm: string
   current_weight_kg: string
   target_weight_kg: string
@@ -35,7 +38,7 @@ const ACTIVITY_OPTIONS = [
 export default function SettingsPage() {
   const router = useRouter()
   const [form, setForm] = useState<ProfileForm>({
-    goal: '', height_cm: '', current_weight_kg: '', target_weight_kg: '',
+    goal: '', gender: '', age: '', height_cm: '', current_weight_kg: '', target_weight_kg: '',
     activity_level: '', workout_days_per_week: '3',
     target_calories: '', target_protein_g: '', target_carbs_g: '', target_fat_g: '',
   })
@@ -59,6 +62,8 @@ export default function SettingsPage() {
       if (profile) {
         setForm({
           goal: profile.goal ?? '',
+          gender: profile.gender ?? '',
+          age: profile.age?.toString() ?? '',
           height_cm: profile.height_cm?.toString() ?? '',
           current_weight_kg: profile.current_weight_kg?.toString() ?? '',
           target_weight_kg: profile.target_weight_kg?.toString() ?? '',
@@ -85,6 +90,8 @@ export default function SettingsPage() {
       await supabase.from('user_profiles').upsert({
         user_id: user.id,
         goal: form.goal || null,
+        gender: form.gender || null,
+        age: form.age ? Number(form.age) : null,
         height_cm: form.height_cm ? Number(form.height_cm) : null,
         current_weight_kg: form.current_weight_kg ? Number(form.current_weight_kg) : null,
         target_weight_kg: form.target_weight_kg ? Number(form.target_weight_kg) : null,
@@ -159,6 +166,38 @@ export default function SettingsPage() {
   const set = (key: keyof ProfileForm) => (val: string) =>
     setForm(p => ({ ...p, [key]: val }))
 
+  const handleAutoCalc = () => {
+    const weight = Number(form.current_weight_kg)
+    const height = Number(form.height_cm)
+    const age = Number(form.age)
+    const gender = form.gender as Gender
+    const activity = form.activity_level as ActivityLevel
+    const goal = form.goal as Goal
+
+    if (!weight || !height || !age || !gender || !activity) {
+      setSavedMsg('❌ 성별, 나이, 키, 체중, 활동량을 먼저 입력해주세요')
+      setTimeout(() => setSavedMsg(''), 3000)
+      return
+    }
+
+    const result = calcTDEE(gender, weight, height, age, activity)
+    const targetCal = goal ? adjustCaloriesForGoal(result.tdee, goal) : result.tdee
+    const protein = Math.round(weight * 2)
+    const fat = Math.round(weight * 0.8)
+    const carbsCal = targetCal - (protein * 4) - (fat * 9)
+    const carbs = Math.max(0, Math.round(carbsCal / 4))
+
+    setForm(p => ({
+      ...p,
+      target_calories: String(targetCal),
+      target_protein_g: String(protein),
+      target_carbs_g: String(carbs),
+      target_fat_g: String(fat),
+    }))
+    setSavedMsg(`✅ TDEE ${result.tdee} kcal 기준으로 목표를 설정했습니다`)
+    setTimeout(() => setSavedMsg(''), 3000)
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
@@ -203,7 +242,27 @@ export default function SettingsPage() {
         {/* 신체 정보 */}
         <div className="bg-[#1a1a1a] rounded-[16px] p-4 space-y-3">
           <p className="text-sm font-semibold text-[#f0f0f0]">신체 정보</p>
+
+          {/* 성별 */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-[#888888] w-20 shrink-0">성별</span>
+            <div className="flex gap-2 flex-1">
+              {(['남성', '여성'] as const).map(g => (
+                <button
+                  key={g}
+                  onClick={() => set('gender')(g)}
+                  className="flex-1 py-2 rounded-[10px] text-sm font-medium transition-all"
+                  style={{
+                    backgroundColor: form.gender === g ? '#C8FF00' : '#242424',
+                    color: form.gender === g ? '#0f0f0f' : '#888888',
+                  }}
+                >{g}</button>
+              ))}
+            </div>
+          </div>
+
           {([
+            { key: 'age', label: '나이', unit: '세', placeholder: '25', min: '1', max: '120' },
             { key: 'height_cm', label: '키', unit: 'cm', placeholder: '170', min: '100', max: '250' },
             { key: 'current_weight_kg', label: '현재 체중', unit: 'kg', placeholder: '70', min: '20', max: '300' },
             { key: 'target_weight_kg', label: '목표 체중', unit: 'kg', placeholder: '65', min: '20', max: '300' },
@@ -272,7 +331,16 @@ export default function SettingsPage() {
 
         {/* 영양 목표 */}
         <div className="bg-[#1a1a1a] rounded-[16px] p-4 space-y-3">
-          <p className="text-sm font-semibold text-[#f0f0f0]">영양 목표 (선택)</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-[#f0f0f0]">영양 목표 (선택)</p>
+            <button
+              onClick={handleAutoCalc}
+              className="flex items-center gap-1 text-xs font-medium text-[#0f0f0f] bg-[#C8FF00] px-3 py-1.5 rounded-[8px] active:scale-95 transition-transform"
+            >
+              <Zap size={11} />
+              TDEE 자동 계산
+            </button>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             {([
               { key: 'target_calories', label: '목표 칼로리', unit: 'kcal', color: '#C8FF00' },

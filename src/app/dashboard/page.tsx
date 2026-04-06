@@ -4,6 +4,7 @@ import Link from 'next/link'
 import WorkoutHeatmap from '@/components/dashboard/WorkoutHeatmap'
 import CalorieBarChart from '@/components/dashboard/CalorieBarChart'
 import WeightChart from '@/components/dashboard/WeightChart'
+import WeeklyComboChart from '@/components/dashboard/WeeklyComboChart'
 import { calcTDEE, ACTIVITY_INFO, type ActivityLevel, type Gender } from '@/lib/utils/tdee'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -90,6 +91,47 @@ export default async function DashboardPage() {
   const weightData: WeightEntry[] = (bodyStats ?? [])
     .filter(s => s.weight_kg != null)
     .map(s => ({ date: toDateStr(new Date(s.recorded_at as string)), weight: s.weight_kg as number }))
+
+  // ── 3-b. 주간 칼로리 + 운동 횟수 복합 데이터 (4주) ─────────────────────
+  const fourWeeksAgo = new Date(today)
+  fourWeeksAgo.setDate(today.getDate() - 27)
+
+  interface WeeklyEntry { week: string; calories: number; workouts: number }
+  const weeklyMap = new Map<string, WeeklyEntry>()
+
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date(today)
+    d.setDate(today.getDate() - i)
+    const weekNum = Math.floor(i / 7)
+    const weekLabel = weekNum === 0 ? '이번 주' : `${weekNum}주 전`
+    if (!weeklyMap.has(weekLabel)) {
+      weeklyMap.set(weekLabel, { week: weekLabel, calories: 0, workouts: 0 })
+    }
+  }
+
+  for (const meal of mealsData ?? []) {
+    const d = new Date(meal.eaten_at as string)
+    const diff = Math.floor((today.getTime() - d.getTime()) / (7 * 24 * 3600 * 1000))
+    const weekLabel = diff === 0 ? '이번 주' : `${diff}주 전`
+    const entry = weeklyMap.get(weekLabel)
+    if (entry) {
+      const items = (meal.meal_items as { calories: number }[] | null) ?? []
+      entry.calories += items.reduce((s, i) => s + (i.calories ?? 0), 0)
+    }
+  }
+
+  for (const w of workoutDays ?? []) {
+    const d = new Date(w.started_at as string)
+    const diff = Math.floor((today.getTime() - d.getTime()) / (7 * 24 * 3600 * 1000))
+    const weekLabel = diff === 0 ? '이번 주' : `${diff}주 전`
+    const entry = weeklyMap.get(weekLabel)
+    if (entry) entry.workouts += 1
+  }
+
+  const weeklyData = ['3주 전', '2주 전', '1주 전', '이번 주'].map(label => {
+    const entry = weeklyMap.get(label)
+    return { week: label, calories: Math.round((entry?.calories ?? 0) / 7), workouts: entry?.workouts ?? 0 }
+  })
 
   // ── 4. 유저 프로필 (BMR/TDEE 계산용) ─────────────────────────────────────
   const { data: profile } = await supabase
@@ -207,6 +249,11 @@ export default async function DashboardPage() {
         {/* ── 칼로리 바차트 ─────────────────────────────────────────────────── */}
         <Section title="최근 7일 칼로리">
           <CalorieBarChart data={calorieData} />
+        </Section>
+
+        {/* ── 주간 복합 차트 ────────────────────────────────────────────────── */}
+        <Section title="주간 칼로리 + 운동 현황 (4주)">
+          <WeeklyComboChart data={weeklyData} />
         </Section>
 
         {/* ── 체중 차트 ─────────────────────────────────────────────────────── */}

@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { Plus, Timer } from 'lucide-react'
 import MealItemList from '@/components/diet/MealItemList'
 import DietDateNav from '@/components/diet/DietDateNav'
 import MealTemplatePanel from '@/components/diet/MealTemplatePanel'
@@ -68,6 +68,24 @@ export default async function DietPage({
     fat: allItems.reduce((s, i) => s + (i.fat_g ?? 0), 0),
   }
 
+  // 탄수화물 사이클링: 오늘 운동 여부 확인
+  const { data: todayWorkouts } = await supabase
+    .from('workouts')
+    .select('id')
+    .eq('user_id', user.id)
+    .gte('started_at', `${date}T00:00:00`)
+    .lte('started_at', `${date}T23:59:59`)
+    .not('finished_at', 'is', null)
+
+  const hasWorkoutToday = (todayWorkouts?.length ?? 0) > 0
+  const targetCarbs = profile?.target_carbs_g ?? null
+
+  // 사이클링 비율: 운동일 = 1.3x, 휴식일 = 0.7x
+  const carbCycleTarget = targetCarbs
+    ? (hasWorkoutToday ? Math.round(targetCarbs * 1.3) : Math.round(targetCarbs * 0.7))
+    : null
+  const carbCycleLabel = hasWorkoutToday ? '🏋️ 운동일 (고탄수)' : '😴 휴식일 (저탄수)'
+
   const targetCal = profile?.target_calories ?? 2000
   const calProgress = Math.min((total.calories / targetCal) * 100, 100)
 
@@ -107,7 +125,12 @@ export default async function DietPage({
       {/* 헤더 */}
       <header className="sticky top-0 z-50 bg-[#0f0f0f] border-b border-[#2a2a2a] px-4 h-14 flex items-center justify-between">
         <h1 className="font-semibold text-[#f0f0f0]">식단 기록</h1>
-        <DietDateNav date={date} />
+        <div className="flex items-center gap-2">
+          <Link href="/fasting" className="p-2 text-[#888888] hover:text-[#C8FF00] transition-colors" title="간헐적 단식">
+            <Timer size={18} />
+          </Link>
+          <DietDateNav date={date} />
+        </div>
       </header>
 
       <div className="px-4 pt-4 pb-24 space-y-4">
@@ -158,6 +181,22 @@ export default async function DietPage({
             ))}
           </div>
         </div>
+
+        {/* 탄수화물 사이클링 카드 */}
+        {carbCycleTarget !== null && (
+          <div className="bg-[#1a1a1a] rounded-[14px] px-4 py-3 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-[#888888]">탄수화물 사이클링</p>
+              <p className="text-sm font-bold text-[#f0f0f0] mt-0.5">{carbCycleLabel}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold tabular-nums" style={{ color: hasWorkoutToday ? '#C8FF00' : '#4FC3F7' }}>
+                {carbCycleTarget}g
+              </p>
+              <p className="text-[10px] text-[#555555]">오늘 탄수화물 목표</p>
+            </div>
+          </div>
+        )}
 
         {/* 식단 추천 카드 */}
         {tips.length > 0 && (
