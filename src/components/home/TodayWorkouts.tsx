@@ -88,7 +88,11 @@ export default function TodayWorkouts({ date }: { date: string }) {
     if (!confirm('이 운동 기록을 삭제하시겠습니까?')) return
     setDeleting(workoutId)
     const supabase = createClient()
-    await supabase.from('workouts').delete().eq('id', workoutId)
+    const { error } = await supabase.from('workouts').delete().eq('id', workoutId)
+    if (error) {
+      alert('삭제 중 오류가 발생했습니다.')
+      console.error('workout delete error:', error)
+    }
     await fetchWorkouts()
     setDeleting(null)
   }
