@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   ChevronLeft, Users, BarChart2, Utensils, Dumbbell,
   Trash2, Shield, ShieldOff, Check, Plus, X, MessageSquare,
-  RefreshCw, Edit2
+  RefreshCw, Edit2, Ban, UserCheck, Download
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -13,9 +13,10 @@ type Tab = 'dashboard' | 'users' | 'suggestions' | 'foods' | 'exercises'
 
 interface UserRow {
   id: string
-  email: string
   created_at: string
-  user_profiles: { goal: string | null; is_admin: boolean | null } | null
+  goal: string | null
+  is_admin: boolean | null
+  is_blocked: boolean | null
 }
 
 interface Suggestion {
@@ -65,6 +66,11 @@ export default function AdminPage() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [replyingId, setReplyingId] = useState<string | null>(null)
   const [replyText, setReplyText] = useState('')
+
+  // Food API sync
+  const [syncQuery, setSyncQuery] = useState('')
+  const [syncing, setSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState('')
 
   // Foods
   const [foods, setFoods] = useState<FoodRow[]>([])
@@ -138,14 +144,15 @@ export default function AdminPage() {
     const supabase = createClient()
     const { data } = await supabase
       .from('user_profiles')
-      .select('user_id, goal, is_admin, created_at')
+      .select('user_id, goal, is_admin, is_blocked, created_at')
       .order('created_at', { ascending: false })
       .limit(100)
     setUsers((data ?? []).map(p => ({
       id: p.user_id,
-      email: p.user_id.slice(0, 8) + '...',
       created_at: p.created_at,
-      user_profiles: { goal: p.goal, is_admin: p.is_admin },
+      goal: p.goal,
+      is_admin: p.is_admin,
+      is_blocked: p.is_blocked,
     })))
   }, [])
 
@@ -207,6 +214,31 @@ export default function AdminPage() {
     const supabase = createClient()
     await supabase.from('user_profiles').update({ is_admin: !current }).eq('user_id', userId)
     fetchUsers()
+  }
+
+  // 유저 차단/해제
+  const toggleBlock = async (userId: string, current: boolean) => {
+    if (!confirm(current ? '차단을 해제할까요?' : '이 유저를 차단할까요?')) return
+    const supabase = createClient()
+    await supabase.from('user_profiles').update({ is_blocked: !current }).eq('user_id', userId)
+    fetchUsers()
+  }
+
+  // 식품 API 수동 갱신
+  const handleSyncFoodApi = async () => {
+    if (!syncQuery.trim() || syncing) return
+    setSyncing(true)
+    setSyncResult('')
+    try {
+      const res = await fetch(`/api/search-foods?q=${encodeURIComponent(syncQuery.trim())}`)
+      const data = await res.json()
+      const count = (data.results ?? []).filter((r: { source?: string }) => r.source === 'api').length
+      setSyncResult(`완료: API에서 ${count}개 식품 가져와 DB에 저장했습니다.`)
+      fetchFoods()
+    } catch {
+      setSyncResult('오류: API 호출에 실패했습니다.')
+    }
+    setSyncing(false)
   }
 
   // 음식 추가
@@ -332,25 +364,34 @@ export default function AdminPage() {
         {tab === 'users' && (
           <div className="space-y-2">
             {users.map(u => (
-              <div key={u.id} className="bg-[#1a1a1a] rounded-[14px] p-4 flex items-center gap-3">
+              <div key={u.id} className={`bg-[#1a1a1a] rounded-[14px] p-4 flex items-center gap-3 ${u.is_blocked ? 'opacity-60' : ''}`}>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-[#f0f0f0] font-mono truncate">{u.id.slice(0, 16)}...</p>
                   <p className="text-[11px] text-[#555555] mt-0.5">
-                    {u.user_profiles?.goal ?? '목표 미설정'} ·{' '}
-                    {new Date(u.created_at).toLocaleDateString('ko-KR')}
+                    {u.goal ?? '목표 미설정'} · {new Date(u.created_at).toLocaleDateString('ko-KR')}
                   </p>
+                  {u.is_blocked && (
+                    <span className="text-[10px] text-[#FF4B4B]">차단됨</span>
+                  )}
                 </div>
-                {u.user_profiles?.is_admin && (
+                {u.is_admin && (
                   <span className="text-[10px] bg-[#C8FF00]/10 text-[#C8FF00] border border-[#C8FF00]/30 px-1.5 py-0.5 rounded-full shrink-0">
                     Admin
                   </span>
                 )}
                 <button
-                  onClick={() => toggleAdmin(u.id, u.user_profiles?.is_admin ?? false)}
+                  onClick={() => toggleAdmin(u.id, u.is_admin ?? false)}
                   className="p-1.5 rounded-[8px] text-[#555555] hover:text-[#C8FF00] transition-colors"
-                  title={u.user_profiles?.is_admin ? '관리자 해제' : '관리자 지정'}
+                  title={u.is_admin ? '관리자 해제' : '관리자 지정'}
                 >
-                  {u.user_profiles?.is_admin ? <ShieldOff size={15} /> : <Shield size={15} />}
+                  {u.is_admin ? <ShieldOff size={15} /> : <Shield size={15} />}
+                </button>
+                <button
+                  onClick={() => toggleBlock(u.id, u.is_blocked ?? false)}
+                  className={`p-1.5 rounded-[8px] transition-colors ${u.is_blocked ? 'text-[#FF4B4B] hover:text-[#888]' : 'text-[#555555] hover:text-[#FF4B4B]'}`}
+                  title={u.is_blocked ? '차단 해제' : '차단'}
+                >
+                  {u.is_blocked ? <UserCheck size={15} /> : <Ban size={15} />}
                 </button>
               </div>
             ))}
@@ -443,6 +484,33 @@ export default function AdminPage() {
                 className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-[#C8FF00] text-[#0f0f0f] rounded-[10px] text-sm font-bold disabled:opacity-50">
                 <Plus size={14} />{addingFood ? '추가 중...' : '음식 추가'}
               </button>
+            </div>
+
+            {/* 정부 API 동기화 */}
+            <div className="bg-[#1a1a1a] rounded-[14px] p-4 space-y-2">
+              <p className="text-sm font-semibold text-[#f0f0f0]">정부 DB API 가져오기</p>
+              <p className="text-[11px] text-[#555555]">검색어를 입력하면 data.go.kr 식품영양성분 DB에서 가져와 저장합니다.</p>
+              <div className="flex gap-2">
+                <input
+                  value={syncQuery}
+                  onChange={e => setSyncQuery(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSyncFoodApi()}
+                  placeholder="예: 닭가슴살, 신라면, 계란..."
+                  className="flex-1 bg-[#242424] border border-[#2a2a2a] rounded-[8px] px-3 py-2 text-xs text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]"
+                />
+                <button
+                  onClick={handleSyncFoodApi}
+                  disabled={!syncQuery.trim() || syncing}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-[#C8FF00] text-[#0f0f0f] rounded-[8px] text-xs font-bold disabled:opacity-50 shrink-0"
+                >
+                  <Download size={13} />{syncing ? '...' : '가져오기'}
+                </button>
+              </div>
+              {syncResult && (
+                <p className={`text-xs ${syncResult.startsWith('오류') ? 'text-[#FF4B4B]' : 'text-[#C8FF00]'}`}>
+                  {syncResult}
+                </p>
+              )}
             </div>
 
             {/* 검색 */}

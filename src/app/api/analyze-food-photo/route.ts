@@ -15,12 +15,26 @@ const IDENTIFY_PROMPT = `이 이미지를 보고 음식 또는 제품명을 파�
 }
 
 예시:
+- 닥터유 단백질바 → product_name: "닥터유 프로틴바", search_keywords: ["닥터유", "프로틴바", "단백질바", "오리온"]
 - 신라면 봉지 → product_name: "신라면", search_keywords: ["신라면", "라면", "농심"]
 - 닭가슴살 → product_name: "닭가슴살 (삶은것)", search_keywords: ["닭가슴살", "닭"]
 - 빅맥 → product_name: "맥도날드 빅맥", search_keywords: ["빅맥", "맥도날드", "버거"]`
 
+interface ApiRow {
+  FOOD_CD: string
+  FOOD_NM_KR: string
+  MAKER_NM: string | null
+  FOOD_CAT1_NM: string | null
+  AMT_NUM1: string
+  AMT_NUM3: string
+  AMT_NUM4: string
+  AMT_NUM6: string
+  SERVING_SIZE: string
+}
+
 function buildNutritionPrompt(productName: string, amountG: number): string {
-  return `"${productName}" ${amountG}g의 영양성분을 추정해주세요.
+  return `"${productName}" ${amountG}g의 정확한 영양성분을 알려주세요.
+실제 제품이라면 실제 영양성분표 기준으로, 일반 음식이라면 표준 영양 데이터 기준으로 응답하세요.
 반드시 아래 JSON 형식으로만 응답하세요 (숫자값만, 설명 없이):
 {
   "food_name": "${productName}",
@@ -30,6 +44,35 @@ function buildNutritionPrompt(productName: string, amountG: number): string {
   "carbs_per_100g": 0,
   "fat_per_100g": 3.6
 }`
+}
+
+async function searchGovApi(keyword: string): Promise<{
+  name: string; brand: string | null; calories_per_100g: number;
+  protein_per_100g: number; carbs_per_100g: number; fat_per_100g: number; serving_size_g: number;
+} | null> {
+  const apiKey = process.env.FOOD_SAFETY_API_KEY
+  if (!apiKey) return null
+  try {
+    const encoded = encodeURIComponent(keyword)
+    const url = `https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02/getFoodNtrCpntDbInq02?serviceKey=${encodeURIComponent(apiKey)}&pageNo=1&numOfRows=5&type=json&FOOD_NM_KR=${encoded}`
+    const res = await fetch(url, { cache: 'no-store' })
+    if (!res.ok) return null
+    const json = await res.json()
+    const rows: ApiRow[] = json?.body?.items ?? []
+    if (rows.length === 0) return null
+    const row = rows[0]
+    return {
+      name: row.FOOD_NM_KR,
+      brand: row.MAKER_NM || null,
+      calories_per_100g: parseFloat(row.AMT_NUM1) || 0,
+      protein_per_100g: parseFloat(row.AMT_NUM3) || 0,
+      fat_per_100g: parseFloat(row.AMT_NUM4) || 0,
+      carbs_per_100g: parseFloat(row.AMT_NUM6) || 0,
+      serving_size_g: parseFloat(row.SERVING_SIZE) || 100,
+    }
+  } catch {
+    return null
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -64,6 +107,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { product_name, search_keywords = [], estimated_amount_g = 100 } = identified
+    const searchTerms = [product_name, ...search_keywords].filter(Boolean).slice(0, 5)
 
     // ── Step 2: Supabase foods DB에서 검색 ───────────────────────────────────
     let dbFood: {
@@ -76,10 +120,8 @@ export async function POST(req: NextRequest) {
       serving_size_g: number | null
     } | null = null
 
-    const searchTerms = [product_name, ...search_keywords].slice(0, 4)
-
     for (const term of searchTerms) {
-      if (!term || dbFood) break
+      if (dbFood) break
       const { data } = await supabase
         .from('foods')
         .select('name, brand, calories_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, serving_size_g')
@@ -99,9 +141,8 @@ export async function POST(req: NextRequest) {
       if (brandData) { dbFood = brandData; break }
     }
 
-    // ── Step 3: DB 매칭 시 반환 ───────────────────────────────────────────────
     if (dbFood) {
-      console.log(`[analyze-food-photo] DB 매칭 성공: ${dbFood.name}`)
+      console.log(`[analyze-food-photo] DB 매칭: ${dbFood.name}`)
       const amountG = dbFood.serving_size_g ?? estimated_amount_g
       return NextResponse.json({
         food_name: dbFood.brand ? `${dbFood.brand} ${dbFood.name}` : dbFood.name,
@@ -115,8 +156,43 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // ── Step 4: DB 미매칭 → generateText로 영양정보 추정 (이미지 재전송 없음) ──
-    console.log(`[analyze-food-photo] DB 미매칭 → AI 추정: ${product_name}`)
+    // ── Step 3: 정부 식품영양성분 API 검색 ──────────────────────────────────
+    let apiFood: Awaited<ReturnType<typeof searchGovApi>> = null
+
+    for (const term of searchTerms) {
+      if (apiFood) break
+      apiFood = await searchGovApi(term)
+    }
+
+    if (apiFood) {
+      console.log(`[analyze-food-photo] 정부API 매칭: ${apiFood.name}`)
+      // DB에 캐시
+      void supabase.from('foods').upsert({
+        name: apiFood.name,
+        brand: apiFood.brand,
+        category: identified.category ?? null,
+        calories_per_100g: apiFood.calories_per_100g,
+        protein_per_100g: apiFood.protein_per_100g,
+        carbs_per_100g: apiFood.carbs_per_100g,
+        fat_per_100g: apiFood.fat_per_100g,
+        serving_size_g: apiFood.serving_size_g,
+        serving_unit: 'g',
+      }, { onConflict: 'name,brand', ignoreDuplicates: true })
+
+      return NextResponse.json({
+        food_name: apiFood.brand ? `${apiFood.brand} ${apiFood.name}` : apiFood.name,
+        amount_g: apiFood.serving_size_g,
+        calories_per_100g: apiFood.calories_per_100g,
+        protein_per_100g: apiFood.protein_per_100g,
+        carbs_per_100g: apiFood.carbs_per_100g,
+        fat_per_100g: apiFood.fat_per_100g,
+        confidence: 'high',
+        source: 'gov_api',
+      })
+    }
+
+    // ── Step 4: DB·API 모두 없음 → AI 영양정보 추정 ─────────────────────────
+    console.log(`[analyze-food-photo] AI 추정: ${product_name}`)
     let nutrition: {
       food_name: string
       amount_g: number
@@ -133,7 +209,7 @@ export async function POST(req: NextRequest) {
       throw new Error('영양정보 분석에 실패했습니다. 다시 시도해주세요.')
     }
 
-    // ── Step 5: 분석 결과 foods 테이블에 캐싱 (다음 검색 시 활용) ───────────────
+    // AI 결과도 DB에 캐시
     void supabase.from('foods').upsert({
       name: nutrition.food_name,
       brand: null,
