@@ -292,8 +292,8 @@ export default function AdminPage() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
-      <div className="w-6 h-6 border-2 border-[#C8FF00] border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen bg-bg-primary flex items-center justify-center">
+      <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
@@ -308,22 +308,22 @@ export default function AdminPage() {
   ]
 
   return (
-    <main className="min-h-screen bg-[#0f0f0f]">
+    <main className="min-h-screen bg-bg-primary">
       {/* 헤더 */}
-      <header className="sticky top-0 z-50 bg-[#0f0f0f] border-b border-[#2a2a2a] px-4 h-14 flex items-center gap-3">
-        <button onClick={() => router.back()} className="text-[#888888]"><ChevronLeft size={24} /></button>
-        <h1 className="font-semibold text-[#f0f0f0] flex-1">관리자</h1>
-        <span className="text-xs bg-[#C8FF00]/10 text-[#C8FF00] border border-[#C8FF00]/30 px-2 py-1 rounded-full">Admin</span>
+      <header className="sticky top-0 z-50 bg-bg-primary border-b border-we-border px-4 h-14 flex items-center gap-3">
+        <button onClick={() => router.back()} className="text-text-secondary"><ChevronLeft size={24} /></button>
+        <h1 className="font-semibold text-text-primary flex-1">관리자</h1>
+        <span className="text-xs bg-accent/10 text-accent border border-accent/30 px-2 py-1 rounded-full">Admin</span>
       </header>
 
       {/* 탭 */}
-      <div className="flex border-b border-[#2a2a2a] bg-[#0f0f0f] sticky top-14 z-40">
+      <div className="flex border-b border-we-border bg-bg-primary sticky top-14 z-40">
         {tabItems.map(({ id, label, Icon }) => (
           <button
             key={id}
             onClick={() => setTab(id)}
             className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[10px] transition-colors ${
-              tab === id ? 'text-[#C8FF00] border-b-2 border-[#C8FF00]' : 'text-[#555555]'
+              tab === id ? 'text-accent border-b-2 border-accent' : 'text-text-muted'
             }`}
           >
             <Icon size={16} />
@@ -340,20 +340,20 @@ export default function AdminPage() {
             <div className="grid grid-cols-2 gap-3">
               {[
                 { label: '총 회원', value: stats.totalUsers, sub: `오늘 +${stats.todayUsers}`, color: '#4FC3F7' },
-                { label: '총 운동 기록', value: stats.totalWorkouts, sub: `오늘 +${stats.todayWorkouts}`, color: '#C8FF00' },
+                { label: '총 운동 기록', value: stats.totalWorkouts, sub: `오늘 +${stats.todayWorkouts}`, color: 'var(--accent)' },
                 { label: '총 식단 기록', value: stats.totalMeals, sub: `오늘 +${stats.todayMeals}`, color: '#81C784' },
                 { label: '건의사항', value: stats.totalSuggestions, sub: `미처리 ${stats.pendingSuggestions}건`, color: '#FFB74D' },
               ].map(({ label, value, sub, color }) => (
-                <div key={label} className="bg-[#1a1a1a] rounded-[14px] p-4">
-                  <p className="text-xs text-[#555555]">{label}</p>
+                <div key={label} className="bg-bg-secondary rounded-[14px] p-4">
+                  <p className="text-xs text-text-muted">{label}</p>
                   <p className="text-2xl font-bold mt-1 tabular-nums" style={{ color }}>{value.toLocaleString()}</p>
-                  <p className="text-[10px] text-[#888888] mt-0.5">{sub}</p>
+                  <p className="text-[10px] text-text-secondary mt-0.5">{sub}</p>
                 </div>
               ))}
             </div>
             <button
               onClick={fetchStats}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-[#1a1a1a] rounded-[14px] text-sm text-[#888888]"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-bg-secondary rounded-[14px] text-sm text-text-secondary"
             >
               <RefreshCw size={14} />새로고침
             </button>
@@ -364,31 +364,31 @@ export default function AdminPage() {
         {tab === 'users' && (
           <div className="space-y-2">
             {users.map(u => (
-              <div key={u.id} className={`bg-[#1a1a1a] rounded-[14px] p-4 flex items-center gap-3 ${u.is_blocked ? 'opacity-60' : ''}`}>
+              <div key={u.id} className={`bg-bg-secondary rounded-[14px] p-4 flex items-center gap-3 ${u.is_blocked ? 'opacity-60' : ''}`}>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-[#f0f0f0] font-mono truncate">{u.id.slice(0, 16)}...</p>
-                  <p className="text-[11px] text-[#555555] mt-0.5">
+                  <p className="text-xs text-text-primary font-mono truncate">{u.id.slice(0, 16)}...</p>
+                  <p className="text-[11px] text-text-muted mt-0.5">
                     {u.goal ?? '목표 미설정'} · {new Date(u.created_at).toLocaleDateString('ko-KR')}
                   </p>
                   {u.is_blocked && (
-                    <span className="text-[10px] text-[#FF4B4B]">차단됨</span>
+                    <span className="text-[10px] text-we-danger">차단됨</span>
                   )}
                 </div>
                 {u.is_admin && (
-                  <span className="text-[10px] bg-[#C8FF00]/10 text-[#C8FF00] border border-[#C8FF00]/30 px-1.5 py-0.5 rounded-full shrink-0">
+                  <span className="text-[10px] bg-accent/10 text-accent border border-accent/30 px-1.5 py-0.5 rounded-full shrink-0">
                     Admin
                   </span>
                 )}
                 <button
                   onClick={() => toggleAdmin(u.id, u.is_admin ?? false)}
-                  className="p-1.5 rounded-[8px] text-[#555555] hover:text-[#C8FF00] transition-colors"
+                  className="p-1.5 rounded-[8px] text-text-muted hover:text-accent transition-colors"
                   title={u.is_admin ? '관리자 해제' : '관리자 지정'}
                 >
                   {u.is_admin ? <ShieldOff size={15} /> : <Shield size={15} />}
                 </button>
                 <button
                   onClick={() => toggleBlock(u.id, u.is_blocked ?? false)}
-                  className={`p-1.5 rounded-[8px] transition-colors ${u.is_blocked ? 'text-[#FF4B4B] hover:text-[#888]' : 'text-[#555555] hover:text-[#FF4B4B]'}`}
+                  className={`p-1.5 rounded-[8px] transition-colors ${u.is_blocked ? 'text-we-danger hover:text-text-secondary' : 'text-text-muted hover:text-we-danger'}`}
                   title={u.is_blocked ? '차단 해제' : '차단'}
                 >
                   {u.is_blocked ? <UserCheck size={15} /> : <Ban size={15} />}
@@ -402,32 +402,32 @@ export default function AdminPage() {
         {tab === 'suggestions' && (
           <div className="space-y-3">
             {suggestions.length === 0 && (
-              <p className="text-center text-sm text-[#555555] py-8">건의사항이 없습니다</p>
+              <p className="text-center text-sm text-text-muted py-8">건의사항이 없습니다</p>
             )}
             {suggestions.map(s => (
-              <div key={s.id} className="bg-[#1a1a1a] rounded-[14px] p-4">
+              <div key={s.id} className="bg-bg-secondary rounded-[14px] p-4">
                 <div className="flex items-start justify-between gap-2 mb-1.5">
-                  <p className="text-sm font-semibold text-[#f0f0f0]">{s.title}</p>
+                  <p className="text-sm font-semibold text-text-primary">{s.title}</p>
                   <div className="flex gap-1 shrink-0">
                     <button onClick={() => { setReplyingId(s.id); setReplyText(s.admin_reply ?? '') }}
-                      className="p-1.5 text-[#555] hover:text-[#C8FF00]"><Edit2 size={13} /></button>
+                      className="p-1.5 text-text-muted hover:text-accent"><Edit2 size={13} /></button>
                     <button onClick={() => handleDeleteSuggestion(s.id)}
-                      className="p-1.5 text-[#555] hover:text-[#FF4B4B]"><Trash2 size={13} /></button>
+                      className="p-1.5 text-text-muted hover:text-we-danger"><Trash2 size={13} /></button>
                   </div>
                 </div>
-                <p className="text-xs text-[#888888]">{s.content}</p>
+                <p className="text-xs text-text-secondary">{s.content}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                    s.status === 'answered' ? 'bg-[#C8FF00]/10 text-[#C8FF00]' : 'bg-[#242424] text-[#555]'
+                    s.status === 'answered' ? 'bg-accent/10 text-accent' : 'bg-bg-tertiary text-text-muted'
                   }`}>{s.status === 'answered' ? '답변 완료' : '검토 중'}</span>
-                  <span className="text-[10px] text-[#444]">
+                  <span className="text-[10px] text-text-muted">
                     {new Date(s.created_at).toLocaleDateString('ko-KR')}
                   </span>
                 </div>
                 {s.admin_reply && (
-                  <div className="mt-2 bg-[#C8FF00]/5 border border-[#C8FF00]/20 rounded-[8px] px-3 py-2">
-                    <p className="text-[10px] text-[#C8FF00] mb-0.5">답변</p>
-                    <p className="text-xs text-[#888]">{s.admin_reply}</p>
+                  <div className="mt-2 bg-accent/5 border border-accent/20 rounded-[8px] px-3 py-2">
+                    <p className="text-[10px] text-accent mb-0.5">답변</p>
+                    <p className="text-xs text-text-secondary">{s.admin_reply}</p>
                   </div>
                 )}
                 {replyingId === s.id && (
@@ -437,15 +437,15 @@ export default function AdminPage() {
                       onChange={e => setReplyText(e.target.value)}
                       placeholder="답변을 입력하세요..."
                       rows={3}
-                      className="w-full bg-[#242424] border border-[#2a2a2a] rounded-[10px] px-3 py-2 text-xs text-[#f0f0f0] outline-none focus:border-[#C8FF00] resize-none"
+                      className="w-full bg-bg-tertiary border border-we-border rounded-[10px] px-3 py-2 text-xs text-text-primary outline-none focus:border-accent resize-none"
                     />
                     <div className="flex gap-2">
                       <button onClick={() => handleReply(s.id)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-[#C8FF00] text-[#0f0f0f] rounded-[8px] text-xs font-bold">
+                        className="flex items-center gap-1 px-3 py-1.5 bg-accent text-bg-primary rounded-[8px] text-xs font-bold">
                         <Check size={12} />저장
                       </button>
                       <button onClick={() => { setReplyingId(null); setReplyText('') }}
-                        className="px-3 py-1.5 bg-[#242424] text-[#888] rounded-[8px] text-xs">
+                        className="px-3 py-1.5 bg-bg-tertiary text-text-secondary rounded-[8px] text-xs">
                         취소
                       </button>
                     </div>
@@ -460,15 +460,15 @@ export default function AdminPage() {
         {tab === 'foods' && (
           <div className="space-y-3">
             {/* 음식 추가 폼 */}
-            <div className="bg-[#1a1a1a] rounded-[14px] p-4 space-y-3">
-              <p className="text-sm font-semibold text-[#f0f0f0]">음식 추가</p>
+            <div className="bg-bg-secondary rounded-[14px] p-4 space-y-3">
+              <p className="text-sm font-semibold text-text-primary">음식 추가</p>
               <div className="grid grid-cols-2 gap-2">
                 <input value={newFood.name} onChange={e => setNewFood(p => ({...p, name: e.target.value}))}
-                  placeholder="음식 이름*" className="col-span-2 bg-[#242424] border border-[#2a2a2a] rounded-[8px] px-3 py-2 text-xs text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]" />
+                  placeholder="음식 이름*" className="col-span-2 bg-bg-tertiary border border-we-border rounded-[8px] px-3 py-2 text-xs text-text-primary outline-none focus:border-accent placeholder:text-text-muted" />
                 <input value={newFood.brand} onChange={e => setNewFood(p => ({...p, brand: e.target.value}))}
-                  placeholder="브랜드" className="bg-[#242424] border border-[#2a2a2a] rounded-[8px] px-3 py-2 text-xs text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]" />
+                  placeholder="브랜드" className="bg-bg-tertiary border border-we-border rounded-[8px] px-3 py-2 text-xs text-text-primary outline-none focus:border-accent placeholder:text-text-muted" />
                 <input value={newFood.category} onChange={e => setNewFood(p => ({...p, category: e.target.value}))}
-                  placeholder="카테고리" className="bg-[#242424] border border-[#2a2a2a] rounded-[8px] px-3 py-2 text-xs text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]" />
+                  placeholder="카테고리" className="bg-bg-tertiary border border-we-border rounded-[8px] px-3 py-2 text-xs text-text-primary outline-none focus:border-accent placeholder:text-text-muted" />
                 {[
                   { key: 'cal' as const, ph: '칼로리(kcal/100g)' },
                   { key: 'protein' as const, ph: '단백질(g/100g)' },
@@ -477,37 +477,37 @@ export default function AdminPage() {
                   { key: 'serving' as const, ph: '1회 제공량(g)' },
                 ].map(({ key, ph }) => (
                   <input key={key} type="number" value={newFood[key]} onChange={e => setNewFood(p => ({...p, [key]: e.target.value}))}
-                    placeholder={ph} className="bg-[#242424] border border-[#2a2a2a] rounded-[8px] px-3 py-2 text-xs text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]" />
+                    placeholder={ph} className="bg-bg-tertiary border border-we-border rounded-[8px] px-3 py-2 text-xs text-text-primary outline-none focus:border-accent placeholder:text-text-muted" />
                 ))}
               </div>
               <button onClick={handleAddFood} disabled={!newFood.name.trim() || addingFood}
-                className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-[#C8FF00] text-[#0f0f0f] rounded-[10px] text-sm font-bold disabled:opacity-50">
+                className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-accent text-bg-primary rounded-[10px] text-sm font-bold disabled:opacity-50">
                 <Plus size={14} />{addingFood ? '추가 중...' : '음식 추가'}
               </button>
             </div>
 
             {/* 정부 API 동기화 */}
-            <div className="bg-[#1a1a1a] rounded-[14px] p-4 space-y-2">
-              <p className="text-sm font-semibold text-[#f0f0f0]">정부 DB API 가져오기</p>
-              <p className="text-[11px] text-[#555555]">검색어를 입력하면 data.go.kr 식품영양성분 DB에서 가져와 저장합니다.</p>
+            <div className="bg-bg-secondary rounded-[14px] p-4 space-y-2">
+              <p className="text-sm font-semibold text-text-primary">정부 DB API 가져오기</p>
+              <p className="text-[11px] text-text-muted">검색어를 입력하면 data.go.kr 식품영양성분 DB에서 가져와 저장합니다.</p>
               <div className="flex gap-2">
                 <input
                   value={syncQuery}
                   onChange={e => setSyncQuery(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSyncFoodApi()}
                   placeholder="예: 닭가슴살, 신라면, 계란..."
-                  className="flex-1 bg-[#242424] border border-[#2a2a2a] rounded-[8px] px-3 py-2 text-xs text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]"
+                  className="flex-1 bg-bg-tertiary border border-we-border rounded-[8px] px-3 py-2 text-xs text-text-primary outline-none focus:border-accent placeholder:text-text-muted"
                 />
                 <button
                   onClick={handleSyncFoodApi}
                   disabled={!syncQuery.trim() || syncing}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-[#C8FF00] text-[#0f0f0f] rounded-[8px] text-xs font-bold disabled:opacity-50 shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-accent text-bg-primary rounded-[8px] text-xs font-bold disabled:opacity-50 shrink-0"
                 >
                   <Download size={13} />{syncing ? '...' : '가져오기'}
                 </button>
               </div>
               {syncResult && (
-                <p className={`text-xs ${syncResult.startsWith('오류') ? 'text-[#FF4B4B]' : 'text-[#C8FF00]'}`}>
+                <p className={`text-xs ${syncResult.startsWith('오류') ? 'text-we-danger' : 'text-accent'}`}>
                   {syncResult}
                 </p>
               )}
@@ -516,21 +516,21 @@ export default function AdminPage() {
             {/* 검색 */}
             <input value={foodSearch} onChange={e => setFoodSearch(e.target.value)}
               placeholder="음식 검색..."
-              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-[10px] px-4 py-3 text-sm text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]" />
+              className="w-full bg-bg-secondary border border-we-border rounded-[10px] px-4 py-3 text-sm text-text-primary outline-none focus:border-accent placeholder:text-text-muted" />
 
             {/* 목록 */}
             <div className="space-y-1.5">
               {foods.map(f => (
-                <div key={f.id} className="bg-[#1a1a1a] rounded-[12px] px-4 py-3 flex items-center gap-3">
+                <div key={f.id} className="bg-bg-secondary rounded-[12px] px-4 py-3 flex items-center gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#f0f0f0] truncate">
-                      {f.brand && <span className="text-[#C8FF00] mr-1">{f.brand}</span>}{f.name}
+                    <p className="text-sm text-text-primary truncate">
+                      {f.brand && <span className="text-accent mr-1">{f.brand}</span>}{f.name}
                     </p>
-                    <p className="text-[11px] text-[#555555] tabular-nums">
+                    <p className="text-[11px] text-text-muted tabular-nums">
                       {Math.round(f.calories_per_100g)}kcal · P{Math.round(f.protein_per_100g)} C{Math.round(f.carbs_per_100g)} F{Math.round(f.fat_per_100g)} /100g
                     </p>
                   </div>
-                  <button onClick={() => handleDeleteFood(f.id)} className="p-1.5 text-[#444] hover:text-[#FF4B4B]">
+                  <button onClick={() => handleDeleteFood(f.id)} className="p-1.5 text-text-muted hover:text-we-danger">
                     <Trash2 size={14} />
                   </button>
                 </div>
@@ -543,22 +543,22 @@ export default function AdminPage() {
         {tab === 'exercises' && (
           <div className="space-y-3">
             {/* 운동 추가 폼 */}
-            <div className="bg-[#1a1a1a] rounded-[14px] p-4 space-y-3">
-              <p className="text-sm font-semibold text-[#f0f0f0]">운동 추가</p>
+            <div className="bg-bg-secondary rounded-[14px] p-4 space-y-3">
+              <p className="text-sm font-semibold text-text-primary">운동 추가</p>
               <input value={newEx.name} onChange={e => setNewEx(p => ({...p, name: e.target.value}))}
                 placeholder="운동 이름*"
-                className="w-full bg-[#242424] border border-[#2a2a2a] rounded-[8px] px-3 py-2.5 text-sm text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]" />
+                className="w-full bg-bg-tertiary border border-we-border rounded-[8px] px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent placeholder:text-text-muted" />
               <div className="grid grid-cols-2 gap-2">
                 <select value={newEx.muscle_group} onChange={e => setNewEx(p => ({...p, muscle_group: e.target.value}))}
-                  className="bg-[#242424] border border-[#2a2a2a] rounded-[8px] px-3 py-2.5 text-sm text-[#f0f0f0] outline-none">
+                  className="bg-bg-tertiary border border-we-border rounded-[8px] px-3 py-2.5 text-sm text-text-primary outline-none">
                   {MUSCLE_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
                 </select>
                 <input value={newEx.equipment} onChange={e => setNewEx(p => ({...p, equipment: e.target.value}))}
                   placeholder="기구 (바벨, 덤벨...)"
-                  className="bg-[#242424] border border-[#2a2a2a] rounded-[8px] px-3 py-2 text-sm text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]" />
+                  className="bg-bg-tertiary border border-we-border rounded-[8px] px-3 py-2 text-sm text-text-primary outline-none focus:border-accent placeholder:text-text-muted" />
               </div>
               <button onClick={handleAddExercise} disabled={!newEx.name.trim() || addingEx}
-                className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-[#C8FF00] text-[#0f0f0f] rounded-[10px] text-sm font-bold disabled:opacity-50">
+                className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-accent text-bg-primary rounded-[10px] text-sm font-bold disabled:opacity-50">
                 <Plus size={14} />{addingEx ? '추가 중...' : '운동 추가'}
               </button>
             </div>
@@ -566,10 +566,10 @@ export default function AdminPage() {
             {/* 검색 */}
             <input value={exSearch} onChange={e => setExSearch(e.target.value)}
               placeholder="운동 검색..."
-              className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-[10px] px-4 py-3 text-sm text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]" />
+              className="w-full bg-bg-secondary border border-we-border rounded-[10px] px-4 py-3 text-sm text-text-primary outline-none focus:border-accent placeholder:text-text-muted" />
 
             {/* 집계 */}
-            <p className="text-xs text-[#555555]">총 {exList.length}개 운동 종목</p>
+            <p className="text-xs text-text-muted">총 {exList.length}개 운동 종목</p>
 
             {/* 목록 (부위별 그룹) */}
             {MUSCLE_GROUPS.map(group => {
@@ -577,15 +577,15 @@ export default function AdminPage() {
               if (items.length === 0 && exSearch) return null
               return (
                 <div key={group}>
-                  <p className="text-xs font-semibold text-[#555555] mb-1.5">{group} ({items.length})</p>
+                  <p className="text-xs font-semibold text-text-muted mb-1.5">{group} ({items.length})</p>
                   <div className="space-y-1">
                     {items.map(e => (
-                      <div key={e.id} className="bg-[#1a1a1a] rounded-[10px] px-4 py-2.5 flex items-center gap-3">
+                      <div key={e.id} className="bg-bg-secondary rounded-[10px] px-4 py-2.5 flex items-center gap-3">
                         <div className="flex-1">
-                          <p className="text-sm text-[#f0f0f0]">{e.name}</p>
-                          <p className="text-[10px] text-[#555555]">{e.equipment ?? '맨몸'}</p>
+                          <p className="text-sm text-text-primary">{e.name}</p>
+                          <p className="text-[10px] text-text-muted">{e.equipment ?? '맨몸'}</p>
                         </div>
-                        <button onClick={() => handleDeleteExercise(e.id)} className="p-1.5 text-[#444] hover:text-[#FF4B4B]">
+                        <button onClick={() => handleDeleteExercise(e.id)} className="p-1.5 text-text-muted hover:text-we-danger">
                           <X size={13} />
                         </button>
                       </div>

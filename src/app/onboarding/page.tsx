@@ -148,7 +148,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10" style={{ backgroundColor: '#0f0f0f' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10" style={{ backgroundColor: 'var(--bg-primary)' }}>
       {/* 진행 바 */}
       <div className="flex gap-2 mb-10">
         {[1, 2, 3, 4, 5].map((dot) => (
@@ -156,8 +156,8 @@ export default function OnboardingPage() {
             key={dot}
             className="w-2.5 h-2.5 rounded-full transition-all duration-300"
             style={{
-              backgroundColor: dot <= step ? '#C8FF00' : 'transparent',
-              border: dot <= step ? 'none' : '1.5px solid #444',
+              backgroundColor: dot <= step ? 'var(--accent)' : 'transparent',
+              border: dot <= step ? 'none' : '1.5px solid var(--border)',
             }}
           />
         ))}
@@ -177,9 +177,9 @@ export default function OnboardingPage() {
               exit="exit"
               transition={{ duration: 0.28, ease: 'easeInOut' }}
             >
-              <div className="rounded-2xl p-6" style={{ backgroundColor: '#1a1a1a' }}>
+              <div className="rounded-2xl p-6" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h1 className="text-white text-2xl font-bold mb-2">목표를 선택하세요</h1>
-                <p className="text-sm mb-6" style={{ color: '#888' }}>나의 운동 목표를 선택해주세요</p>
+                <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>나의 운동 목표를 선택해주세요</p>
                 <div className="grid grid-cols-2 gap-3">
                   {GOALS.map((g) => (
                     <button
@@ -193,9 +193,9 @@ export default function OnboardingPage() {
                         backgroundColor:
                           formData.goal === g.id
                             ? 'rgba(200,255,0,0.12)'
-                            : '#242424',
+                            : 'var(--bg-tertiary)',
                         border: formData.goal === g.id
-                          ? '2px solid #C8FF00'
+                          ? '2px solid var(--accent)'
                           : '2px solid transparent',
                       }}
                     >
@@ -219,13 +219,13 @@ export default function OnboardingPage() {
               exit="exit"
               transition={{ duration: 0.28, ease: 'easeInOut' }}
             >
-              <div className="rounded-2xl p-6" style={{ backgroundColor: '#1a1a1a' }}>
+              <div className="rounded-2xl p-6" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h1 className="text-white text-2xl font-bold mb-2">기본 정보</h1>
-                <p className="text-sm mb-6" style={{ color: '#888' }}>정확한 루틴 생성을 위해 필요해요</p>
+                <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>정확한 루틴 생성을 위해 필요해요</p>
 
                 {/* 성별 */}
                 <div className="mb-5">
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#aaa' }}>성별</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>성별</label>
                   <div className="flex gap-3">
                     {['남성', '여성'].map((g) => (
                       <button
@@ -233,8 +233,8 @@ export default function OnboardingPage() {
                         onClick={() => setFormData((prev) => ({ ...prev, gender: g }))}
                         className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
                         style={{
-                          backgroundColor: formData.gender === g ? '#C8FF00' : '#242424',
-                          color: formData.gender === g ? '#000' : '#fff',
+                          backgroundColor: formData.gender === g ? 'var(--accent)' : 'var(--bg-tertiary)',
+                          color: formData.gender === g ? 'var(--bg-primary)' : 'var(--text-primary)',
                           border: 'none',
                         }}
                       >
@@ -246,7 +246,7 @@ export default function OnboardingPage() {
 
                 {/* 나이 */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#aaa' }}>나이</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>나이</label>
                   <div className="relative">
                     <input
                       type="number"
@@ -259,19 +259,19 @@ export default function OnboardingPage() {
                       placeholder="25"
                       className="w-full rounded-lg px-4 py-3 text-white text-sm outline-none focus:ring-2 appearance-none"
                       style={{
-                        backgroundColor: '#242424',
-                        border: '1.5px solid #333',
+                        backgroundColor: 'var(--bg-tertiary)',
+                        border: '1.5px solid var(--border)',
                         // @ts-expect-error - custom focus ring color via style
-                        '--tw-ring-color': '#C8FF00',
+                        '--tw-ring-color': 'var(--accent)',
                       }}
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: '#666' }}>세</span>
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-muted)' }}>세</span>
                   </div>
                 </div>
 
                 {/* 키 */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#aaa' }}>키</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>키</label>
                   <div className="relative">
                     <input
                       type="number"
@@ -283,15 +283,15 @@ export default function OnboardingPage() {
                       }
                       placeholder="170"
                       className="w-full rounded-lg px-4 py-3 text-white text-sm outline-none"
-                      style={{ backgroundColor: '#242424', border: '1.5px solid #333' }}
+                      style={{ backgroundColor: 'var(--bg-tertiary)', border: '1.5px solid var(--border)' }}
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: '#666' }}>cm</span>
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-muted)' }}>cm</span>
                   </div>
                 </div>
 
                 {/* 현재 체중 */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#aaa' }}>현재 체중</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>현재 체중</label>
                   <div className="relative">
                     <input
                       type="number"
@@ -303,15 +303,15 @@ export default function OnboardingPage() {
                       }
                       placeholder="70"
                       className="w-full rounded-lg px-4 py-3 text-white text-sm outline-none"
-                      style={{ backgroundColor: '#242424', border: '1.5px solid #333' }}
+                      style={{ backgroundColor: 'var(--bg-tertiary)', border: '1.5px solid var(--border)' }}
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: '#666' }}>kg</span>
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-muted)' }}>kg</span>
                   </div>
                 </div>
 
                 {/* 목표 체중 */}
                 <div className="mb-6">
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#aaa' }}>목표 체중</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>목표 체중</label>
                   <div className="relative">
                     <input
                       type="number"
@@ -323,9 +323,9 @@ export default function OnboardingPage() {
                       }
                       placeholder="65"
                       className="w-full rounded-lg px-4 py-3 text-white text-sm outline-none"
-                      style={{ backgroundColor: '#242424', border: '1.5px solid #333' }}
+                      style={{ backgroundColor: 'var(--bg-tertiary)', border: '1.5px solid var(--border)' }}
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: '#666' }}>kg</span>
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-muted)' }}>kg</span>
                   </div>
                 </div>
 
@@ -339,12 +339,12 @@ export default function OnboardingPage() {
                     goNext()
                   }}
                   className="w-full py-3.5 rounded-xl font-bold text-black text-sm transition-opacity hover:opacity-90 active:scale-95"
-                  style={{ backgroundColor: '#C8FF00' }}
+                  style={{ backgroundColor: 'var(--accent)' }}
                 >
                   다음
                 </button>
                 {error && (
-                  <p className="mt-3 text-sm text-center" style={{ color: '#ff6b6b' }}>{error}</p>
+                  <p className="mt-3 text-sm text-center" style={{ color: 'var(--danger)' }}>{error}</p>
                 )}
               </div>
             </motion.div>
@@ -361,9 +361,9 @@ export default function OnboardingPage() {
               exit="exit"
               transition={{ duration: 0.28, ease: 'easeInOut' }}
             >
-              <div className="rounded-2xl p-6" style={{ backgroundColor: '#1a1a1a' }}>
+              <div className="rounded-2xl p-6" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h1 className="text-white text-2xl font-bold mb-2">활동량</h1>
-                <p className="text-sm mb-6" style={{ color: '#888' }}>평소 운동 빈도를 선택해주세요</p>
+                <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>평소 운동 빈도를 선택해주세요</p>
                 <div className="flex flex-col gap-3">
                   {ACTIVITY_LEVELS.map((a) => (
                     <button
@@ -377,16 +377,16 @@ export default function OnboardingPage() {
                         backgroundColor:
                           formData.activityLevel === a.id
                             ? 'rgba(200,255,0,0.12)'
-                            : '#242424',
+                            : 'var(--bg-tertiary)',
                         border: formData.activityLevel === a.id
-                          ? '2px solid #C8FF00'
+                          ? '2px solid var(--accent)'
                           : '2px solid transparent',
                       }}
                     >
                       <span className="text-2xl">{a.emoji}</span>
                       <div>
                         <p className="text-white font-semibold text-sm">{a.label}</p>
-                        <p className="text-xs mt-0.5" style={{ color: '#888' }}>{a.desc}</p>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{a.desc}</p>
                       </div>
                     </button>
                   ))}
@@ -406,15 +406,15 @@ export default function OnboardingPage() {
               exit="exit"
               transition={{ duration: 0.28, ease: 'easeInOut' }}
             >
-              <div className="rounded-2xl p-6" style={{ backgroundColor: '#1a1a1a' }}>
+              <div className="rounded-2xl p-6" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h1 className="text-white text-2xl font-bold mb-2">운동 환경</h1>
-                <p className="text-sm mb-6" style={{ color: '#888' }}>주 운동 횟수와 사용 가능한 기구를 알려주세요</p>
+                <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>주 운동 횟수와 사용 가능한 기구를 알려주세요</p>
 
                 {/* 주 운동 횟수 */}
                 <div className="mb-6">
-                  <label className="block text-sm font-medium mb-3" style={{ color: '#aaa' }}>
+                  <label className="block text-sm font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>
                     주 운동 횟수 &nbsp;
-                    <span style={{ color: '#C8FF00' }}>{formData.workoutDays}일</span>
+                    <span style={{ color: 'var(--accent)' }}>{formData.workoutDays}일</span>
                   </label>
                   <div className="flex gap-2 justify-between">
                     {[1, 2, 3, 4, 5, 6, 7].map((d) => (
@@ -423,8 +423,8 @@ export default function OnboardingPage() {
                         onClick={() => setFormData((prev) => ({ ...prev, workoutDays: d }))}
                         className="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-150 active:scale-90"
                         style={{
-                          backgroundColor: formData.workoutDays === d ? '#C8FF00' : '#242424',
-                          color: formData.workoutDays === d ? '#000' : '#fff',
+                          backgroundColor: formData.workoutDays === d ? 'var(--accent)' : 'var(--bg-tertiary)',
+                          color: formData.workoutDays === d ? 'var(--bg-primary)' : 'var(--text-primary)',
                           border: 'none',
                         }}
                       >
@@ -436,7 +436,7 @@ export default function OnboardingPage() {
 
                 {/* 사용 가능 기구 */}
                 <div className="mb-6">
-                  <label className="block text-sm font-medium mb-3" style={{ color: '#aaa' }}>사용 가능 기구</label>
+                  <label className="block text-sm font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>사용 가능 기구</label>
                   <div className="flex flex-wrap gap-2">
                     {EQUIPMENT_OPTIONS.map((eq) => (
                       <button
@@ -444,11 +444,11 @@ export default function OnboardingPage() {
                         onClick={() => toggleEquipment(eq)}
                         className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-150 active:scale-95"
                         style={{
-                          backgroundColor: formData.equipment.includes(eq) ? '#C8FF00' : '#242424',
-                          color: formData.equipment.includes(eq) ? '#000' : '#fff',
+                          backgroundColor: formData.equipment.includes(eq) ? 'var(--accent)' : 'var(--bg-tertiary)',
+                          color: formData.equipment.includes(eq) ? 'var(--bg-primary)' : 'var(--text-primary)',
                           border: formData.equipment.includes(eq)
-                            ? '1.5px solid #C8FF00'
-                            : '1.5px solid #444',
+                            ? '1.5px solid var(--accent)'
+                            : '1.5px solid var(--border)',
                         }}
                       >
                         {eq}
@@ -467,12 +467,12 @@ export default function OnboardingPage() {
                     goNext()
                   }}
                   className="w-full py-3.5 rounded-xl font-bold text-black text-sm transition-opacity hover:opacity-90 active:scale-95"
-                  style={{ backgroundColor: '#C8FF00' }}
+                  style={{ backgroundColor: 'var(--accent)' }}
                 >
                   다음
                 </button>
                 {error && (
-                  <p className="mt-3 text-sm text-center" style={{ color: '#ff6b6b' }}>{error}</p>
+                  <p className="mt-3 text-sm text-center" style={{ color: 'var(--danger)' }}>{error}</p>
                 )}
               </div>
             </motion.div>
@@ -489,9 +489,9 @@ export default function OnboardingPage() {
               exit="exit"
               transition={{ duration: 0.28, ease: 'easeInOut' }}
             >
-              <div className="rounded-2xl p-6" style={{ backgroundColor: '#1a1a1a' }}>
+              <div className="rounded-2xl p-6" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h1 className="text-white text-2xl font-bold mb-2">식이 제한</h1>
-                <p className="text-sm mb-6" style={{ color: '#888' }}>해당하는 항목을 선택해주세요 (선택 사항)</p>
+                <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>해당하는 항목을 선택해주세요 (선택 사항)</p>
 
                 <div className="flex flex-wrap gap-2 mb-8">
                   {DIETARY_OPTIONS.map((d) => (
@@ -500,11 +500,11 @@ export default function OnboardingPage() {
                       onClick={() => toggleDietary(d)}
                       className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-150 active:scale-95"
                       style={{
-                        backgroundColor: formData.dietaryRestrictions.includes(d) ? '#C8FF00' : '#242424',
-                        color: formData.dietaryRestrictions.includes(d) ? '#000' : '#fff',
+                        backgroundColor: formData.dietaryRestrictions.includes(d) ? 'var(--accent)' : 'var(--bg-tertiary)',
+                        color: formData.dietaryRestrictions.includes(d) ? 'var(--bg-primary)' : 'var(--text-primary)',
                         border: formData.dietaryRestrictions.includes(d)
-                          ? '1.5px solid #C8FF00'
-                          : '1.5px solid #444',
+                          ? '1.5px solid var(--accent)'
+                          : '1.5px solid var(--border)',
                       }}
                     >
                       {d}
@@ -513,7 +513,7 @@ export default function OnboardingPage() {
                 </div>
 
                 {error && (
-                  <p className="mb-4 text-sm text-center" style={{ color: '#ff6b6b' }}>{error}</p>
+                  <p className="mb-4 text-sm text-center" style={{ color: 'var(--danger)' }}>{error}</p>
                 )}
 
                 <div className="flex gap-3">
@@ -523,8 +523,8 @@ export default function OnboardingPage() {
                     className="flex-1 py-3.5 rounded-xl font-semibold text-sm transition-opacity hover:opacity-70 disabled:opacity-40"
                     style={{
                       backgroundColor: 'transparent',
-                      color: '#aaa',
-                      border: '1.5px solid #444',
+                      color: 'var(--text-secondary)',
+                      border: '1.5px solid var(--border)',
                     }}
                   >
                     건너뛰기
@@ -533,7 +533,7 @@ export default function OnboardingPage() {
                     onClick={() => !isLoading && handleComplete(false)}
                     disabled={isLoading}
                     className="flex-1 py-3.5 rounded-xl font-bold text-black text-sm transition-opacity hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
-                    style={{ backgroundColor: '#C8FF00' }}
+                    style={{ backgroundColor: 'var(--accent)' }}
                   >
                     {isLoading ? (
                       <span

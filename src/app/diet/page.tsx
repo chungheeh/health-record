@@ -121,12 +121,12 @@ export default async function DietPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#0f0f0f]">
+    <main className="min-h-screen bg-bg-primary">
       {/* 헤더 */}
-      <header className="sticky top-0 z-50 bg-[#0f0f0f] border-b border-[#2a2a2a] px-4 h-14 flex items-center justify-between">
-        <h1 className="font-semibold text-[#f0f0f0]">식단 기록</h1>
+      <header className="sticky top-0 z-50 bg-bg-primary border-b border-we-border px-4 h-14 flex items-center justify-between">
+        <h1 className="font-semibold text-text-primary">식단 기록</h1>
         <div className="flex items-center gap-2">
-          <Link href="/fasting" className="p-2 text-[#888888] hover:text-[#C8FF00] transition-colors" title="간헐적 단식">
+          <Link href="/fasting" className="p-2 text-text-secondary hover:text-accent transition-colors" title="간헐적 단식">
             <Timer size={18} />
           </Link>
           <DietDateNav date={date} />
@@ -135,28 +135,28 @@ export default async function DietPage({
 
       <div className="px-4 pt-4 pb-24 space-y-4">
         {/* 영양소 요약 카드 */}
-        <div className="bg-[#1a1a1a] rounded-[16px] p-5">
+        <div className="bg-bg-secondary rounded-[16px] p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold text-[#f0f0f0]">오늘 섭취</span>
-            <span className="text-xs text-[#888888]">
+            <span className="text-sm font-semibold text-text-primary">오늘 섭취</span>
+            <span className="text-xs text-text-secondary">
               목표 {targetCal.toLocaleString()}kcal
             </span>
           </div>
 
           {/* 칼로리 게이지 바 */}
           <div className="mb-3">
-            <div className="flex justify-between text-xs text-[#888888] mb-1.5">
-              <span className="text-[#f0f0f0] font-bold tabular-nums">
+            <div className="flex justify-between text-xs text-text-secondary mb-1.5">
+              <span className="text-text-primary font-bold tabular-nums">
                 {Math.round(total.calories).toLocaleString()}kcal
               </span>
               <span>{Math.round(calProgress)}%</span>
             </div>
-            <div className="h-2.5 bg-[#242424] rounded-full overflow-hidden">
+            <div className="h-2.5 bg-bg-tertiary rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${calProgress}%`,
-                  backgroundColor: calProgress >= 100 ? '#FF4B4B' : calProgress >= 90 ? '#FFB800' : '#C8FF00',
+                  backgroundColor: calProgress >= 100 ? 'var(--danger)' : calProgress >= 90 ? '#FFB800' : 'var(--accent)',
                 }}
               />
             </div>
@@ -169,13 +169,13 @@ export default async function DietPage({
               { label: '탄수화물', value: total.carbs, target: profile?.target_carbs_g, unit: 'g', color: '#81C784' },
               { label: '지방', value: total.fat, target: profile?.target_fat_g, unit: 'g', color: '#FFB74D' },
             ].map(({ label, value, target, unit, color }) => (
-              <div key={label} className="bg-[#242424] rounded-[10px] p-3 text-center">
-                <p className="text-xs text-[#888888] mb-1">{label}</p>
+              <div key={label} className="bg-bg-tertiary rounded-[10px] p-3 text-center">
+                <p className="text-xs text-text-secondary mb-1">{label}</p>
                 <p className="text-base font-bold tabular-nums" style={{ color }}>
-                  {Math.round(value)}<span className="text-xs font-normal text-[#888888]">{unit}</span>
+                  {Math.round(value)}<span className="text-xs font-normal text-text-secondary">{unit}</span>
                 </p>
                 {target && (
-                  <p className="text-[10px] text-[#555555] mt-0.5">/ {target}{unit}</p>
+                  <p className="text-[10px] text-text-muted mt-0.5">/ {target}{unit}</p>
                 )}
               </div>
             ))}
@@ -184,16 +184,16 @@ export default async function DietPage({
 
         {/* 탄수화물 사이클링 카드 */}
         {carbCycleTarget !== null && (
-          <div className="bg-[#1a1a1a] rounded-[14px] px-4 py-3 flex items-center justify-between">
+          <div className="bg-bg-secondary rounded-[14px] px-4 py-3 flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-[#888888]">탄수화물 사이클링</p>
-              <p className="text-sm font-bold text-[#f0f0f0] mt-0.5">{carbCycleLabel}</p>
+              <p className="text-xs font-semibold text-text-secondary">탄수화물 사이클링</p>
+              <p className="text-sm font-bold text-text-primary mt-0.5">{carbCycleLabel}</p>
             </div>
             <div className="text-right">
-              <p className="text-lg font-bold tabular-nums" style={{ color: hasWorkoutToday ? '#C8FF00' : '#4FC3F7' }}>
+              <p className="text-lg font-bold tabular-nums" style={{ color: hasWorkoutToday ? 'var(--accent)' : '#4FC3F7' }}>
                 {carbCycleTarget}g
               </p>
-              <p className="text-[10px] text-[#555555]">오늘 탄수화물 목표</p>
+              <p className="text-[10px] text-text-muted">오늘 탄수화물 목표</p>
             </div>
           </div>
         )}
@@ -202,11 +202,11 @@ export default async function DietPage({
         {tips.length > 0 && (
           <div className="space-y-2">
             {tips.map((tip, i) => (
-              <div key={i} className="bg-[#1a1a1a] rounded-[14px] px-4 py-3 flex items-start gap-3">
+              <div key={i} className="bg-bg-secondary rounded-[14px] px-4 py-3 flex items-start gap-3">
                 <span className="text-lg shrink-0 mt-0.5">{tip.emoji}</span>
                 <div>
-                  <p className="text-sm font-semibold text-[#f0f0f0]">{tip.text}</p>
-                  <p className="text-xs text-[#888888] mt-0.5 leading-relaxed">{tip.sub}</p>
+                  <p className="text-sm font-semibold text-text-primary">{tip.text}</p>
+                  <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">{tip.sub}</p>
                 </div>
               </div>
             ))}
@@ -220,14 +220,14 @@ export default async function DietPage({
           const mealCals = mealItems.reduce((s, i) => s + (i.calories ?? 0), 0)
 
           return (
-            <div key={mealType} className="bg-[#1a1a1a] rounded-[16px] overflow-hidden">
+            <div key={mealType} className="bg-bg-secondary rounded-[16px] overflow-hidden">
               {/* 식사 헤더 */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-we-border">
                 <div className="flex items-center gap-2">
                   <span>{MEAL_EMOJI[mealType]}</span>
-                  <span className="font-semibold text-[#f0f0f0] text-sm">{mealType}</span>
+                  <span className="font-semibold text-text-primary text-sm">{mealType}</span>
                   {mealCals > 0 && (
-                    <span className="text-xs text-[#888888] tabular-nums">{Math.round(mealCals)}kcal</span>
+                    <span className="text-xs text-text-secondary tabular-nums">{Math.round(mealCals)}kcal</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -238,7 +238,7 @@ export default async function DietPage({
                   />
                   <Link
                     href={`/diet/add?date=${date}&meal=${encodeURIComponent(mealType)}`}
-                    className="bg-[#242424] text-[#C8FF00] rounded-full p-1.5"
+                    className="bg-bg-tertiary text-accent rounded-full p-1.5"
                   >
                     <Plus size={14} />
                   </Link>

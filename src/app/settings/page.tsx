@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ChevronLeft, RefreshCw, ShieldCheck, Zap } from 'lucide-react'
 import { calcTDEE, adjustCaloriesForGoal, type ActivityLevel, type Gender, type Goal } from '@/lib/utils/tdee'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 
 interface ProfileForm {
   goal: string
@@ -200,26 +201,32 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#C8FF00] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-[#0f0f0f]">
+    <main className="min-h-screen bg-bg-primary">
       {/* 헤더 */}
-      <header className="sticky top-0 z-50 bg-[#0f0f0f] border-b border-[#2a2a2a] px-4 h-14 flex items-center gap-3">
-        <button onClick={() => router.back()} className="text-[#888888]">
+      <header className="sticky top-0 z-50 bg-bg-primary border-b border-we-border px-4 h-14 flex items-center gap-3">
+        <button onClick={() => router.back()} className="text-text-secondary">
           <ChevronLeft size={24} />
         </button>
-        <h1 className="font-semibold text-[#f0f0f0] flex-1">설정</h1>
+        <h1 className="font-semibold text-text-primary flex-1">설정</h1>
       </header>
 
       <div className="px-4 pt-4 pb-44 space-y-4">
+        {/* 테마 */}
+        <div className="bg-bg-secondary rounded-[16px] p-4 space-y-3">
+          <p className="text-sm font-semibold text-text-primary">테마</p>
+          <ThemeToggle />
+        </div>
+
         {/* 목표 */}
-        <div className="bg-[#1a1a1a] rounded-[16px] p-4 space-y-3">
-          <p className="text-sm font-semibold text-[#f0f0f0]">운동 목표</p>
+        <div className="bg-bg-secondary rounded-[16px] p-4 space-y-3">
+          <p className="text-sm font-semibold text-text-primary">운동 목표</p>
           <div className="grid grid-cols-2 gap-2">
             {GOAL_OPTIONS.map(g => (
               <button
@@ -227,9 +234,9 @@ export default function SettingsPage() {
                 onClick={() => set('goal')(g.id)}
                 className="flex items-center gap-2 px-3 py-2.5 rounded-[10px] text-sm transition-all"
                 style={{
-                  backgroundColor: form.goal === g.id ? 'rgba(200,255,0,0.12)' : '#242424',
-                  border: `1.5px solid ${form.goal === g.id ? '#C8FF00' : 'transparent'}`,
-                  color: form.goal === g.id ? '#C8FF00' : '#f0f0f0',
+                  backgroundColor: form.goal === g.id ? 'var(--accent-dim)' : 'var(--bg-tertiary)',
+                  border: `1.5px solid ${form.goal === g.id ? 'var(--accent)' : 'transparent'}`,
+                  color: form.goal === g.id ? 'var(--accent)' : 'var(--text-primary)',
                 }}
               >
                 <span>{g.emoji}</span>
@@ -240,12 +247,12 @@ export default function SettingsPage() {
         </div>
 
         {/* 신체 정보 */}
-        <div className="bg-[#1a1a1a] rounded-[16px] p-4 space-y-3">
-          <p className="text-sm font-semibold text-[#f0f0f0]">신체 정보</p>
+        <div className="bg-bg-secondary rounded-[16px] p-4 space-y-3">
+          <p className="text-sm font-semibold text-text-primary">신체 정보</p>
 
           {/* 성별 */}
           <div className="flex items-center gap-3">
-            <span className="text-xs text-[#888888] w-20 shrink-0">성별</span>
+            <span className="text-xs text-text-secondary w-20 shrink-0">성별</span>
             <div className="flex gap-2 flex-1">
               {(['남성', '여성'] as const).map(g => (
                 <button
@@ -253,8 +260,8 @@ export default function SettingsPage() {
                   onClick={() => set('gender')(g)}
                   className="flex-1 py-2 rounded-[10px] text-sm font-medium transition-all"
                   style={{
-                    backgroundColor: form.gender === g ? '#C8FF00' : '#242424',
-                    color: form.gender === g ? '#0f0f0f' : '#888888',
+                    backgroundColor: form.gender === g ? 'var(--accent)' : 'var(--bg-tertiary)',
+                    color: form.gender === g ? 'var(--bg-primary)' : 'var(--text-secondary)',
                   }}
                 >{g}</button>
               ))}
@@ -268,8 +275,8 @@ export default function SettingsPage() {
             { key: 'target_weight_kg', label: '목표 체중', unit: 'kg', placeholder: '65', min: '20', max: '300' },
           ] as const).map(({ key, label, unit, placeholder, min, max }) => (
             <div key={key} className="flex items-center gap-3">
-              <span className="text-xs text-[#888888] w-20 shrink-0">{label}</span>
-              <div className="flex-1 bg-[#242424] border border-[#2a2a2a] rounded-[10px] flex items-center px-3 focus-within:border-[#C8FF00]">
+              <span className="text-xs text-text-secondary w-20 shrink-0">{label}</span>
+              <div className="flex-1 bg-bg-tertiary border border-we-border rounded-[10px] flex items-center px-3 focus-within:border-accent">
                 <input
                   type="number"
                   inputMode="decimal"
@@ -278,17 +285,17 @@ export default function SettingsPage() {
                   max={max}
                   value={form[key]}
                   onChange={e => set(key)(e.target.value)}
-                  className="flex-1 bg-transparent py-2.5 text-sm text-[#f0f0f0] outline-none"
+                  className="flex-1 bg-transparent py-2.5 text-sm text-text-primary outline-none"
                 />
-                <span className="text-xs text-[#555555]">{unit}</span>
+                <span className="text-xs text-text-muted">{unit}</span>
               </div>
             </div>
           ))}
         </div>
 
         {/* 활동량 */}
-        <div className="bg-[#1a1a1a] rounded-[16px] p-4 space-y-3">
-          <p className="text-sm font-semibold text-[#f0f0f0]">활동량</p>
+        <div className="bg-bg-secondary rounded-[16px] p-4 space-y-3">
+          <p className="text-sm font-semibold text-text-primary">활동량</p>
           <div className="grid grid-cols-2 gap-2">
             {ACTIVITY_OPTIONS.map(a => (
               <button
@@ -296,8 +303,8 @@ export default function SettingsPage() {
                 onClick={() => set('activity_level')(a.id)}
                 className="py-2.5 rounded-[10px] text-sm font-medium transition-all"
                 style={{
-                  backgroundColor: form.activity_level === a.id ? '#C8FF00' : '#242424',
-                  color: form.activity_level === a.id ? '#0f0f0f' : '#888888',
+                  backgroundColor: form.activity_level === a.id ? 'var(--accent)' : 'var(--bg-tertiary)',
+                  color: form.activity_level === a.id ? 'var(--bg-primary)' : 'var(--text-secondary)',
                 }}
               >
                 {a.label}
@@ -307,10 +314,10 @@ export default function SettingsPage() {
         </div>
 
         {/* 주 운동 횟수 */}
-        <div className="bg-[#1a1a1a] rounded-[16px] p-4 space-y-3">
-          <p className="text-sm font-semibold text-[#f0f0f0]">
+        <div className="bg-bg-secondary rounded-[16px] p-4 space-y-3">
+          <p className="text-sm font-semibold text-text-primary">
             주 운동 횟수&nbsp;
-            <span className="text-[#C8FF00]">{form.workout_days_per_week}일</span>
+            <span className="text-accent">{form.workout_days_per_week}일</span>
           </p>
           <div className="flex gap-2">
             {[1,2,3,4,5,6,7].map(d => (
@@ -319,8 +326,8 @@ export default function SettingsPage() {
                 onClick={() => set('workout_days_per_week')(String(d))}
                 className="flex-1 py-2.5 rounded-[8px] text-xs font-bold transition-all"
                 style={{
-                  backgroundColor: Number(form.workout_days_per_week) === d ? '#C8FF00' : '#242424',
-                  color: Number(form.workout_days_per_week) === d ? '#0f0f0f' : '#888888',
+                  backgroundColor: Number(form.workout_days_per_week) === d ? 'var(--accent)' : 'var(--bg-tertiary)',
+                  color: Number(form.workout_days_per_week) === d ? 'var(--bg-primary)' : 'var(--text-secondary)',
                 }}
               >
                 {d}
@@ -330,12 +337,12 @@ export default function SettingsPage() {
         </div>
 
         {/* 영양 목표 */}
-        <div className="bg-[#1a1a1a] rounded-[16px] p-4 space-y-3">
+        <div className="bg-bg-secondary rounded-[16px] p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-[#f0f0f0]">영양 목표 (선택)</p>
+            <p className="text-sm font-semibold text-text-primary">영양 목표 (선택)</p>
             <button
               onClick={handleAutoCalc}
-              className="flex items-center gap-1 text-xs font-medium text-[#0f0f0f] bg-[#C8FF00] px-3 py-1.5 rounded-[8px] active:scale-95 transition-transform"
+              className="flex items-center gap-1 text-xs font-medium text-bg-primary bg-accent px-3 py-1.5 rounded-[8px] active:scale-95 transition-transform"
             >
               <Zap size={11} />
               TDEE 자동 계산
@@ -343,12 +350,12 @@ export default function SettingsPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             {([
-              { key: 'target_calories', label: '목표 칼로리', unit: 'kcal', color: '#C8FF00' },
+              { key: 'target_calories', label: '목표 칼로리', unit: 'kcal', color: 'var(--accent)' },
               { key: 'target_protein_g', label: '단백질', unit: 'g', color: '#4FC3F7' },
               { key: 'target_carbs_g', label: '탄수화물', unit: 'g', color: '#81C784' },
               { key: 'target_fat_g', label: '지방', unit: 'g', color: '#FFB74D' },
             ] as const).map(({ key, label, unit, color }) => (
-              <div key={key} className="bg-[#242424] rounded-[10px] p-3">
+              <div key={key} className="bg-bg-tertiary rounded-[10px] p-3">
                 <label className="text-[10px] font-medium" style={{ color }}>{label}</label>
                 <div className="flex items-center mt-1.5 gap-1">
                   <input
@@ -358,9 +365,9 @@ export default function SettingsPage() {
                     min="0"
                     value={form[key]}
                     onChange={e => set(key)(e.target.value)}
-                    className="flex-1 bg-transparent text-sm text-[#f0f0f0] outline-none tabular-nums w-full"
+                    className="flex-1 bg-transparent text-sm text-text-primary outline-none tabular-nums w-full"
                   />
-                  <span className="text-[10px] text-[#555555] shrink-0">{unit}</span>
+                  <span className="text-[10px] text-text-muted shrink-0">{unit}</span>
                 </div>
               </div>
             ))}
@@ -371,21 +378,21 @@ export default function SettingsPage() {
         <button
           onClick={handleRegenerate}
           disabled={regenerating}
-          className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#1a1a1a] border border-[#2a2a2a] rounded-[16px] text-sm text-[#888888] disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-2 py-3.5 bg-bg-secondary border border-we-border rounded-[16px] text-sm text-text-secondary disabled:opacity-60"
         >
           <RefreshCw size={16} className={regenerating ? 'animate-spin' : ''} />
           {regenerating ? '루틴 생성 중...' : 'AI 루틴 재생성'}
         </button>
 
         {savedMsg && (
-          <p className="text-center text-sm text-[#C8FF00]">{savedMsg}</p>
+          <p className="text-center text-sm text-accent">{savedMsg}</p>
         )}
 
         {/* 관리자 버튼 — is_admin인 경우만 표시 */}
         {isAdmin && (
           <button
             onClick={() => router.push('/admin')}
-            className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#1a1a1a] border border-[#C8FF00]/30 rounded-[16px] text-sm text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-3.5 bg-bg-secondary border border-accent/30 rounded-[16px] text-sm text-accent hover:bg-accent/10 transition-colors"
           >
             <ShieldCheck size={16} />
             관리자 페이지
@@ -394,11 +401,11 @@ export default function SettingsPage() {
       </div>
 
       {/* 저장 버튼 — bottom-16 으로 BottomNav(h-16) 위에 위치 */}
-      <div className="fixed bottom-16 left-0 right-0 max-w-[430px] mx-auto px-4 pb-3 pt-3 bg-gradient-to-t from-[#0f0f0f] via-[#0f0f0f]/90 to-transparent z-40">
+      <div className="fixed bottom-16 left-0 right-0 max-w-[430px] mx-auto px-4 pb-3 pt-3 bg-gradient-to-t from-bg-primary via-bg-primary/90 to-transparent z-40">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="w-full py-4 bg-[#C8FF00] text-[#0f0f0f] font-bold rounded-[16px] text-sm disabled:opacity-60 active:scale-[0.98] transition-transform shadow-lg"
+          className="w-full py-4 bg-accent text-bg-primary font-bold rounded-[16px] text-sm disabled:opacity-60 active:scale-[0.98] transition-transform shadow-lg"
         >
           {saving ? '저장 중...' : '변경사항 저장'}
         </button>

@@ -14,11 +14,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-bg-primary flex items-center justify-center px-4">
       <div className="w-full max-w-[430px] flex flex-col items-center gap-10">
         {/* 로고 & 슬로건 */}
         <div className="flex flex-col items-center gap-3 text-center">
-          <span className="text-[56px] font-black text-[#C8FF00] leading-none tracking-tight">
+          <span className="text-[56px] font-black text-accent leading-none tracking-tight">
             W.E
           </span>
           <p className="text-white text-[18px] font-semibold leading-snug whitespace-pre-line">
@@ -27,7 +27,7 @@ export default function LoginPage() {
         </div>
 
         {/* 구분선 */}
-        <div className="w-full border-t border-[#2a2a2a]" />
+        <div className="w-full border-t border-we-border" />
 
         {/* Google 로그인 버튼 */}
         <div className="w-full">
@@ -66,7 +66,7 @@ export default function LoginPage() {
         </div>
 
         {/* 하단 푸터 */}
-        <p className="text-[#888888] text-[13px] text-center leading-relaxed">
+        <p className="text-text-secondary text-[13px] text-center leading-relaxed">
           개인 데이터는 귀하의 기기에만 저장됩니다
         </p>
       </div>

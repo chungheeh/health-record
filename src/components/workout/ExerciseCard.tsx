@@ -20,7 +20,7 @@ interface ExerciseCardProps {
 const REST_OPTIONS = [30, 60, 90, 120, 180]
 
 const SET_TYPE_OPTIONS: { value: SetType; label: string; color: string }[] = [
-  { value: 'normal', label: '기본', color: '#888888' },
+  { value: 'normal', label: '기본', color: 'var(--text-secondary)' },
   { value: 'warmup', label: '웜업', color: '#FFB74D' },
   { value: 'dropset', label: '드랍', color: '#FF6B6B' },
 ]
@@ -74,30 +74,30 @@ export default function ExerciseCard({
     }
   }
 
-  const badgeClass = muscleGroupColor[exercise.muscle_group] ?? 'bg-[#242424] text-[#888888]'
+  const badgeClass = muscleGroupColor[exercise.muscle_group] ?? 'bg-bg-tertiary text-text-secondary'
 
   return (
-    <div className="bg-[#1a1a1a] rounded-[16px] overflow-hidden">
+    <div className="bg-bg-secondary rounded-[16px] overflow-hidden">
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-we-border">
         <div className="flex items-center gap-2">
           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeClass}`}>
             {exercise.muscle_group}
           </span>
-          <span className="font-semibold text-[#f0f0f0]">{exercise.exercise_name}</span>
+          <span className="font-semibold text-text-primary">{exercise.exercise_name}</span>
         </div>
         <div className="flex items-center gap-1">
           {hasPrevious && hasUnfilled && (
             <button
               onClick={fillPreviousSets}
-              className="text-[10px] text-[#C8FF00] bg-[#C8FF00]/10 border border-[#C8FF00]/20 px-2 py-1 rounded-[6px] font-medium whitespace-nowrap"
+              className="text-[10px] text-accent bg-accent/10 border border-accent/20 px-2 py-1 rounded-[6px] font-medium whitespace-nowrap"
             >
               이전 기록 채우기
             </button>
           )}
           <button
             onClick={() => onRemove(exerciseIndex)}
-            className="text-[#555555] hover:text-[#FF4B4B] transition-colors p-1"
+            className="text-text-muted hover:text-we-danger transition-colors p-1"
           >
             <Trash2 size={16} />
           </button>
@@ -107,7 +107,7 @@ export default function ExerciseCard({
       {/* 세트 목록 */}
       <div className="px-4 py-3 space-y-2">
         {/* 컬럼 헤더 */}
-        <div className="grid grid-cols-[44px_1fr_1fr_1fr_40px_28px] gap-2 text-xs text-[#555555] mb-1">
+        <div className="grid grid-cols-[44px_1fr_1fr_1fr_40px_28px] gap-2 text-xs text-text-muted mb-1">
           <span className="text-center">세트</span>
           <span className="text-center">종류</span>
           <span className="text-center">무게(kg)</span>
@@ -132,12 +132,12 @@ export default function ExerciseCard({
                 transition={{ duration: 0.15 }}
                 className={`grid grid-cols-[44px_1fr_1fr_1fr_40px_28px] gap-2 items-center transition-all duration-200 ${
                   isCompleted
-                    ? 'bg-[#C8FF00]/5 rounded-[10px] px-0'
+                    ? 'bg-accent/5 rounded-[10px] px-0'
                     : ''
                 }`}
               >
                 {/* 세트 번호 */}
-                <span className={`text-center text-sm font-medium tabular-nums ${isCompleted ? 'text-[#C8FF00]/60' : 'text-[#888888]'}`}>
+                <span className={`text-center text-sm font-medium tabular-nums ${isCompleted ? 'text-accent/60' : 'text-text-secondary'}`}>
                   {set.set_number}
                 </span>
 
@@ -146,11 +146,11 @@ export default function ExerciseCard({
                   value={set.set_type}
                   onChange={e => onUpdateSet(exerciseIndex, setIndex, { set_type: e.target.value as SetType })}
                   disabled={isCompleted}
-                  className="bg-[#242424] border border-[#2a2a2a] rounded-[8px] py-2 text-center text-xs outline-none disabled:opacity-40 appearance-none cursor-pointer"
+                  className="bg-bg-tertiary border border-we-border rounded-[8px] py-2 text-center text-xs outline-none disabled:opacity-40 appearance-none cursor-pointer"
                   style={{ color: setTypeInfo.color }}
                 >
                   {SET_TYPE_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value} style={{ color: opt.color, backgroundColor: '#242424' }}>
+                    <option key={opt.value} value={opt.value} style={{ color: opt.color, backgroundColor: 'var(--bg-tertiary)' }}>
                       {opt.label}
                     </option>
                   ))}
@@ -159,7 +159,7 @@ export default function ExerciseCard({
                 {/* 무게 입력 */}
                 <div className="relative">
                   {prevSet?.weight_kg && !set.weight_kg && (
-                    <span className="absolute inset-0 flex items-center justify-center text-sm text-[#333333] pointer-events-none tabular-nums">
+                    <span className="absolute inset-0 flex items-center justify-center text-sm text-text-muted pointer-events-none tabular-nums">
                       {prevSet.weight_kg}
                     </span>
                   )}
@@ -169,7 +169,7 @@ export default function ExerciseCard({
                     onChange={e => onUpdateSet(exerciseIndex, setIndex, { weight_kg: Number(e.target.value) || null })}
                     disabled={isCompleted}
                     placeholder={prevSet?.weight_kg?.toString() ?? '0'}
-                    className="w-full bg-[#242424] border border-[#2a2a2a] rounded-[10px] px-2 py-2 text-center text-sm text-[#f0f0f0] tabular-nums focus:border-[#C8FF00] outline-none disabled:opacity-40"
+                    className="w-full bg-bg-tertiary border border-we-border rounded-[10px] px-2 py-2 text-center text-sm text-text-primary tabular-nums focus:border-accent outline-none disabled:opacity-40"
                     inputMode="decimal"
                     step="0.5"
                   />
@@ -178,7 +178,7 @@ export default function ExerciseCard({
                 {/* 횟수 입력 */}
                 <div className="relative">
                   {prevSet?.reps && !set.reps && (
-                    <span className="absolute inset-0 flex items-center justify-center text-sm text-[#333333] pointer-events-none tabular-nums">
+                    <span className="absolute inset-0 flex items-center justify-center text-sm text-text-muted pointer-events-none tabular-nums">
                       {prevSet.reps}
                     </span>
                   )}
@@ -188,7 +188,7 @@ export default function ExerciseCard({
                     onChange={e => onUpdateSet(exerciseIndex, setIndex, { reps: Number(e.target.value) || null })}
                     disabled={isCompleted}
                     placeholder={prevSet?.reps?.toString() ?? '0'}
-                    className="w-full bg-[#242424] border border-[#2a2a2a] rounded-[10px] px-2 py-2 text-center text-sm text-[#f0f0f0] tabular-nums focus:border-[#C8FF00] outline-none disabled:opacity-40"
+                    className="w-full bg-bg-tertiary border border-we-border rounded-[10px] px-2 py-2 text-center text-sm text-text-primary tabular-nums focus:border-accent outline-none disabled:opacity-40"
                     inputMode="numeric"
                   />
                 </div>
@@ -201,24 +201,24 @@ export default function ExerciseCard({
                   disabled={isCompleted || isCompleting || !set.weight_kg || !set.reps}
                   className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
                     isCompleted
-                      ? 'bg-[#C8FF00] shadow-lg shadow-[#C8FF00]/30'
+                      ? 'bg-accent shadow-lg shadow-accent/30'
                       : (set.weight_kg && set.reps)
-                        ? 'bg-[#2a2a2a] border-2 border-[#555555] hover:border-[#C8FF00]/60 active:bg-[#C8FF00]/20'
-                        : 'bg-[#1e1e1e] border border-[#2a2a2a]'
+                        ? 'bg-we-border border-2 border-we-border hover:border-accent/60 active:bg-accent/20'
+                        : 'bg-bg-secondary border border-we-border'
                   }`}
                 >
                   {isCompleting ? (
-                    <div className="w-3.5 h-3.5 border-2 border-[#888888] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-3.5 h-3.5 border-2 border-we-border border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <Check
                       size={15}
                       strokeWidth={isCompleted ? 3 : 2.5}
                       className={
                         isCompleted
-                          ? 'text-[#0f0f0f]'
+                          ? 'text-bg-primary'
                           : (set.weight_kg && set.reps)
-                            ? 'text-[#888888]'
-                            : 'text-[#3a3a3a]'
+                            ? 'text-text-secondary'
+                            : 'text-text-muted'
                       }
                     />
                   )}
@@ -228,7 +228,7 @@ export default function ExerciseCard({
                 {!isCompleted && exercise.sets.length > 1 && (
                   <button
                     onClick={() => onRemoveSet(exerciseIndex, setIndex)}
-                    className="w-6 h-6 flex items-center justify-center text-[#444444] hover:text-[#FF4B4B] transition-colors"
+                    className="w-6 h-6 flex items-center justify-center text-text-muted hover:text-we-danger transition-colors"
                   >
                     <Minus size={13} />
                   </button>
@@ -244,7 +244,7 @@ export default function ExerciseCard({
       <div className="px-4 pb-2">
         <button
           onClick={() => setShowRestPicker(!showRestPicker)}
-          className="text-xs text-[#555555] hover:text-[#888888] transition-colors"
+          className="text-xs text-text-muted hover:text-text-secondary transition-colors"
         >
           휴식 {selectedRest}초 {showRestPicker ? '▲' : '▼'}
         </button>
@@ -256,8 +256,8 @@ export default function ExerciseCard({
                 onClick={() => { setSelectedRest(s); setShowRestPicker(false) }}
                 className={`flex-1 py-1 rounded-[8px] text-xs font-medium transition-colors
                   ${selectedRest === s
-                    ? 'bg-[#C8FF00] text-[#0f0f0f]'
-                    : 'bg-[#242424] text-[#888888]'
+                    ? 'bg-accent text-bg-primary'
+                    : 'bg-bg-tertiary text-text-secondary'
                   }`}
               >
                 {s >= 60 ? `${s / 60}분` : `${s}초`}
@@ -270,7 +270,7 @@ export default function ExerciseCard({
       {/* + 세트 추가 */}
       <button
         onClick={() => onAddSet(exerciseIndex)}
-        className="w-full py-2.5 flex items-center justify-center gap-1 text-xs text-[#555555] hover:text-[#C8FF00] border-t border-[#2a2a2a] transition-colors active:bg-[#242424]"
+        className="w-full py-2.5 flex items-center justify-center gap-1 text-xs text-text-muted hover:text-accent border-t border-we-border transition-colors active:bg-bg-tertiary"
       >
         <Plus size={14} />
         세트 추가

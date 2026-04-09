@@ -9,18 +9,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // W.E 디자인 시스템
-        'bg-primary': '#0f0f0f',
-        'bg-secondary': '#1a1a1a',
-        'bg-tertiary': '#242424',
-        'accent': '#C8FF00',
-        'accent-dim': 'rgba(200,255,0,0.12)',
-        'we-danger': '#FF4B4B',
-        'we-success': '#00D67C',
-        'we-border': '#2a2a2a',
-        'text-primary': '#f0f0f0',
-        'text-secondary': '#888888',
-        'text-muted': '#555555',
+        // W.E 디자인 시스템 — CSS 변수 기반 (테마 전환 지원)
+        // rgb(var(--xxx-rgb) / <alpha-value>) 형태로 opacity 모디파이어 사용 가능
+        'bg-primary':    'rgb(var(--bg-primary-rgb) / <alpha-value>)',
+        'bg-secondary':  'rgb(var(--bg-secondary-rgb) / <alpha-value>)',
+        'bg-tertiary':   'rgb(var(--bg-tertiary-rgb) / <alpha-value>)',
+        'accent':        'rgb(var(--accent-rgb) / <alpha-value>)',
+        'accent-dim':    'rgb(var(--accent-rgb) / 0.12)',
+        'we-danger':     'rgb(var(--danger-rgb) / <alpha-value>)',
+        'we-success':    'rgb(var(--success-rgb) / <alpha-value>)',
+        'we-border':     'rgb(var(--border-rgb) / <alpha-value>)',
+        'text-primary':  'rgb(var(--text-primary-rgb) / <alpha-value>)',
+        'text-secondary':'rgb(var(--text-secondary-rgb) / <alpha-value>)',
+        'text-muted':    'rgb(var(--text-muted-rgb) / <alpha-value>)',
       },
       fontFamily: {
         pretendard: ['Pretendard Variable', 'Pretendard', '-apple-system', 'sans-serif'],

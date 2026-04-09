@@ -99,17 +99,17 @@ export default function TodayWorkouts({ date }: { date: string }) {
 
   if (loading) {
     return (
-      <div className="bg-[#1a1a1a] rounded-[16px] p-4 flex items-center justify-center h-20">
-        <div className="w-5 h-5 border-2 border-[#C8FF00] border-t-transparent rounded-full animate-spin" />
+      <div className="bg-bg-secondary rounded-[16px] p-4 flex items-center justify-center h-20">
+        <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   if (workouts.length === 0) {
     return (
-      <div className="bg-[#1a1a1a] rounded-[16px] p-5 text-center">
+      <div className="bg-bg-secondary rounded-[16px] p-5 text-center">
         <p className="text-3xl mb-2">🏋️</p>
-        <p className="text-sm text-[#555555]">이 날 운동 기록이 없습니다</p>
+        <p className="text-sm text-text-muted">이 날 운동 기록이 없습니다</p>
       </div>
     )
   }
@@ -120,9 +120,9 @@ export default function TodayWorkouts({ date }: { date: string }) {
   return (
     <div className="space-y-3">
       {displayed.map((w) => (
-        <div key={w.id} className="bg-[#1a1a1a] rounded-[16px] overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
-            <span className="text-xs text-[#888888]">
+        <div key={w.id} className="bg-bg-secondary rounded-[16px] overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-we-border">
+            <span className="text-xs text-text-secondary">
               {new Date(w.started_at).toLocaleTimeString('ko-KR', {
                 hour: '2-digit', minute: '2-digit',
               })}
@@ -130,14 +130,14 @@ export default function TodayWorkouts({ date }: { date: string }) {
             <div className="flex items-center gap-2">
               <Link
                 href={`/workout/${w.id}`}
-                className="text-xs text-[#C8FF00] flex items-center gap-0.5"
+                className="text-xs text-accent flex items-center gap-0.5"
               >
                 상세 <ChevronRight size={12} />
               </Link>
               <button
                 onClick={() => handleDelete(w.id)}
                 disabled={deleting === w.id}
-                className="text-[#555555] hover:text-[#FF4B4B] transition-colors p-1 disabled:opacity-40"
+                className="text-text-muted hover:text-we-danger transition-colors p-1 disabled:opacity-40"
               >
                 {deleting === w.id
                   ? <span className="text-xs">삭제 중</span>
@@ -150,26 +150,26 @@ export default function TodayWorkouts({ date }: { date: string }) {
           <Link href={`/workout/${w.id}`} className="block px-4 py-3">
             <div className="grid grid-cols-3 gap-3 mb-3">
               <div className="text-center">
-                <p className="text-base font-bold text-[#C8FF00] tabular-nums">
+                <p className="text-base font-bold text-accent tabular-nums">
                   {formatDuration(w.total_seconds)}
                 </p>
-                <p className="text-[10px] text-[#555555] mt-0.5">시간</p>
+                <p className="text-[10px] text-text-muted mt-0.5">시간</p>
               </div>
               <div className="text-center">
-                <p className="text-base font-bold text-[#f0f0f0] tabular-nums">
+                <p className="text-base font-bold text-text-primary tabular-nums">
                   {w.exercise_count}
                 </p>
-                <p className="text-[10px] text-[#555555] mt-0.5">종목</p>
+                <p className="text-[10px] text-text-muted mt-0.5">종목</p>
               </div>
               <div className="text-center">
-                <p className="text-base font-bold text-[#f0f0f0] tabular-nums">
+                <p className="text-base font-bold text-text-primary tabular-nums">
                   {w.total_volume.toLocaleString()}
                 </p>
-                <p className="text-[10px] text-[#555555] mt-0.5">볼륨(kg)</p>
+                <p className="text-[10px] text-text-muted mt-0.5">볼륨(kg)</p>
               </div>
             </div>
             {w.exercise_names.length > 0 && (
-              <p className="text-xs text-[#555555] truncate">
+              <p className="text-xs text-text-muted truncate">
                 {w.exercise_names.join(' · ')}
                 {w.exercise_count > 3 ? ` 외 ${w.exercise_count - 3}개` : ''}
               </p>
@@ -182,7 +182,7 @@ export default function TodayWorkouts({ date }: { date: string }) {
       {workouts.length > INITIAL_SHOW && (
         <button
           onClick={() => setShowAll(prev => !prev)}
-          className="w-full flex items-center justify-center gap-1.5 py-3 bg-[#1a1a1a] rounded-[16px] text-xs text-[#888888] border border-[#2a2a2a] active:bg-[#242424] transition-colors"
+          className="w-full flex items-center justify-center gap-1.5 py-3 bg-bg-secondary rounded-[16px] text-xs text-text-secondary border border-we-border active:bg-bg-tertiary transition-colors"
         >
           <ChevronDown
             size={14}

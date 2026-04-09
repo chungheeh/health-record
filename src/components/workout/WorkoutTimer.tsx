@@ -68,16 +68,16 @@ export default function WorkoutTimer({
   const restProgress = restTimer ? (restRemaining / restTimer.duration) : 0
 
   return (
-    <div className="sticky top-0 z-50 bg-[#1a1a1a] border-b border-[#2a2a2a] px-4 py-2.5">
+    <div className="sticky top-0 z-50 bg-bg-secondary border-b border-we-border px-4 py-2.5">
       <div className="flex items-center justify-between">
         {/* 왼쪽: 상태 + 타이머 */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold" style={{ color: isPaused ? '#FFB74D' : '#C8FF00' }}>
+          <span className="text-xs font-semibold" style={{ color: isPaused ? '#FFB74D' : 'var(--accent)' }}>
             {isPaused ? '⏸ 일시정지' : '🔥 운동 중'}
           </span>
           <span
             className="tabular-nums text-lg font-bold"
-            style={{ color: isPaused ? '#888888' : '#f0f0f0' }}
+            style={{ color: isPaused ? 'var(--text-secondary)' : 'var(--text-primary)' }}
           >
             {formatTime(elapsed)}
           </span>
@@ -91,11 +91,11 @@ export default function WorkoutTimer({
             className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-[8px] active:scale-95 transition-all"
             style={
               isPaused
-                ? { backgroundColor: 'rgba(200,255,0,0.15)', border: '1.5px solid #C8FF00', color: '#C8FF00' }
-                : { backgroundColor: '#2a2a2a', border: '1.5px solid #3a3a3a', color: '#f0f0f0' }
+                ? { backgroundColor: 'rgba(200,255,0,0.15)', border: '1.5px solid var(--accent)', color: 'var(--accent)' }
+                : { backgroundColor: 'var(--border)', border: '1.5px solid var(--border)', color: 'var(--text-primary)' }
             }
           >
-            {isPaused ? <Play size={12} fill="#C8FF00" /> : <Pause size={12} />}
+            {isPaused ? <Play size={12} fill="var(--accent)" /> : <Pause size={12} />}
             {isPaused ? '재개' : '일시정지'}
           </button>
 
@@ -103,7 +103,7 @@ export default function WorkoutTimer({
           <button
             onClick={onFinish}
             className="text-xs font-semibold px-3 py-1.5 rounded-[8px] active:scale-95 transition-all"
-            style={{ backgroundColor: 'rgba(255,75,75,0.15)', border: '1.5px solid rgba(255,75,75,0.4)', color: '#FF4B4B' }}
+            style={{ backgroundColor: 'rgba(255,75,75,0.15)', border: '1.5px solid rgba(255,75,75,0.4)', color: 'var(--danger)' }}
           >
             종료
           </button>
@@ -114,16 +114,16 @@ export default function WorkoutTimer({
       {restTimer && restRemaining > 0 && (
         <div className="mt-2">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-[#888888]">
-              휴식 <span className="tabular-nums text-[#f0f0f0] font-semibold">{formatTime(restRemaining)}</span>
+            <span className="text-xs text-text-secondary">
+              휴식 <span className="tabular-nums text-text-primary font-semibold">{formatTime(restRemaining)}</span>
             </span>
-            <button onClick={onCancelRest} className="text-[#555555] hover:text-[#888888]">
+            <button onClick={onCancelRest} className="text-text-muted hover:text-text-secondary">
               <X size={14} />
             </button>
           </div>
-          <div className="h-1.5 bg-[#242424] rounded-full overflow-hidden">
+          <div className="h-1.5 bg-bg-tertiary rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#C8FF00] rounded-full transition-all duration-1000"
+              className="h-full bg-accent rounded-full transition-all duration-1000"
               style={{ width: `${restProgress * 100}%` }}
             />
           </div>

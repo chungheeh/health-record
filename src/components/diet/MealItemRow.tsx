@@ -38,18 +38,18 @@ export default function MealItemRow({ item, date, mealType, onDeleted }: Props) 
     <div className="px-4 py-3 flex items-center gap-3">
       {/* 식품 정보 */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-[#f0f0f0] truncate">{item.food_name}</p>
+        <p className="text-sm text-text-primary truncate">{item.food_name}</p>
         {item.amount_g && (
-          <p className="text-xs text-[#555555] mt-0.5 tabular-nums">{item.amount_g}g</p>
+          <p className="text-xs text-text-muted mt-0.5 tabular-nums">{item.amount_g}g</p>
         )}
       </div>
 
       {/* 칼로리 + 매크로 */}
       <div className="text-right shrink-0">
-        <p className="text-sm font-medium text-[#f0f0f0] tabular-nums">
+        <p className="text-sm font-medium text-text-primary tabular-nums">
           {Math.round(item.calories ?? 0)}kcal
         </p>
-        <p className="text-xs text-[#555555] tabular-nums">
+        <p className="text-xs text-text-muted tabular-nums">
           P{Math.round(item.protein_g ?? 0)} C{Math.round(item.carbs_g ?? 0)} F{Math.round(item.fat_g ?? 0)}
         </p>
       </div>
@@ -58,14 +58,14 @@ export default function MealItemRow({ item, date, mealType, onDeleted }: Props) 
       <div className="flex items-center gap-1 shrink-0">
         <Link
           href={`/diet/add?date=${date}&meal=${encodeURIComponent(mealType)}&editId=${item.id}`}
-          className="p-1.5 text-[#555555] hover:text-[#C8FF00] transition-colors"
+          className="p-1.5 text-text-muted hover:text-accent transition-colors"
         >
           <Pencil size={13} />
         </Link>
         <button
           onClick={handleDelete}
           disabled={deleting}
-          className="p-1.5 text-[#555555] hover:text-[#FF4B4B] transition-colors disabled:opacity-40"
+          className="p-1.5 text-text-muted hover:text-we-danger transition-colors disabled:opacity-40"
         >
           {deleting ? (
             <span className="text-[10px]">삭제 중</span>

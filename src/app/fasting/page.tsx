@@ -82,12 +82,12 @@ export default function FastingPage() {
   const strokeDashoffset = circumference * (1 - progress)
 
   return (
-    <main className="min-h-screen bg-[#0f0f0f]">
-      <header className="sticky top-0 z-50 bg-[#0f0f0f] border-b border-[#2a2a2a] px-4 h-14 flex items-center gap-3">
-        <Link href="/diet" className="text-[#888888]">
+    <main className="min-h-screen bg-bg-primary">
+      <header className="sticky top-0 z-50 bg-bg-primary border-b border-we-border px-4 h-14 flex items-center gap-3">
+        <Link href="/diet" className="text-text-secondary">
           <ChevronLeft size={24} />
         </Link>
-        <h1 className="font-semibold text-[#f0f0f0] flex-1">간헐적 단식</h1>
+        <h1 className="font-semibold text-text-primary flex-1">간헐적 단식</h1>
       </header>
 
       <div className="px-4 pt-6 pb-32 space-y-6">
@@ -95,26 +95,26 @@ export default function FastingPage() {
         {/* 모드 선택 (단식 중 아닐 때만) */}
         {!session && (
           <div className="space-y-2">
-            <p className="text-xs text-[#888888] font-medium uppercase tracking-wider">단식 모드 선택</p>
+            <p className="text-xs text-text-secondary font-medium uppercase tracking-wider">단식 모드 선택</p>
             {FASTING_MODES.map(mode => (
               <button
                 key={mode.label}
                 onClick={() => setSelectedMode(mode)}
                 className="w-full flex items-center justify-between px-4 py-3.5 rounded-[14px] transition-all text-left"
                 style={{
-                  backgroundColor: selectedMode.label === mode.label ? 'rgba(200,255,0,0.08)' : '#1a1a1a',
-                  border: `1.5px solid ${selectedMode.label === mode.label ? '#C8FF00' : '#2a2a2a'}`,
+                  backgroundColor: selectedMode.label === mode.label ? 'rgba(200,255,0,0.08)' : 'var(--bg-secondary)',
+                  border: `1.5px solid ${selectedMode.label === mode.label ? 'var(--accent)' : 'var(--border)'}`,
                 }}
               >
                 <div>
-                  <p className="font-bold text-[#f0f0f0]">{mode.label}</p>
-                  <p className="text-xs text-[#888888] mt-0.5">{mode.desc}</p>
+                  <p className="font-bold text-text-primary">{mode.label}</p>
+                  <p className="text-xs text-text-secondary mt-0.5">{mode.desc}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold" style={{ color: selectedMode.label === mode.label ? '#C8FF00' : '#555555' }}>
+                  <p className="text-sm font-semibold" style={{ color: selectedMode.label === mode.label ? 'var(--accent)' : 'var(--text-muted)' }}>
                     단식 {mode.fastHours}h
                   </p>
-                  <p className="text-xs text-[#555555]">식사 {mode.eatHours}h</p>
+                  <p className="text-xs text-text-muted">식사 {mode.eatHours}h</p>
                 </div>
               </button>
             ))}
@@ -126,11 +126,11 @@ export default function FastingPage() {
           <div className="flex flex-col items-center py-4">
             <div className="relative w-56 h-56">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 220 220">
-                <circle cx="110" cy="110" r="100" fill="none" stroke="#242424" strokeWidth="12" />
+                <circle cx="110" cy="110" r="100" fill="none" stroke="var(--bg-tertiary)" strokeWidth="12" />
                 <circle
                   cx="110" cy="110" r="100"
                   fill="none"
-                  stroke={isComplete ? '#00D67C' : '#C8FF00'}
+                  stroke={isComplete ? 'var(--success)' : 'var(--accent)'}
                   strokeWidth="12"
                   strokeLinecap="round"
                   strokeDasharray={circumference}
@@ -139,19 +139,19 @@ export default function FastingPage() {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <p className="text-xs text-[#888888] mb-1">{activeMode.label} 단식</p>
+                <p className="text-xs text-text-secondary mb-1">{activeMode.label} 단식</p>
                 {isComplete ? (
                   <>
-                    <p className="text-2xl font-bold text-[#00D67C]">완료! 🎉</p>
-                    <p className="text-xs text-[#888888] mt-1">식사 시간입니다</p>
+                    <p className="text-2xl font-bold text-we-success">완료! 🎉</p>
+                    <p className="text-xs text-text-secondary mt-1">식사 시간입니다</p>
                   </>
                 ) : (
                   <>
-                    <p className="text-3xl font-bold tabular-nums text-[#f0f0f0]">
+                    <p className="text-3xl font-bold tabular-nums text-text-primary">
                       {formatDuration(elapsedMs)}
                     </p>
-                    <p className="text-xs text-[#888888] mt-1">경과</p>
-                    <p className="text-sm font-semibold tabular-nums mt-2" style={{ color: '#C8FF00' }}>
+                    <p className="text-xs text-text-secondary mt-1">경과</p>
+                    <p className="text-sm font-semibold tabular-nums mt-2" style={{ color: 'var(--accent)' }}>
                       -{formatDuration(remainingMs)} 남음
                     </p>
                   </>
@@ -162,15 +162,15 @@ export default function FastingPage() {
             {/* 시작/종료 시각 */}
             <div className="flex gap-6 mt-6">
               <div className="text-center">
-                <p className="text-[10px] text-[#555555]">단식 시작</p>
-                <p className="text-sm font-semibold text-[#f0f0f0]">
+                <p className="text-[10px] text-text-muted">단식 시작</p>
+                <p className="text-sm font-semibold text-text-primary">
                   {new Date(session.startMs).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
               {eatWindowEnd && (
                 <div className="text-center">
-                  <p className="text-[10px] text-[#555555]">식사 시작</p>
-                  <p className="text-sm font-semibold" style={{ color: isComplete ? '#00D67C' : '#C8FF00' }}>
+                  <p className="text-[10px] text-text-muted">식사 시작</p>
+                  <p className="text-sm font-semibold" style={{ color: isComplete ? 'var(--success)' : 'var(--accent)' }}>
                     {eatWindowEnd.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
@@ -178,21 +178,21 @@ export default function FastingPage() {
             </div>
 
             {/* 진행률 */}
-            <div className="w-full mt-6 bg-[#1a1a1a] rounded-[16px] p-4">
-              <div className="flex justify-between text-xs text-[#888888] mb-2">
+            <div className="w-full mt-6 bg-bg-secondary rounded-[16px] p-4">
+              <div className="flex justify-between text-xs text-text-secondary mb-2">
                 <span>진행률</span>
                 <span>{Math.round(progress * 100)}%</span>
               </div>
-              <div className="h-2 bg-[#242424] rounded-full overflow-hidden">
+              <div className="h-2 bg-bg-tertiary rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all"
                   style={{
                     width: `${progress * 100}%`,
-                    backgroundColor: isComplete ? '#00D67C' : '#C8FF00',
+                    backgroundColor: isComplete ? 'var(--success)' : 'var(--accent)',
                   }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] text-[#444] mt-1.5">
+              <div className="flex justify-between text-[10px] text-text-muted mt-1.5">
                 <span>0h</span>
                 <span>{session.fastHours}h</span>
               </div>
@@ -202,8 +202,8 @@ export default function FastingPage() {
 
         {/* 단식 효과 정보 */}
         {session && (
-          <div className="bg-[#1a1a1a] rounded-[16px] p-4 space-y-3">
-            <p className="text-xs font-semibold text-[#888888] uppercase tracking-wider">단식 효과 타임라인</p>
+          <div className="bg-bg-secondary rounded-[16px] p-4 space-y-3">
+            <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider">단식 효과 타임라인</p>
             {[
               { h: 4, label: '혈당 안정화', icon: '📉', active: elapsedMs >= 4 * 3600000 },
               { h: 8, label: '케톤 생성 시작', icon: '🔥', active: elapsedMs >= 8 * 3600000 },
@@ -214,12 +214,12 @@ export default function FastingPage() {
               <div key={item.h} className="flex items-center gap-3">
                 <span className={`text-lg ${item.active ? '' : 'grayscale opacity-30'}`}>{item.icon}</span>
                 <div className="flex-1">
-                  <p className={`text-sm font-medium ${item.active ? 'text-[#f0f0f0]' : 'text-[#555555]'}`}>
+                  <p className={`text-sm font-medium ${item.active ? 'text-text-primary' : 'text-text-muted'}`}>
                     {item.h}시간: {item.label}
                   </p>
                 </div>
                 {item.active && (
-                  <span className="text-[10px] text-[#C8FF00] bg-[#C8FF00]/10 px-2 py-0.5 rounded-full">달성</span>
+                  <span className="text-[10px] text-accent bg-accent/10 px-2 py-0.5 rounded-full">달성</span>
                 )}
               </div>
             ))}
@@ -231,7 +231,7 @@ export default function FastingPage() {
           {!session ? (
             <button
               onClick={startFasting}
-              className="w-full py-4 bg-[#C8FF00] text-[#0f0f0f] font-bold rounded-[16px] flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+              className="w-full py-4 bg-accent text-bg-primary font-bold rounded-[16px] flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
             >
               <Play size={18} fill="currentColor" />
               {selectedMode.label} 단식 시작
@@ -239,14 +239,14 @@ export default function FastingPage() {
           ) : (
             <div className="space-y-2">
               {isComplete && (
-                <div className="flex items-center gap-2 bg-[#00D67C]/10 border border-[#00D67C]/30 rounded-[12px] px-4 py-3">
-                  <Bell size={16} className="text-[#00D67C]" />
-                  <p className="text-sm text-[#00D67C] font-medium">단식 완료! 이제 식사해도 됩니다 🎉</p>
+                <div className="flex items-center gap-2 bg-we-success/10 border border-we-success/30 rounded-[12px] px-4 py-3">
+                  <Bell size={16} className="text-we-success" />
+                  <p className="text-sm text-we-success font-medium">단식 완료! 이제 식사해도 됩니다 🎉</p>
                 </div>
               )}
               <button
                 onClick={stopFasting}
-                className="w-full py-4 bg-[#1a1a1a] border border-[#FF4B4B]/30 text-[#FF4B4B] font-bold rounded-[16px] flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                className="w-full py-4 bg-bg-secondary border border-we-danger/30 text-we-danger font-bold rounded-[16px] flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
               >
                 <Square size={16} fill="currentColor" />
                 단식 종료

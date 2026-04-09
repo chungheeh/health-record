@@ -203,7 +203,7 @@ export default function WorkoutNewPage() {
   const muscleGroups = Array.from(new Set(exercises.map(e => e.muscle_group)))
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f]">
+    <div className="min-h-screen bg-bg-primary">
 
       {/* 동기부여 팝업 */}
       <AnimatePresence>
@@ -216,14 +216,14 @@ export default function WorkoutNewPage() {
               initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-              className="bg-[#1a1a1a] rounded-[24px] p-8 text-center w-full max-w-sm border border-[#2a2a2a]"
+              className="bg-bg-secondary rounded-[24px] p-8 text-center w-full max-w-sm border border-we-border"
             >
               <p className="text-6xl mb-4">{motivationMsg.emoji}</p>
-              <p className="text-2xl font-bold text-[#C8FF00] mb-2">{motivationMsg.msg}</p>
-              <p className="text-sm text-[#888888]">{motivationMsg.sub}</p>
+              <p className="text-2xl font-bold text-accent mb-2">{motivationMsg.msg}</p>
+              <p className="text-sm text-text-secondary">{motivationMsg.sub}</p>
               <div className="mt-6 flex justify-center gap-1">
                 {[0,1,2].map(i => (
-                  <motion.div key={i} className="w-2 h-2 rounded-full bg-[#C8FF00]"
+                  <motion.div key={i} className="w-2 h-2 rounded-full bg-accent"
                     animate={{ opacity: [0.3, 1, 0.3] }}
                     transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.3 }}
                   />
@@ -251,18 +251,18 @@ export default function WorkoutNewPage() {
 
       {/* 준비 중 헤더 */}
       {isSetup && (
-        <header className="sticky top-0 z-50 bg-[#0f0f0f] border-b border-[#2a2a2a] px-4 h-14 flex items-center justify-between">
+        <header className="sticky top-0 z-50 bg-bg-primary border-b border-we-border px-4 h-14 flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-sm font-semibold text-[#f0f0f0]">운동 준비</span>
-            <span className="text-[10px] text-[#555555]">종목을 추가하고 시작하세요</span>
+            <span className="text-sm font-semibold text-text-primary">운동 준비</span>
+            <span className="text-[10px] text-text-muted">종목을 추가하고 시작하세요</span>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={handleCancel}
-              className="px-3 py-1.5 rounded-[8px] text-xs font-medium text-[#888888] bg-[#242424] active:scale-95 transition-transform">
+              className="px-3 py-1.5 rounded-[8px] text-xs font-medium text-text-secondary bg-bg-tertiary active:scale-95 transition-transform">
               취소
             </button>
             <button onClick={beginTimer}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-bold bg-[#C8FF00] text-[#0f0f0f] active:scale-95 transition-transform shadow-md shadow-[#C8FF00]/20">
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-bold bg-accent text-bg-primary active:scale-95 transition-transform shadow-md shadow-accent/20">
               ▶ 운동 시작
             </button>
           </div>
@@ -273,17 +273,17 @@ export default function WorkoutNewPage() {
       {!isActive && !redirecting && (
         <div className="flex flex-col items-center justify-center min-h-screen px-6 gap-6">
           <div className="text-center">
-            <div className="w-20 h-20 rounded-full bg-[#C8FF00]/10 border-2 border-[#C8FF00]/30 flex items-center justify-center mx-auto mb-4">
-              <Dumbbell size={36} className="text-[#C8FF00]" />
+            <div className="w-20 h-20 rounded-full bg-accent/10 border-2 border-accent/30 flex items-center justify-center mx-auto mb-4">
+              <Dumbbell size={36} className="text-accent" />
             </div>
-            <h1 className="text-2xl font-bold text-[#f0f0f0] mb-2">운동 시작</h1>
-            <p className="text-[#888888] text-sm">오늘도 최선을 다해봐요 💪</p>
+            <h1 className="text-2xl font-bold text-text-primary mb-2">운동 시작</h1>
+            <p className="text-text-secondary text-sm">오늘도 최선을 다해봐요 💪</p>
           </div>
           <button onClick={handleStart} disabled={isLoading}
-            className="w-full max-w-xs bg-[#C8FF00] text-[#0f0f0f] font-bold text-lg rounded-[16px] py-5 active:scale-95 transition-transform disabled:opacity-50">
+            className="w-full max-w-xs bg-accent text-bg-primary font-bold text-lg rounded-[16px] py-5 active:scale-95 transition-transform disabled:opacity-50">
             {isLoading ? '준비 중...' : '운동 준비하기'}
           </button>
-          <button onClick={() => router.back()} className="text-[#555555] text-sm">취소</button>
+          <button onClick={() => router.back()} className="text-text-muted text-sm">취소</button>
         </div>
       )}
 
@@ -291,11 +291,11 @@ export default function WorkoutNewPage() {
       {isActive && (
         <div className="px-4 pt-4 pb-8">
           {session.exercises.length === 0 ? (
-            <div className="text-center py-16 text-[#555555]">
+            <div className="text-center py-16 text-text-muted">
               <p className="text-4xl mb-3">🏋️</p>
               <p className="text-sm mb-4">운동 종목을 추가해보세요</p>
               <button onClick={() => setShowSearch(true)}
-                className="bg-[#C8FF00] text-[#0f0f0f] font-bold px-6 py-3 rounded-[12px] text-sm active:scale-95 transition-transform">
+                className="bg-accent text-bg-primary font-bold px-6 py-3 rounded-[12px] text-sm active:scale-95 transition-transform">
                 종목 추가하기
               </button>
             </div>
@@ -319,7 +319,7 @@ export default function WorkoutNewPage() {
 
           {session.exercises.length > 0 && (
             <button onClick={() => setShowSearch(true)}
-              className="mt-4 w-full bg-[#1a1a1a] border border-dashed border-[#2a2a2a] rounded-[16px] py-4 text-[#888888] text-sm flex items-center justify-center gap-2 active:bg-[#242424] transition-colors">
+              className="mt-4 w-full bg-bg-secondary border border-dashed border-we-border rounded-[16px] py-4 text-text-secondary text-sm flex items-center justify-center gap-2 active:bg-bg-tertiary transition-colors">
               <Plus size={16} />종목 추가하기
             </button>
           )}
@@ -327,7 +327,7 @@ export default function WorkoutNewPage() {
           {isTimerRunning && (
             <button onClick={handleFinish}
               disabled={finishing}
-              className="mt-6 w-full bg-[#1a1a1a] border border-[#2a2a2a] text-[#888888] font-medium rounded-[12px] py-3 text-sm active:scale-[0.98] transition-transform disabled:opacity-40">
+              className="mt-6 w-full bg-bg-secondary border border-we-border text-text-secondary font-medium rounded-[12px] py-3 text-sm active:scale-[0.98] transition-transform disabled:opacity-40">
               {finishing ? '저장 중...' : '운동 종료하기'}
             </button>
           )}
@@ -345,41 +345,41 @@ export default function WorkoutNewPage() {
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="bg-[#1a1a1a] rounded-t-[24px] max-h-[92vh] flex flex-col"
+              className="bg-bg-secondary rounded-t-[24px] max-h-[92vh] flex flex-col"
             >
               {/* 핸들 */}
               <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 bg-[#2a2a2a] rounded-full" />
+                <div className="w-10 h-1 bg-we-border rounded-full" />
               </div>
 
               {/* 헤더 */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-we-border">
                 <div>
-                  <h3 className="font-semibold text-[#f0f0f0]">운동 선택</h3>
+                  <h3 className="font-semibold text-text-primary">운동 선택</h3>
                   {selectedExercises.length > 0 && (
-                    <p className="text-xs text-[#C8FF00]">{selectedExercises.length}개 선택됨</p>
+                    <p className="text-xs text-accent">{selectedExercises.length}개 선택됨</p>
                   )}
                 </div>
-                <button onClick={() => { setShowSearch(false); setShowCustomForm(false); setSelectedExercises([]) }} className="text-[#555555] p-1">
+                <button onClick={() => { setShowSearch(false); setShowCustomForm(false); setSelectedExercises([]) }} className="text-text-muted p-1">
                   <X size={20} />
                 </button>
               </div>
 
               {/* 검색창 */}
               <div className="px-4 pt-3 pb-2">
-                <div className="flex items-center gap-2 bg-[#242424] rounded-[12px] px-3 border border-[#2a2a2a] focus-within:border-[#C8FF00]">
-                  <Search size={16} className="text-[#555555]" />
+                <div className="flex items-center gap-2 bg-bg-tertiary rounded-[12px] px-3 border border-we-border focus-within:border-accent">
+                  <Search size={16} className="text-text-muted" />
                   <input
                     type="text"
                     placeholder="운동 이름 검색..."
                     value={searchQuery}
                     onChange={e => { setSearchQuery(e.target.value); setShowCustomForm(false) }}
-                    className="flex-1 bg-transparent py-3 text-sm text-[#f0f0f0] outline-none placeholder:text-[#555555]"
+                    className="flex-1 bg-transparent py-3 text-sm text-text-primary outline-none placeholder:text-text-muted"
                     autoFocus
                   />
                   {searchQuery && (
                     <button onClick={() => setSearchQuery('')}>
-                      <X size={14} className="text-[#555555]" />
+                      <X size={14} className="text-text-muted" />
                     </button>
                   )}
                 </div>
@@ -387,15 +387,15 @@ export default function WorkoutNewPage() {
 
               {/* 카테고리 탭 (검색 중엔 숨김) */}
               {!searchQuery && (
-                <div className="flex mx-4 mb-2 bg-[#242424] rounded-[10px] p-0.5">
+                <div className="flex mx-4 mb-2 bg-bg-tertiary rounded-[10px] p-0.5">
                   {(['free', 'machine'] as const).map(tab => (
                     <button
                       key={tab}
                       onClick={() => { setCategoryTab(tab); setShowCustomForm(false) }}
                       className={`flex-1 py-2 rounded-[8px] text-xs font-semibold transition-colors ${
                         categoryTab === tab
-                          ? 'bg-[#C8FF00] text-[#0f0f0f]'
-                          : 'text-[#555555]'
+                          ? 'bg-accent text-bg-primary'
+                          : 'text-text-muted'
                       }`}
                     >
                       {tab === 'free' ? '🏋️ 프리웨이트' : '⚙️ 머신'}
@@ -414,8 +414,8 @@ export default function WorkoutNewPage() {
                         onClick={() => setSelectedBrand(brand)}
                         className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap ${
                           selectedBrand === brand
-                            ? 'bg-[#C8FF00] text-[#0f0f0f]'
-                            : 'bg-[#242424] text-[#888888] border border-[#2a2a2a]'
+                            ? 'bg-accent text-bg-primary'
+                            : 'bg-bg-tertiary text-text-secondary border border-we-border'
                         }`}
                       >
                         {brand}
@@ -429,10 +429,10 @@ export default function WorkoutNewPage() {
               <div className="overflow-y-auto flex-1 pb-2">
                 {searchQuery && exercises.length === 0 && !showCustomForm && (
                   <div className="px-4 py-6 text-center">
-                    <p className="text-sm text-[#555555] mb-3">"{searchQuery}" 검색 결과가 없어요</p>
+                    <p className="text-sm text-text-muted mb-3">"{searchQuery}" 검색 결과가 없어요</p>
                     <button
                       onClick={() => { setCustomName(searchQuery); setShowCustomForm(true) }}
-                      className="bg-[#C8FF00] text-[#0f0f0f] font-bold px-5 py-2.5 rounded-[10px] text-sm active:scale-95 transition-transform"
+                      className="bg-accent text-bg-primary font-bold px-5 py-2.5 rounded-[10px] text-sm active:scale-95 transition-transform"
                     >
                       + "{searchQuery}" 직접 추가하기
                     </button>
@@ -441,7 +441,7 @@ export default function WorkoutNewPage() {
 
                 {/* 머신 탭: 브랜드 정보 표시 */}
                 {!searchQuery && categoryTab === 'machine' && exercises.length > 0 && (
-                  <p className="px-4 py-1.5 text-[10px] text-[#444]">
+                  <p className="px-4 py-1.5 text-[10px] text-text-muted">
                     {selectedBrand} · {exercises.length}개 기구
                   </p>
                 )}
@@ -452,7 +452,7 @@ export default function WorkoutNewPage() {
                   if (!groupExercises.length) return null
                   return (
                     <div key={group}>
-                      <p className="px-4 py-2 text-xs font-semibold text-[#555555] bg-[#242424] sticky top-0">
+                      <p className="px-4 py-2 text-xs font-semibold text-text-muted bg-bg-tertiary sticky top-0">
                         {group} ({groupExercises.length})
                       </p>
                       {groupExercises.map(ex => {
@@ -461,18 +461,18 @@ export default function WorkoutNewPage() {
                           <button
                             key={ex.id}
                             onClick={() => toggleSelectExercise(ex)}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 border-b border-[#2a2a2a] transition-colors text-left ${isSelected ? 'bg-[#C8FF00]/10' : 'hover:bg-[#242424] active:bg-[#242424]'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 border-b border-we-border transition-colors text-left ${isSelected ? 'bg-accent/10' : 'hover:bg-bg-tertiary active:bg-bg-tertiary'}`}
                           >
-                            <div className={`w-5 h-5 rounded-[6px] flex items-center justify-center flex-shrink-0 border-2 transition-all ${isSelected ? 'bg-[#C8FF00] border-[#C8FF00]' : 'border-[#444444]'}`}>
-                              {isSelected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="#0f0f0f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                            <div className={`w-5 h-5 rounded-[6px] flex items-center justify-center flex-shrink-0 border-2 transition-all ${isSelected ? 'bg-accent border-accent' : 'border-we-border'}`}>
+                              {isSelected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="var(--bg-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <span className="text-sm text-[#f0f0f0] block truncate">{ex.name}</span>
+                              <span className="text-sm text-text-primary block truncate">{ex.name}</span>
                               {searchQuery && ex.brand && (
-                                <span className="text-[10px] text-[#C8FF00]">{ex.brand}</span>
+                                <span className="text-[10px] text-accent">{ex.brand}</span>
                               )}
                             </div>
-                            <span className="text-xs text-[#555555] shrink-0">{ex.equipment}</span>
+                            <span className="text-xs text-text-muted shrink-0">{ex.equipment}</span>
                           </button>
                         )
                       })}
@@ -483,7 +483,7 @@ export default function WorkoutNewPage() {
                 {!showCustomForm && (
                   <button
                     onClick={() => { setCustomName(searchQuery); setShowCustomForm(true) }}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-4 text-sm text-[#555555] hover:text-[#C8FF00] transition-colors border-t border-[#2a2a2a] mt-2"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-4 text-sm text-text-muted hover:text-accent transition-colors border-t border-we-border mt-2"
                   >
                     <Plus size={15} />
                     찾는 운동이 없나요? 직접 추가하기
@@ -492,10 +492,10 @@ export default function WorkoutNewPage() {
 
                 {/* 선택 추가 버튼 */}
                 {selectedExercises.length > 0 && (
-                  <div className="sticky bottom-0 px-4 pb-4 pt-2 bg-gradient-to-t from-[#1a1a1a] to-transparent">
+                  <div className="sticky bottom-0 px-4 pb-4 pt-2 bg-gradient-to-t from-bg-secondary to-transparent">
                     <button
                       onClick={handleAddSelected}
-                      className="w-full bg-[#C8FF00] text-[#0f0f0f] font-bold py-3.5 rounded-[14px] text-sm active:scale-[0.98] transition-transform shadow-lg shadow-[#C8FF00]/20"
+                      className="w-full bg-accent text-bg-primary font-bold py-3.5 rounded-[14px] text-sm active:scale-[0.98] transition-transform shadow-lg shadow-accent/20"
                     >
                       {selectedExercises.length}개 종목 추가하기
                     </button>
@@ -507,45 +507,45 @@ export default function WorkoutNewPage() {
                   {showCustomForm && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                      className="mx-4 my-3 bg-[#242424] rounded-[14px] p-4 border border-[#2a2a2a]"
+                      className="mx-4 my-3 bg-bg-tertiary rounded-[14px] p-4 border border-we-border"
                     >
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-semibold text-[#f0f0f0]">운동 직접 추가</span>
-                        <button onClick={() => setShowCustomForm(false)} className="text-[#555555]"><X size={16} /></button>
+                        <span className="text-sm font-semibold text-text-primary">운동 직접 추가</span>
+                        <button onClick={() => setShowCustomForm(false)} className="text-text-muted"><X size={16} /></button>
                       </div>
                       <div className="mb-3">
-                        <label className="text-xs text-[#888888] mb-1 block">운동 이름 *</label>
+                        <label className="text-xs text-text-secondary mb-1 block">운동 이름 *</label>
                         <input
                           type="text" value={customName} onChange={e => setCustomName(e.target.value)}
                           placeholder="예) 케이블 크런치"
-                          className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-[8px] px-3 py-2.5 text-sm text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]"
+                          className="w-full bg-bg-secondary border border-we-border rounded-[8px] px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent placeholder:text-text-muted"
                           autoFocus
                         />
                       </div>
                       <div className="mb-3">
-                        <label className="text-xs text-[#888888] mb-1 block">근육 부위 *</label>
+                        <label className="text-xs text-text-secondary mb-1 block">근육 부위 *</label>
                         <div className="relative">
                           <select value={customMuscle} onChange={e => setCustomMuscle(e.target.value)}
-                            className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-[8px] px-3 py-2.5 text-sm text-[#f0f0f0] outline-none focus:border-[#C8FF00] appearance-none">
-                            {MUSCLE_GROUPS.map(m => <option key={m} value={m} style={{ backgroundColor: '#1a1a1a' }}>{m}</option>)}
+                            className="w-full bg-bg-secondary border border-we-border rounded-[8px] px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent appearance-none">
+                            {MUSCLE_GROUPS.map(m => <option key={m} value={m} style={{ backgroundColor: 'var(--bg-secondary)' }}>{m}</option>)}
                           </select>
-                          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555555] pointer-events-none" />
+                          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                         </div>
                       </div>
                       <div className="mb-4">
-                        <label className="text-xs text-[#888888] mb-1 block">기구</label>
+                        <label className="text-xs text-text-secondary mb-1 block">기구</label>
                         <div className="relative">
                           <select value={customEquipment} onChange={e => setCustomEquipment(e.target.value)}
-                            className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-[8px] px-3 py-2.5 text-sm text-[#f0f0f0] outline-none focus:border-[#C8FF00] appearance-none">
+                            className="w-full bg-bg-secondary border border-we-border rounded-[8px] px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent appearance-none">
                             {['바벨', '덤벨', '케이블', '머신', '맨몸', '기타'].map(e => (
-                              <option key={e} value={e} style={{ backgroundColor: '#1a1a1a' }}>{e}</option>
+                              <option key={e} value={e} style={{ backgroundColor: 'var(--bg-secondary)' }}>{e}</option>
                             ))}
                           </select>
-                          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555555] pointer-events-none" />
+                          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                         </div>
                       </div>
                       <button onClick={handleAddCustom} disabled={!customName.trim() || customAdding}
-                        className="w-full bg-[#C8FF00] text-[#0f0f0f] font-bold py-3 rounded-[10px] text-sm active:scale-95 transition-transform disabled:opacity-40">
+                        className="w-full bg-accent text-bg-primary font-bold py-3 rounded-[10px] text-sm active:scale-95 transition-transform disabled:opacity-40">
                         {customAdding ? '추가 중...' : '추가하고 세트 기록하기'}
                       </button>
                     </motion.div>

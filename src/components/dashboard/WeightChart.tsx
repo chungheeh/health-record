@@ -30,14 +30,14 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
     return (
       <div
         style={{
-          backgroundColor: '#242424',
-          border: '1px solid #2a2a2a',
+          backgroundColor: 'var(--bg-tertiary)',
+          border: '1px solid var(--border)',
           borderRadius: '8px',
           padding: '8px 12px',
         }}
       >
-        <p style={{ color: '#888888', fontSize: '12px', margin: 0 }}>{label}</p>
-        <p style={{ color: '#C8FF00', fontSize: '14px', fontWeight: 600, margin: '2px 0 0' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>{label}</p>
+        <p style={{ color: 'var(--accent)', fontSize: '14px', fontWeight: 600, margin: '2px 0 0' }}>
           {payload[0].value} kg
         </p>
       </div>
@@ -57,16 +57,16 @@ export default function WeightChart({ data }: WeightChartProps) {
     <div style={{ width: '100%', height: 200 }}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis
             dataKey="label"
-            tick={{ fill: '#888888', fontSize: 11 }}
-            axisLine={{ stroke: '#2a2a2a' }}
+            tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
+            axisLine={{ stroke: 'var(--border)' }}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
-            tick={{ fill: '#888888', fontSize: 11 }}
+            tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             domain={['auto', 'auto']}
@@ -76,10 +76,10 @@ export default function WeightChart({ data }: WeightChartProps) {
           <Line
             type="monotone"
             dataKey="weight"
-            stroke="#C8FF00"
+            stroke="var(--accent)"
             strokeWidth={2}
-            dot={{ fill: '#C8FF00', r: 3, strokeWidth: 0 }}
-            activeDot={{ fill: '#C8FF00', r: 5, strokeWidth: 0 }}
+            dot={{ fill: 'var(--accent)', r: 3, strokeWidth: 0 }}
+            activeDot={{ fill: 'var(--accent)', r: 5, strokeWidth: 0 }}
           />
         </LineChart>
       </ResponsiveContainer>

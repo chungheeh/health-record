@@ -22,7 +22,7 @@ export default function Card({
   return (
     <div
       className={[
-        'bg-[#1a1a1a] rounded-[16px] overflow-hidden',
+        'bg-bg-secondary rounded-[16px] overflow-hidden',
         paddingClasses[padding],
         className,
       ]

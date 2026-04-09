@@ -27,17 +27,17 @@ export default function DietDateNav({ date }: DietDateNavProps) {
     <div className="flex items-center gap-0.5">
       <button
         onClick={() => navigate('prev')}
-        className="p-1.5 text-[#888888] hover:text-[#f0f0f0] active:text-[#C8FF00] transition-colors"
+        className="p-1.5 text-text-secondary hover:text-text-primary active:text-accent transition-colors"
       >
         <ChevronLeft size={18} />
       </button>
-      <span className="text-sm text-[#f0f0f0] font-medium min-w-[80px] text-center tabular-nums">
+      <span className="text-sm text-text-primary font-medium min-w-[80px] text-center tabular-nums">
         {label}
       </span>
       <button
         onClick={() => navigate('next')}
         disabled={isToday}
-        className="p-1.5 text-[#888888] hover:text-[#f0f0f0] active:text-[#C8FF00] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        className="p-1.5 text-text-secondary hover:text-text-primary active:text-accent transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <ChevronRight size={18} />
       </button>

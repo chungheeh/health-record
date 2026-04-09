@@ -32,7 +32,7 @@ export default function MealItemList({ items: initialItems, date, mealType }: Pr
       <div className="px-4 py-4 text-center">
         <Link
           href={`/diet/add?date=${date}&meal=${encodeURIComponent(mealType)}`}
-          className="text-xs text-[#555555]"
+          className="text-xs text-text-muted"
         >
           + 음식 추가
         </Link>
@@ -41,7 +41,7 @@ export default function MealItemList({ items: initialItems, date, mealType }: Pr
   }
 
   return (
-    <div className="divide-y divide-[#2a2a2a]">
+    <div className="divide-y divide-we-border">
       {items.map(item => (
         <MealItemRow
           key={item.id}

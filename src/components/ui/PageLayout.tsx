@@ -17,10 +17,10 @@ export default function PageLayout({
   showBottomNav = true,
 }: PageLayoutProps) {
   return (
-    <div className="min-h-screen bg-[#0f0f0f]">
+    <div className="min-h-screen bg-bg-primary">
       {/* 상단 고정 헤더 */}
-      <header className="fixed top-0 left-0 right-0 h-14 bg-[#0f0f0f] border-b border-[#2a2a2a] z-50 flex items-center justify-between px-4">
-        <h1 className="font-semibold text-[#f0f0f0] text-base">{title}</h1>
+      <header className="fixed top-0 left-0 right-0 h-14 bg-bg-primary border-b border-we-border z-50 flex items-center justify-between px-4">
+        <h1 className="font-semibold text-text-primary text-base">{title}</h1>
         {rightAction && (
           <div className="flex items-center">{rightAction}</div>
         )}

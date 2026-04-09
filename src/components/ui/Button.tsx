@@ -21,9 +21,9 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const variantClasses: Record<string, string> = {
-    primary: 'bg-[#C8FF00] text-[#0f0f0f] font-semibold',
-    ghost: 'bg-transparent border border-[#2a2a2a] text-[#f0f0f0]',
-    danger: 'bg-[#FF4B4B] text-white font-semibold',
+    primary: 'bg-accent text-bg-primary font-semibold',
+    ghost: 'bg-transparent border border-we-border text-text-primary',
+    danger: 'bg-we-danger text-white font-semibold',
   }
 
   const sizeClasses: Record<string, string> = {

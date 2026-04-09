@@ -23,7 +23,7 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-16 bg-[#1a1a1a] border-t border-[#2a2a2a] z-50">
+    <nav className="fixed bottom-0 left-0 right-0 h-16 bg-bg-secondary border-t border-we-border z-50">
       <ul className="flex items-center justify-around h-full px-2">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
@@ -35,7 +35,7 @@ export default function BottomNav() {
                 href={item.href}
                 className={[
                   'flex flex-col items-center justify-center gap-0.5 h-full',
-                  active ? 'text-[#C8FF00]' : 'text-[#555555]',
+                  active ? 'text-accent' : 'text-text-muted',
                 ].join(' ')}
               >
                 <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />

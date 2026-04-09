@@ -10,9 +10,9 @@ interface WorkoutHeatmapProps {
 }
 
 function getCellColor(count: number): string {
-  if (count === 0) return '#1e1e1e'
-  if (count === 1) return 'rgba(74, 255, 74, 0.3)'
-  return 'rgba(200, 255, 0, 0.7)'
+  if (count === 0) return 'var(--bg-secondary)'
+  if (count === 1) return 'color-mix(in srgb, var(--accent) 30%, transparent)'
+  return 'color-mix(in srgb, var(--accent) 70%, transparent)'
 }
 
 export default function WorkoutHeatmap({ data }: WorkoutHeatmapProps) {
@@ -63,7 +63,7 @@ export default function WorkoutHeatmap({ data }: WorkoutHeatmapProps) {
             <div
               key={i}
               className="flex-1 text-center"
-              style={{ fontSize: '10px', color: '#888888', minWidth: '20px' }}
+              style={{ fontSize: '10px', color: 'var(--text-secondary)', minWidth: '20px' }}
             >
               {label}
             </div>
@@ -108,15 +108,15 @@ export default function WorkoutHeatmap({ data }: WorkoutHeatmapProps) {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-2 mt-3" style={{ color: '#888888', fontSize: '11px' }}>
+      <div className="flex items-center gap-2 mt-3" style={{ color: 'var(--text-secondary)', fontSize: '11px' }}>
         <span>없음</span>
         <div
           style={{
             width: '12px',
             height: '12px',
             borderRadius: '2px',
-            backgroundColor: '#1e1e1e',
-            border: '1px solid #2a2a2a',
+            backgroundColor: 'var(--bg-secondary)',
+            border: '1px solid var(--border)',
           }}
         />
         <div
@@ -124,7 +124,7 @@ export default function WorkoutHeatmap({ data }: WorkoutHeatmapProps) {
             width: '12px',
             height: '12px',
             borderRadius: '2px',
-            backgroundColor: 'rgba(74, 255, 74, 0.3)',
+            backgroundColor: 'color-mix(in srgb, var(--accent) 30%, transparent)',
           }}
         />
         <div
@@ -132,7 +132,7 @@ export default function WorkoutHeatmap({ data }: WorkoutHeatmapProps) {
             width: '12px',
             height: '12px',
             borderRadius: '2px',
-            backgroundColor: 'rgba(200, 255, 0, 0.7)',
+            backgroundColor: 'color-mix(in srgb, var(--accent) 70%, transparent)',
           }}
         />
         <span>2회 이상</span>

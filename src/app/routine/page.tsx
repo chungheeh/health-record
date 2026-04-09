@@ -172,21 +172,21 @@ function RoutineWizard({ onGenerated, initialProfile }: {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-          className="w-16 h-16 rounded-full border-4 border-[#C8FF00]/20 border-t-[#C8FF00] mb-6"
+          className="w-16 h-16 rounded-full border-4 border-accent/20 border-t-accent mb-6"
         />
-        <h2 className="text-lg font-bold text-[#f0f0f0] mb-2">AI가 루틴을 설계하는 중...</h2>
-        <p className="text-sm text-[#888888] mb-8">
+        <h2 className="text-lg font-bold text-text-primary mb-2">AI가 루틴을 설계하는 중...</h2>
+        <p className="text-sm text-text-secondary mb-8">
           {profile.goal} 목표에 맞춘 과학적 운동 계획을 작성하고 있어요
         </p>
         {/* progress bar */}
-        <div className="w-full max-w-xs bg-[#2a2a2a] rounded-full h-2 mb-3 overflow-hidden">
+        <div className="w-full max-w-xs bg-we-border rounded-full h-2 mb-3 overflow-hidden">
           <motion.div
-            className="h-full bg-[#C8FF00] rounded-full"
+            className="h-full bg-accent rounded-full"
             animate={{ width: `${genProgress}%` }}
             transition={{ duration: 0.3 }}
           />
         </div>
-        <p className="text-xs text-[#555555]">{genProgress}%</p>
+        <p className="text-xs text-text-muted">{genProgress}%</p>
         <div className="mt-8 space-y-2 text-left w-full max-w-xs">
           {[
             '운동 분할법 선택 중...',
@@ -199,15 +199,15 @@ function RoutineWizard({ onGenerated, initialProfile }: {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: genProgress > i * 25 ? 1 : 0.2, x: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="flex items-center gap-2 text-xs text-[#888888]"
+              className="flex items-center gap-2 text-xs text-text-secondary"
             >
               <motion.div
                 animate={genProgress > (i + 1) * 25 ? { scale: [1, 1.2, 1] } : {}}
                 className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                  genProgress > (i + 1) * 25 ? 'bg-[#C8FF00]' : 'bg-[#2a2a2a]'
+                  genProgress > (i + 1) * 25 ? 'bg-accent' : 'bg-we-border'
                 }`}
               >
-                {genProgress > (i + 1) * 25 && <Check size={9} className="text-[#0f0f0f]" strokeWidth={3} />}
+                {genProgress > (i + 1) * 25 && <Check size={9} className="text-bg-primary" strokeWidth={3} />}
               </motion.div>
               {msg}
             </motion.div>
@@ -224,22 +224,22 @@ function RoutineWizard({ onGenerated, initialProfile }: {
         {steps.map((s, i) => (
           <div key={i} className="flex items-center gap-2 flex-1">
             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-              i < step ? 'bg-[#C8FF00] text-[#0f0f0f]'
-              : i === step ? 'bg-[#C8FF00]/20 border-2 border-[#C8FF00] text-[#C8FF00]'
-              : 'bg-[#2a2a2a] text-[#555555]'
+              i < step ? 'bg-accent text-bg-primary'
+              : i === step ? 'bg-accent/20 border-2 border-accent text-accent'
+              : 'bg-we-border text-text-muted'
             }`}>
               {i < step ? <Check size={12} strokeWidth={3} /> : i + 1}
             </div>
             {i < steps.length - 1 && (
-              <div className={`flex-1 h-0.5 rounded ${i < step ? 'bg-[#C8FF00]' : 'bg-[#2a2a2a]'}`} />
+              <div className={`flex-1 h-0.5 rounded ${i < step ? 'bg-accent' : 'bg-we-border'}`} />
             )}
           </div>
         ))}
       </div>
 
       <div className="px-5 mb-5">
-        <h2 className="text-lg font-bold text-[#f0f0f0]">{steps[step].title}</h2>
-        <p className="text-sm text-[#888888]">{steps[step].subtitle}</p>
+        <h2 className="text-lg font-bold text-text-primary">{steps[step].title}</h2>
+        <p className="text-sm text-text-secondary">{steps[step].subtitle}</p>
       </div>
 
       <div className="flex-1 px-5 overflow-y-auto pb-4">
@@ -260,18 +260,18 @@ function RoutineWizard({ onGenerated, initialProfile }: {
                     onClick={() => set('goal', g.id)}
                     className="w-full flex items-center gap-4 p-4 rounded-[14px] border-2 text-left transition-all active:scale-[0.98]"
                     style={{
-                      backgroundColor: profile.goal === g.id ? 'rgba(200,255,0,0.08)' : '#1a1a1a',
-                      borderColor: profile.goal === g.id ? '#C8FF00' : '#2a2a2a',
+                      backgroundColor: profile.goal === g.id ? 'rgba(200,255,0,0.08)' : 'var(--bg-secondary)',
+                      borderColor: profile.goal === g.id ? 'var(--accent)' : 'var(--border)',
                     }}
                   >
                     <span className="text-2xl">{g.emoji}</span>
                     <div className="flex-1">
-                      <p className="font-semibold text-[#f0f0f0]">{g.label}</p>
-                      <p className="text-xs text-[#888888]">{g.desc}</p>
+                      <p className="font-semibold text-text-primary">{g.label}</p>
+                      <p className="text-xs text-text-secondary">{g.desc}</p>
                     </div>
                     {profile.goal === g.id && (
-                      <div className="w-5 h-5 rounded-full bg-[#C8FF00] flex items-center justify-center">
-                        <Check size={11} className="text-[#0f0f0f]" strokeWidth={3} />
+                      <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center">
+                        <Check size={11} className="text-bg-primary" strokeWidth={3} />
                       </div>
                     )}
                   </button>
@@ -284,7 +284,7 @@ function RoutineWizard({ onGenerated, initialProfile }: {
               <div className="space-y-4">
                 {/* 성별 */}
                 <div>
-                  <label className="text-xs text-[#888888] mb-2 block">성별</label>
+                  <label className="text-xs text-text-secondary mb-2 block">성별</label>
                   <div className="grid grid-cols-2 gap-2">
                     {['남성', '여성'].map(g => (
                       <button
@@ -292,8 +292,8 @@ function RoutineWizard({ onGenerated, initialProfile }: {
                         onClick={() => set('gender', g)}
                         className="py-3 rounded-[10px] text-sm font-medium transition-all"
                         style={{
-                          backgroundColor: profile.gender === g ? '#C8FF00' : '#242424',
-                          color: profile.gender === g ? '#0f0f0f' : '#888888',
+                          backgroundColor: profile.gender === g ? 'var(--accent)' : 'var(--bg-tertiary)',
+                          color: profile.gender === g ? 'var(--bg-primary)' : 'var(--text-secondary)',
                         }}
                       >
                         {g === '남성' ? '👨 남성' : '👩 여성'}
@@ -310,17 +310,17 @@ function RoutineWizard({ onGenerated, initialProfile }: {
                   { key: 'targetWeight' as const, label: '목표 체중', unit: 'kg', placeholder: '65', inputMode: 'decimal' as const },
                 ].map(({ key, label, unit, placeholder, inputMode }) => (
                   <div key={key}>
-                    <label className="text-xs text-[#888888] mb-1.5 block">{label}</label>
-                    <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-[12px] flex items-center px-4 focus-within:border-[#C8FF00] transition-colors">
+                    <label className="text-xs text-text-secondary mb-1.5 block">{label}</label>
+                    <div className="bg-bg-secondary border border-we-border rounded-[12px] flex items-center px-4 focus-within:border-accent transition-colors">
                       <input
                         type="number"
                         inputMode={inputMode}
                         placeholder={placeholder}
                         value={profile[key]}
                         onChange={e => set(key, e.target.value)}
-                        className="flex-1 bg-transparent py-3 text-sm text-[#f0f0f0] outline-none"
+                        className="flex-1 bg-transparent py-3 text-sm text-text-primary outline-none"
                       />
-                      <span className="text-xs text-[#555555]">{unit}</span>
+                      <span className="text-xs text-text-muted">{unit}</span>
                     </div>
                   </div>
                 ))}
@@ -332,7 +332,7 @@ function RoutineWizard({ onGenerated, initialProfile }: {
               <div className="space-y-5">
                 {/* 활동량 */}
                 <div>
-                  <label className="text-xs text-[#888888] mb-2 block">평소 활동량</label>
+                  <label className="text-xs text-text-secondary mb-2 block">평소 활동량</label>
                   <div className="space-y-2">
                     {ACTIVITY_OPTIONS.map(a => (
                       <button
@@ -340,17 +340,17 @@ function RoutineWizard({ onGenerated, initialProfile }: {
                         onClick={() => set('activityLevel', a.id)}
                         className="w-full flex items-center justify-between px-4 py-3 rounded-[12px] border-2 text-left transition-all"
                         style={{
-                          backgroundColor: profile.activityLevel === a.id ? 'rgba(200,255,0,0.08)' : '#1a1a1a',
-                          borderColor: profile.activityLevel === a.id ? '#C8FF00' : '#2a2a2a',
+                          backgroundColor: profile.activityLevel === a.id ? 'rgba(200,255,0,0.08)' : 'var(--bg-secondary)',
+                          borderColor: profile.activityLevel === a.id ? 'var(--accent)' : 'var(--border)',
                         }}
                       >
                         <div>
-                          <p className="text-sm font-medium text-[#f0f0f0]">{a.label}</p>
-                          <p className="text-xs text-[#888888]">{a.desc}</p>
+                          <p className="text-sm font-medium text-text-primary">{a.label}</p>
+                          <p className="text-xs text-text-secondary">{a.desc}</p>
                         </div>
                         {profile.activityLevel === a.id && (
-                          <div className="w-5 h-5 rounded-full bg-[#C8FF00] flex items-center justify-center shrink-0">
-                            <Check size={11} className="text-[#0f0f0f]" strokeWidth={3} />
+                          <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center shrink-0">
+                            <Check size={11} className="text-bg-primary" strokeWidth={3} />
                           </div>
                         )}
                       </button>
@@ -360,8 +360,8 @@ function RoutineWizard({ onGenerated, initialProfile }: {
 
                 {/* 주 운동 횟수 */}
                 <div>
-                  <label className="text-xs text-[#888888] mb-2 block">
-                    주 운동 횟수 <span className="text-[#C8FF00] font-semibold">{profile.workoutDays}일</span>
+                  <label className="text-xs text-text-secondary mb-2 block">
+                    주 운동 횟수 <span className="text-accent font-semibold">{profile.workoutDays}일</span>
                   </label>
                   <div className="flex gap-2">
                     {[2,3,4,5,6].map(d => (
@@ -370,9 +370,9 @@ function RoutineWizard({ onGenerated, initialProfile }: {
                         onClick={() => set('workoutDays', d)}
                         className="flex-1 py-3 rounded-[10px] text-sm font-bold transition-all"
                         style={{
-                          backgroundColor: profile.workoutDays === d ? '#C8FF00' : '#1a1a1a',
-                          color: profile.workoutDays === d ? '#0f0f0f' : '#888888',
-                          border: `2px solid ${profile.workoutDays === d ? '#C8FF00' : '#2a2a2a'}`,
+                          backgroundColor: profile.workoutDays === d ? 'var(--accent)' : 'var(--bg-secondary)',
+                          color: profile.workoutDays === d ? 'var(--bg-primary)' : 'var(--text-secondary)',
+                          border: `2px solid ${profile.workoutDays === d ? 'var(--accent)' : 'var(--border)'}`,
                         }}
                       >
                         {d}
@@ -383,7 +383,7 @@ function RoutineWizard({ onGenerated, initialProfile }: {
 
                 {/* 사용 기구 */}
                 <div>
-                  <label className="text-xs text-[#888888] mb-2 block">사용 가능한 기구 (복수 선택)</label>
+                  <label className="text-xs text-text-secondary mb-2 block">사용 가능한 기구 (복수 선택)</label>
                   <div className="grid grid-cols-3 gap-2">
                     {EQUIPMENT_OPTIONS.map(e => (
                       <button
@@ -391,9 +391,9 @@ function RoutineWizard({ onGenerated, initialProfile }: {
                         onClick={() => toggleEquipment(e.id)}
                         className="flex flex-col items-center gap-1.5 py-3 rounded-[12px] border-2 text-xs font-medium transition-all active:scale-95"
                         style={{
-                          backgroundColor: profile.equipment.includes(e.id) ? 'rgba(200,255,0,0.1)' : '#1a1a1a',
-                          borderColor: profile.equipment.includes(e.id) ? '#C8FF00' : '#2a2a2a',
-                          color: profile.equipment.includes(e.id) ? '#C8FF00' : '#888888',
+                          backgroundColor: profile.equipment.includes(e.id) ? 'rgba(200,255,0,0.1)' : 'var(--bg-secondary)',
+                          borderColor: profile.equipment.includes(e.id) ? 'var(--accent)' : 'var(--border)',
+                          color: profile.equipment.includes(e.id) ? 'var(--accent)' : 'var(--text-secondary)',
                         }}
                       >
                         <span className="text-xl">{e.emoji}</span>
@@ -414,11 +414,11 @@ function RoutineWizard({ onGenerated, initialProfile }: {
       )}
 
       {/* 버튼 */}
-      <div className="px-5 pt-3 pb-5 flex gap-3 border-t border-[#2a2a2a] mt-2">
+      <div className="px-5 pt-3 pb-5 flex gap-3 border-t border-we-border mt-2">
         {step > 0 && (
           <button
             onClick={() => setStep(s => s - 1)}
-            className="px-5 py-3.5 rounded-[12px] bg-[#1a1a1a] border border-[#2a2a2a] text-sm font-medium text-[#888888]"
+            className="px-5 py-3.5 rounded-[12px] bg-bg-secondary border border-we-border text-sm font-medium text-text-secondary"
           >
             이전
           </button>
@@ -430,7 +430,7 @@ function RoutineWizard({ onGenerated, initialProfile }: {
           }}
           disabled={!canNext()}
           className="flex-1 py-3.5 rounded-[12px] text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-40"
-          style={{ backgroundColor: '#C8FF00', color: '#0f0f0f' }}
+          style={{ backgroundColor: 'var(--accent)', color: 'var(--bg-primary)' }}
         >
           {step < steps.length - 1 ? (
             <>다음 <ChevronRight size={16} /></>
@@ -448,17 +448,17 @@ function RoutineWizard({ onGenerated, initialProfile }: {
 function ExerciseRow({ ex, idx }: { ex: RoutineExercise; idx: number }) {
   return (
     <div className="flex items-start gap-3 py-2.5">
-      <span className="min-w-[22px] h-[22px] rounded-md bg-[#242424] text-[#888888] text-xs flex items-center justify-center font-medium mt-0.5 shrink-0">
+      <span className="min-w-[22px] h-[22px] rounded-md bg-bg-tertiary text-text-secondary text-xs flex items-center justify-center font-medium mt-0.5 shrink-0">
         {idx + 1}
       </span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[#f0f0f0]">{ex.name}</p>
-        {ex.notes && <p className="text-xs text-[#555555] mt-0.5">{ex.notes}</p>}
+        <p className="text-sm font-medium text-text-primary">{ex.name}</p>
+        {ex.notes && <p className="text-xs text-text-muted mt-0.5">{ex.notes}</p>}
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
-        <span className="text-xs px-1.5 py-0.5 rounded bg-[#C8FF00]/15 text-[#C8FF00] font-medium">{ex.sets}세트</span>
-        <span className="text-xs text-[#888888]">{ex.reps}회</span>
-        <span className="text-xs text-[#555555]">{ex.rest_sec}s</span>
+        <span className="text-xs px-1.5 py-0.5 rounded bg-accent/15 text-accent font-medium">{ex.sets}세트</span>
+        <span className="text-xs text-text-secondary">{ex.reps}회</span>
+        <span className="text-xs text-text-muted">{ex.rest_sec}s</span>
       </div>
     </div>
   )
@@ -467,21 +467,21 @@ function ExerciseRow({ ex, idx }: { ex: RoutineExercise; idx: number }) {
 function DayCard({ day }: { day: RoutineDay }) {
   const [open, setOpen] = useState(true)
   return (
-    <div className="bg-[#1a1a1a] rounded-[16px] border border-[#2a2a2a] mb-3 overflow-hidden">
+    <div className="bg-bg-secondary rounded-[16px] border border-we-border mb-3 overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a]"
+        className="w-full flex items-center justify-between px-4 py-3 border-b border-we-border"
       >
         <div className="flex items-center gap-2.5">
-          <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-[#C8FF00] text-[#0f0f0f]">
+          <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-accent text-bg-primary">
             {day.day_name}
           </span>
-          <span className="text-sm font-semibold text-[#f0f0f0]">{day.focus}</span>
+          <span className="text-sm font-semibold text-text-primary">{day.focus}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#555555]">{day.exercises.length}개</span>
+          <span className="text-xs text-text-muted">{day.exercises.length}개</span>
           <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
-            <ChevronRight size={14} className="text-[#555555] rotate-90" />
+            <ChevronRight size={14} className="text-text-muted rotate-90" />
           </motion.div>
         </div>
       </button>
@@ -494,7 +494,7 @@ function DayCard({ day }: { day: RoutineDay }) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="px-4 divide-y divide-[#242424]">
+            <div className="px-4 divide-y divide-we-border">
               {day.exercises.map((ex, i) => <ExerciseRow key={i} ex={ex} idx={i} />)}
             </div>
           </motion.div>
@@ -506,9 +506,9 @@ function DayCard({ day }: { day: RoutineDay }) {
 
 function RestDayCard({ name }: { name: string }) {
   return (
-    <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-[16px] mb-3 px-4 py-3.5 flex items-center gap-3">
-      <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-[#242424] text-[#555555]">{name}</span>
-      <span className="text-sm text-[#555555]">휴식</span>
+    <div className="bg-bg-secondary border border-we-border rounded-[16px] mb-3 px-4 py-3.5 flex items-center gap-3">
+      <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-bg-tertiary text-text-muted">{name}</span>
+      <span className="text-sm text-text-muted">휴식</span>
       <span className="ml-auto text-base">😴</span>
     </div>
   )
@@ -571,8 +571,8 @@ export default function RoutinePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#C8FF00] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -580,15 +580,15 @@ export default function RoutinePage() {
   const routineData = routine?.routine_data ?? null
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f]">
+    <div className="min-h-screen bg-bg-primary">
       <div className="mx-auto w-full max-w-[430px]">
 
         {/* 헤더 */}
-        <header className="sticky top-0 z-20 bg-[#0f0f0f] border-b border-[#2a2a2a] px-5 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-20 bg-bg-primary border-b border-we-border px-5 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-[#f0f0f0]">나의 루틴</h1>
+            <h1 className="text-xl font-bold text-text-primary">나의 루틴</h1>
             {routine && (
-              <p className="text-[11px] text-[#555555] mt-0.5">
+              <p className="text-[11px] text-text-muted mt-0.5">
                 {new Date(routine.created_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} 생성
               </p>
             )}
@@ -596,7 +596,7 @@ export default function RoutinePage() {
           {routine && (
             <button
               onClick={() => setShowWizard(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-[#1a1a1a] border border-[#2a2a2a] text-xs font-medium text-[#888888] active:bg-[#242424]"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-bg-secondary border border-we-border text-xs font-medium text-text-secondary active:bg-bg-tertiary"
             >
               <RefreshCw size={13} />
               재생성
@@ -612,22 +612,22 @@ export default function RoutinePage() {
               animate={{ opacity: 1, y: 0 }}
               className="flex flex-col items-center justify-center py-16 text-center"
             >
-              <div className="w-24 h-24 rounded-full bg-[#C8FF00]/10 border-2 border-[#C8FF00]/20 flex items-center justify-center mb-6">
-                <Dumbbell size={40} className="text-[#C8FF00]" />
+              <div className="w-24 h-24 rounded-full bg-accent/10 border-2 border-accent/20 flex items-center justify-center mb-6">
+                <Dumbbell size={40} className="text-accent" />
               </div>
-              <h2 className="text-xl font-bold text-[#f0f0f0] mb-2">AI 맞춤 루틴</h2>
-              <p className="text-sm text-[#888888] mb-2 leading-relaxed">
+              <h2 className="text-xl font-bold text-text-primary mb-2">AI 맞춤 루틴</h2>
+              <p className="text-sm text-text-secondary mb-2 leading-relaxed">
                 목표, 신체 정보, 운동 환경을 입력하면<br />
                 AI가 과학적 맞춤 운동 계획을 설계해 드려요
               </p>
-              <div className="flex flex-col gap-2 text-xs text-[#555555] mb-8">
+              <div className="flex flex-col gap-2 text-xs text-text-muted mb-8">
                 <p>✅ Harris-Benedict TDEE 자동 계산</p>
                 <p>✅ 목표별 분할법 (다이어트/벌크/유지)</p>
                 <p>✅ 주간 스케줄 + 영양 목표 제시</p>
               </div>
               <button
                 onClick={() => setShowWizard(true)}
-                className="w-full max-w-xs bg-[#C8FF00] text-[#0f0f0f] font-bold py-4 rounded-[16px] text-base active:scale-[0.98] transition-transform shadow-lg shadow-[#C8FF00]/20"
+                className="w-full max-w-xs bg-accent text-bg-primary font-bold py-4 rounded-[16px] text-base active:scale-[0.98] transition-transform shadow-lg shadow-accent/20"
               >
                 🤖 AI 루틴 생성하기
               </button>
@@ -639,15 +639,15 @@ export default function RoutinePage() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-[#1a1a1a] rounded-[20px] border border-[#2a2a2a] overflow-hidden"
+              className="bg-bg-secondary rounded-[20px] border border-we-border overflow-hidden"
             >
-              <div className="px-5 pt-4 pb-2 border-b border-[#2a2a2a] flex items-center justify-between">
+              <div className="px-5 pt-4 pb-2 border-b border-we-border flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-[#f0f0f0]">🤖 AI 루틴 생성</p>
-                  <p className="text-xs text-[#555555]">3단계로 맞춤 루틴을 설계해요</p>
+                  <p className="text-sm font-semibold text-text-primary">🤖 AI 루틴 생성</p>
+                  <p className="text-xs text-text-muted">3단계로 맞춤 루틴을 설계해요</p>
                 </div>
                 {routine && (
-                  <button onClick={() => setShowWizard(false)} className="text-xs text-[#555555] hover:text-[#888888] px-2 py-1 rounded bg-[#242424]">
+                  <button onClick={() => setShowWizard(false)} className="text-xs text-text-muted hover:text-text-secondary px-2 py-1 rounded bg-bg-tertiary">
                     취소
                   </button>
                 )}
@@ -661,39 +661,39 @@ export default function RoutinePage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               {/* Summary card */}
               {routineData.summary && (
-                <div className="bg-[#1a1a1a] rounded-[16px] border border-[#2a2a2a] p-4 mb-4">
+                <div className="bg-bg-secondary rounded-[16px] border border-we-border p-4 mb-4">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-semibold text-[#f0f0f0]">루틴 요약</p>
-                    <span className="text-xs px-2.5 py-1 rounded-full bg-[#C8FF00]/10 text-[#C8FF00] border border-[#C8FF00]/20 font-medium">
+                    <p className="text-sm font-semibold text-text-primary">루틴 요약</p>
+                    <span className="text-xs px-2.5 py-1 rounded-full bg-accent/10 text-accent border border-accent/20 font-medium">
                       {routineData.summary.goal}
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 mb-2">
-                    <div className="bg-[#242424] rounded-[10px] p-3 text-center">
-                      <p className="text-[10px] text-[#888888] mb-1">TDEE</p>
-                      <p className="text-sm font-bold text-[#f0f0f0]">
+                    <div className="bg-bg-tertiary rounded-[10px] p-3 text-center">
+                      <p className="text-[10px] text-text-secondary mb-1">TDEE</p>
+                      <p className="text-sm font-bold text-text-primary">
                         {routineData.summary.tdee?.toLocaleString() ?? '—'}
-                        <span className="text-[10px] font-normal text-[#555555] ml-0.5">kcal</span>
+                        <span className="text-[10px] font-normal text-text-muted ml-0.5">kcal</span>
                       </p>
                     </div>
-                    <div className="bg-[#242424] rounded-[10px] p-3 text-center">
-                      <p className="text-[10px] text-[#888888] mb-1">목표 칼로리</p>
-                      <p className="text-sm font-bold text-[#C8FF00]">
+                    <div className="bg-bg-tertiary rounded-[10px] p-3 text-center">
+                      <p className="text-[10px] text-text-secondary mb-1">목표 칼로리</p>
+                      <p className="text-sm font-bold text-accent">
                         {routineData.summary.target_calories?.toLocaleString() ?? '—'}
-                        <span className="text-[10px] font-normal text-[#555555] ml-0.5">kcal</span>
+                        <span className="text-[10px] font-normal text-text-muted ml-0.5">kcal</span>
                       </p>
                     </div>
                   </div>
-                  <div className="bg-[#242424] rounded-[10px] p-3 flex justify-around">
+                  <div className="bg-bg-tertiary rounded-[10px] p-3 flex justify-around">
                     {[
                       { label: '단백질', value: routineData.summary.protein_g, unit: 'g', color: '#4FC3F7' },
                       { label: '탄수화물', value: routineData.summary.carbs_g, unit: 'g', color: '#81C784' },
                       { label: '지방', value: routineData.summary.fat_g, unit: 'g', color: '#FFB74D' },
                     ].map(({ label, value, unit, color }) => (
                       <div key={label} className="text-center">
-                        <p className="text-[10px] text-[#888888] mb-1">{label}</p>
+                        <p className="text-[10px] text-text-secondary mb-1">{label}</p>
                         <p className="text-sm font-bold" style={{ color }}>
-                          {value ?? '—'}<span className="text-[10px] font-normal text-[#555555] ml-0.5">{unit}</span>
+                          {value ?? '—'}<span className="text-[10px] font-normal text-text-muted ml-0.5">{unit}</span>
                         </p>
                       </div>
                     ))}
@@ -702,7 +702,7 @@ export default function RoutinePage() {
               )}
 
               {/* Weekly schedule */}
-              <h2 className="text-sm font-semibold text-[#f0f0f0] mb-3">주간 스케줄</h2>
+              <h2 className="text-sm font-semibold text-text-primary mb-3">주간 스케줄</h2>
               {DAY_NAMES.map((name, idx) => {
                 const dayNum = idx + 1
                 const dayData = routineData.schedule?.find(d => d.day === dayNum)
@@ -715,9 +715,9 @@ export default function RoutinePage() {
 
               {/* Notes */}
               {routineData.notes && (
-                <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-[14px] p-4 mt-1">
-                  <p className="text-xs font-medium text-[#888888] mb-1.5">💡 AI 코멘트</p>
-                  <p className="text-sm text-[#f0f0f0] leading-relaxed">{routineData.notes}</p>
+                <div className="bg-bg-secondary border border-we-border rounded-[14px] p-4 mt-1">
+                  <p className="text-xs font-medium text-text-secondary mb-1.5">💡 AI 코멘트</p>
+                  <p className="text-sm text-text-primary leading-relaxed">{routineData.notes}</p>
                 </div>
               )}
             </motion.div>

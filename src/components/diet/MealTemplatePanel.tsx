@@ -168,7 +168,7 @@ export default function MealTemplatePanel({ mealType, date, currentItems }: Meal
       {/* 템플릿 버튼 */}
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1 text-xs text-[#888888] hover:text-[#C8FF00] transition-colors px-2 py-1 rounded-[8px] hover:bg-[#C8FF00]/10"
+        className="flex items-center gap-1 text-xs text-text-secondary hover:text-accent transition-colors px-2 py-1 rounded-[8px] hover:bg-accent/10"
         title="템플릿 저장/불러오기"
       >
         <BookOpen size={14} />
@@ -185,43 +185,43 @@ export default function MealTemplatePanel({ mealType, date, currentItems }: Meal
 
       {/* 바텀 시트 */}
       {open && (
-        <div className="fixed bottom-0 left-0 right-0 z-[60] bg-[#1a1a1a] rounded-t-[24px] max-h-[80vh] flex flex-col max-w-[430px] mx-auto">
+        <div className="fixed bottom-0 left-0 right-0 z-[60] bg-bg-secondary rounded-t-[24px] max-h-[80vh] flex flex-col max-w-[430px] mx-auto">
           {/* 핸들 */}
           <div className="flex justify-center pt-3 pb-1">
-            <div className="w-10 h-1 bg-[#3a3a3a] rounded-full" />
+            <div className="w-10 h-1 bg-bg-tertiary rounded-full" />
           </div>
 
           {/* 헤더 */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-[#2a2a2a]">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-we-border">
             <div>
-              <h3 className="font-semibold text-[#f0f0f0]">{mealType} 템플릿</h3>
-              <p className="text-xs text-[#555555] mt-0.5">자주 먹는 식사 조합을 저장하세요</p>
+              <h3 className="font-semibold text-text-primary">{mealType} 템플릿</h3>
+              <p className="text-xs text-text-muted mt-0.5">자주 먹는 식사 조합을 저장하세요</p>
             </div>
-            <button onClick={() => setOpen(false)} className="text-[#555555] hover:text-[#f0f0f0] p-1">
+            <button onClick={() => setOpen(false)} className="text-text-muted hover:text-text-primary p-1">
               <X size={18} />
             </button>
           </div>
 
           {/* 성공 메시지 */}
           {successMsg && (
-            <div className="mx-5 mt-3 bg-[#C8FF00]/10 border border-[#C8FF00]/30 rounded-[10px] px-3 py-2 flex items-center gap-2">
-              <Check size={14} className="text-[#C8FF00] shrink-0" />
-              <p className="text-xs text-[#C8FF00]">{successMsg}</p>
+            <div className="mx-5 mt-3 bg-accent/10 border border-accent/30 rounded-[10px] px-3 py-2 flex items-center gap-2">
+              <Check size={14} className="text-accent shrink-0" />
+              <p className="text-xs text-accent">{successMsg}</p>
             </div>
           )}
 
           {/* 현재 식사 저장 영역 */}
-          <div className="px-5 py-3 border-b border-[#2a2a2a]">
+          <div className="px-5 py-3 border-b border-we-border">
             {!saveMode ? (
               <button
                 onClick={() => setSaveMode(true)}
                 disabled={currentItems.length === 0}
-                className="w-full flex items-center justify-center gap-2 bg-[#242424] border border-dashed border-[#3a3a3a] rounded-[12px] py-3 text-sm text-[#888888] hover:border-[#C8FF00]/50 hover:text-[#C8FF00] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 bg-bg-tertiary border border-dashed border-we-border rounded-[12px] py-3 text-sm text-text-secondary hover:border-accent/50 hover:text-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <BookmarkPlus size={16} />
                 현재 {mealType} 식사를 템플릿으로 저장
                 {currentItems.length > 0 && (
-                  <span className="text-[10px] bg-[#3a3a3a] px-1.5 py-0.5 rounded-full">
+                  <span className="text-[10px] bg-bg-tertiary px-1.5 py-0.5 rounded-full">
                     {currentItems.length}개
                   </span>
                 )}
@@ -234,19 +234,19 @@ export default function MealTemplatePanel({ mealType, date, currentItems }: Meal
                   onChange={e => setSavingName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSaveTemplate()}
                   placeholder="템플릿 이름 (예: 다이어트 아침)"
-                  className="flex-1 bg-[#242424] border border-[#2a2a2a] rounded-[10px] px-3 py-2.5 text-sm text-[#f0f0f0] outline-none focus:border-[#C8FF00] placeholder:text-[#444]"
+                  className="flex-1 bg-bg-tertiary border border-we-border rounded-[10px] px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent placeholder:text-text-muted"
                   autoFocus
                 />
                 <button
                   onClick={handleSaveTemplate}
                   disabled={!savingName.trim() || saving}
-                  className="px-4 py-2.5 bg-[#C8FF00] text-[#0f0f0f] rounded-[10px] text-sm font-semibold disabled:opacity-50"
+                  className="px-4 py-2.5 bg-accent text-bg-primary rounded-[10px] text-sm font-semibold disabled:opacity-50"
                 >
                   {saving ? '저장 중...' : '저장'}
                 </button>
                 <button
                   onClick={() => { setSaveMode(false); setSavingName('') }}
-                  className="px-3 py-2.5 bg-[#242424] text-[#888888] rounded-[10px] text-sm"
+                  className="px-3 py-2.5 bg-bg-tertiary text-text-secondary rounded-[10px] text-sm"
                 >
                   취소
                 </button>
@@ -256,20 +256,20 @@ export default function MealTemplatePanel({ mealType, date, currentItems }: Meal
 
           {/* 템플릿 목록 */}
           <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2 pb-8">
-            <p className="text-[11px] font-semibold text-[#555555] uppercase tracking-wider mb-2">
+            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2">
               저장된 템플릿
             </p>
 
             {loading && (
               <div className="flex justify-center py-6">
-                <div className="w-5 h-5 border-2 border-[#C8FF00] border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
               </div>
             )}
 
             {!loading && templates.length === 0 && (
               <div className="text-center py-8">
-                <p className="text-sm text-[#555555]">저장된 템플릿이 없습니다</p>
-                <p className="text-xs text-[#444] mt-1">식사를 추가한 후 템플릿으로 저장해보세요</p>
+                <p className="text-sm text-text-muted">저장된 템플릿이 없습니다</p>
+                <p className="text-xs text-text-muted mt-1">식사를 추가한 후 템플릿으로 저장해보세요</p>
               </div>
             )}
 
@@ -277,11 +277,11 @@ export default function MealTemplatePanel({ mealType, date, currentItems }: Meal
               const totalCal = tmpl.meal_template_items.reduce((s, i) => s + (i.calories ?? 0), 0)
               const isExpanded = expandedId === tmpl.id
               return (
-                <div key={tmpl.id} className="bg-[#242424] rounded-[14px] overflow-hidden">
+                <div key={tmpl.id} className="bg-bg-tertiary rounded-[14px] overflow-hidden">
                   <div className="flex items-center gap-3 px-4 py-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[#f0f0f0] truncate">{tmpl.name}</p>
-                      <p className="text-[11px] text-[#555555] mt-0.5">
+                      <p className="text-sm font-semibold text-text-primary truncate">{tmpl.name}</p>
+                      <p className="text-[11px] text-text-muted mt-0.5">
                         {tmpl.meal_template_items.length}개 음식 · {Math.round(totalCal)}kcal
                       </p>
                     </div>
@@ -289,7 +289,7 @@ export default function MealTemplatePanel({ mealType, date, currentItems }: Meal
                     {/* 펼치기 */}
                     <button
                       onClick={() => setExpandedId(isExpanded ? null : tmpl.id)}
-                      className="p-1.5 text-[#555555] hover:text-[#888888]"
+                      className="p-1.5 text-text-muted hover:text-text-secondary"
                     >
                       {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </button>
@@ -298,7 +298,7 @@ export default function MealTemplatePanel({ mealType, date, currentItems }: Meal
                     <button
                       onClick={() => handleLoadTemplate(tmpl)}
                       disabled={loadingId === tmpl.id}
-                      className="px-3 py-1.5 bg-[#C8FF00]/10 text-[#C8FF00] rounded-[8px] text-xs font-semibold hover:bg-[#C8FF00]/20 transition-colors disabled:opacity-50"
+                      className="px-3 py-1.5 bg-accent/10 text-accent rounded-[8px] text-xs font-semibold hover:bg-accent/20 transition-colors disabled:opacity-50"
                     >
                       {loadingId === tmpl.id ? '추가 중...' : '불러오기'}
                     </button>
@@ -307,7 +307,7 @@ export default function MealTemplatePanel({ mealType, date, currentItems }: Meal
                     <button
                       onClick={() => handleDeleteTemplate(tmpl.id, tmpl.name)}
                       disabled={deletingId === tmpl.id}
-                      className="p-1.5 text-[#444] hover:text-[#FF4B4B] transition-colors"
+                      className="p-1.5 text-text-muted hover:text-we-danger transition-colors"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -315,11 +315,11 @@ export default function MealTemplatePanel({ mealType, date, currentItems }: Meal
 
                   {/* 항목 펼치기 */}
                   {isExpanded && (
-                    <div className="border-t border-[#2a2a2a] px-4 py-2 space-y-1.5">
+                    <div className="border-t border-we-border px-4 py-2 space-y-1.5">
                       {tmpl.meal_template_items.map(item => (
                         <div key={item.id} className="flex items-center justify-between text-xs">
-                          <span className="text-[#888888] truncate flex-1">{item.food_name}</span>
-                          <span className="text-[#555555] ml-2 shrink-0 tabular-nums">
+                          <span className="text-text-secondary truncate flex-1">{item.food_name}</span>
+                          <span className="text-text-muted ml-2 shrink-0 tabular-nums">
                             {item.amount_g}g · {Math.round(item.calories ?? 0)}kcal
                           </span>
                         </div>

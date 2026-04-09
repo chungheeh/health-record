@@ -23,7 +23,7 @@ export default function Input({
       {label && (
         <label
           htmlFor={inputId}
-          className="text-sm text-[#888888] mb-1"
+          className="text-sm text-text-secondary mb-1"
         >
           {label}
         </label>
@@ -33,12 +33,12 @@ export default function Input({
         <input
           id={inputId}
           className={[
-            'bg-[#242424] border border-[#2a2a2a] rounded-[12px] px-3 py-3',
-            'text-[#f0f0f0] placeholder:text-[#555555]',
-            'focus:border-[#C8FF00] outline-none w-full',
+            'bg-bg-tertiary border border-we-border rounded-[12px] px-3 py-3',
+            'text-text-primary placeholder:text-text-muted',
+            'focus:border-accent outline-none w-full',
             'transition-colors duration-150',
             unit ? 'pr-10' : '',
-            error ? 'border-[#FF4B4B]' : '',
+            error ? 'border-we-danger' : '',
             className,
           ]
             .filter(Boolean)
@@ -46,14 +46,14 @@ export default function Input({
           {...props}
         />
         {unit && (
-          <span className="absolute right-3 text-[#888888] text-sm pointer-events-none">
+          <span className="absolute right-3 text-text-secondary text-sm pointer-events-none">
             {unit}
           </span>
         )}
       </div>
 
       {error && (
-        <span className="text-[#FF4B4B] text-xs mt-1">{error}</span>
+        <span className="text-we-danger text-xs mt-1">{error}</span>
       )}
     </div>
   )
