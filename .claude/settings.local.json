@@ -28,7 +28,12 @@
       "Bash(powershell.exe -Command \"Stop-Process -Id 23860 -Force\")",
       "mcp__Claude_Preview__preview_start",
       "mcp__d81d5551-4540-494e-85ab-db938447057c__list_deployments",
-      "mcp__d81d5551-4540-494e-85ab-db938447057c__get_deployment_build_logs"
+      "mcp__d81d5551-4540-494e-85ab-db938447057c__get_deployment_build_logs",
+      "WebFetch(domain:www.foodsafetykorea.go.kr)",
+      "WebSearch",
+      "WebFetch(domain:www.technogym.com)",
+      "WebFetch(domain:us.matrixfitness.com)",
+      "WebFetch(domain:showmeweights.com)"
     ],
     "defaultMode": "bypassPermissions"
   },

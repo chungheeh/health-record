@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight, MessageSquarePlus } from 'lucide-react'
 import TodayWorkouts from '@/components/home/TodayWorkouts'
 import CoachSheet from '@/components/coach/CoachSheet'
+import DDayRoadmap from '@/components/home/DDayRoadmap'
 
 function addDays(dateStr: string, days: number): string {
   const d = new Date(dateStr + 'T12:00:00')
@@ -80,6 +81,30 @@ export default async function HomePage({
     .eq('user_id', user.id)
     .eq('is_active', true)
     .maybeSingle()
+
+  // D-Day 이벤트 + TDEE
+  const [{ data: activeEvent }, { data: userProfile }] = await Promise.all([
+    supabase
+      .from('target_events')
+      .select('id, title, start_date, target_date, is_active')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('user_profiles')
+      .select('target_calories')
+      .eq('user_id', user.id)
+      .maybeSingle(),
+  ])
+
+  // 오늘 운동일 여부 (루틴 기반)
+  const todayDow = new Date().getDay()
+  const routineSchedule = (activeRoutine?.routine_data as { schedule?: { day: number }[]; rest_days?: number[] } | null)
+  const isWorkoutDay = routineSchedule?.rest_days
+    ? !routineSchedule.rest_days.includes(todayDow)
+    : true
 
   const routineData = activeRoutine?.routine_data as {
     summary?: { target_calories?: number; protein_g?: number; carbs_g?: number }
@@ -187,6 +212,16 @@ export default async function HomePage({
             </div>
           </div>
         </div>
+
+        {/* D-Day 로드맵 (오늘만 표시) */}
+        {isToday && (
+          <DDayRoadmap
+            event={activeEvent ?? null}
+            tdee={userProfile?.target_calories ?? null}
+            todayCalories={Math.round(todayCalories)}
+            isWorkoutDay={isWorkoutDay}
+          />
+        )}
 
         {/* 빠른 시작 버튼 (오늘만 표시) */}
         {isToday && (

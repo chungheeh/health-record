@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      target_events: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          start_date: string
+          target_date: string
+          is_active: boolean | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          start_date?: string
+          target_date: string
+          is_active?: boolean | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          start_date?: string
+          target_date?: string
+          is_active?: boolean | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth_key: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth_key: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          endpoint?: string
+          p256dh?: string
+          auth_key?: string
+          created_at?: string | null
+        }
+        Relationships: []
+      }
       ai_routines: {
         Row: {
           created_at: string | null
