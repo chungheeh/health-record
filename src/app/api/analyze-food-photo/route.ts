@@ -166,9 +166,13 @@ export async function POST(req: NextRequest) {
 
     try {
       const { text, provider } = await analyzeImageWithText(base64, mimeType, IDENTIFY_PROMPT)
-      console.log(`[analyze-food-photo] provider: ${provider}, raw: ${text.slice(0, 300)}`)
-      identified = JSON.parse(text)
-    } catch {
+      console.log(`[analyze-food-photo] provider: ${provider}, raw: ${text.slice(0, 400)}`)
+      // 마크다운 펜스(```json ... ```) 방어 — 중첩 {} 추출
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (!jsonMatch) throw new Error(`JSON 없음: ${text.slice(0, 100)}`)
+      identified = JSON.parse(jsonMatch[0])
+    } catch (err) {
+      console.error('[analyze-food-photo] Step1 실패:', err)
       throw new Error('제품 인식에 실패했습니다. 다시 시도해주세요.')
     }
 
@@ -283,8 +287,11 @@ export async function POST(req: NextRequest) {
 
     try {
       const { text } = await generateText(buildNutritionPrompt(aiProductName, estimated_amount_g))
-      nutrition = JSON.parse(text)
-    } catch {
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (!jsonMatch) throw new Error(`JSON 없음: ${text.slice(0, 100)}`)
+      nutrition = JSON.parse(jsonMatch[0])
+    } catch (err) {
+      console.error('[analyze-food-photo] Step4 실패:', err)
       throw new Error('영양정보 분석에 실패했습니다. 다시 시도해주세요.')
     }
 
