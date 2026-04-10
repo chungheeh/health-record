@@ -93,8 +93,10 @@ async function callAI(system: string, messages: ChatMessage[]): Promise<string> 
     generationConfig: { temperature: 0.8, maxOutputTokens: 1024 },
   })
 
-  // Gemini multi-turn
-  const history = messages.slice(0, -1).map(m => ({
+  // Gemini multi-turn — 첫 메시지는 반드시 user여야 함
+  const historyRaw = messages.slice(0, -1)
+  const firstUserIdx = historyRaw.findIndex(m => m.role === 'user')
+  const history = (firstUserIdx === -1 ? [] : historyRaw.slice(firstUserIdx)).map(m => ({
     role: m.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: m.content }],
   }))
