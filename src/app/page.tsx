@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, MessageSquarePlus } from 'lucide-react'
 import TodayWorkouts from '@/components/home/TodayWorkouts'
+import CoachSheet from '@/components/coach/CoachSheet'
 
 function addDays(dateStr: string, days: number): string {
   const d = new Date(dateStr + 'T12:00:00')
@@ -99,6 +100,7 @@ export default async function HomePage({
 
   return (
     <main className="min-h-screen bg-bg-primary">
+      <CoachSheet />
       {/* 헤더 */}
       <header className="sticky top-0 z-50 bg-bg-primary border-b border-we-border px-4 h-14 flex items-center justify-between">
         <h1 className="text-xl font-bold text-accent">W.E</h1>
