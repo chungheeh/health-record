@@ -73,12 +73,11 @@ async function callAI(system: string, messages: ChatMessage[]): Promise<string> 
       })
       return msg.content[0].type === 'text' ? msg.content[0].text : ''
     } catch (err) {
-      const isCredit =
-        err instanceof Anthropic.APIError &&
-        (err.status === 402 || err.status === 401 ||
-          (err.status === 400 && err.message?.includes('credit balance')))
-      if (!isCredit) throw err
-      console.warn('[coach] Anthropic 크레딧 부족 → Gemini 폴백')
+      if (err instanceof Anthropic.APIError) {
+        console.warn(`[coach] Anthropic 오류 (${err.status}) → Gemini 폴백:`, err.message)
+      } else {
+        throw err
+      }
     }
   }
 
