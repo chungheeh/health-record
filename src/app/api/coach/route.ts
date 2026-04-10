@@ -176,7 +176,7 @@ export async function POST(req: Request) {
     // ── 최근 3일 운동 요약 ────────────────────────────────────────────────────
     type WEx = { exercises: { name: string; muscle_group: string } | null }
     type WRaw = { started_at: string; workout_exercises: WEx[] }
-    const workouts = (workoutsRes.data ?? []) as WRaw[]
+    const workouts = (workoutsRes.data ?? []) as unknown as WRaw[]
 
     const workoutSummary = workouts
       .map(w => {
