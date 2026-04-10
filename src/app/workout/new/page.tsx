@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, X, Dumbbell, Plus, ChevronDown } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -11,6 +11,37 @@ import type { Tables } from '@/lib/supabase/types'
 import { motion, AnimatePresence } from 'framer-motion'
 
 type Exercise = Tables<'exercises'> & { category?: string; brand?: string | null }
+
+// ─── 메모이즈된 목록 아이템 (선택 상태 변경 시에만 리렌더) ────────────────────
+const ExerciseListItem = memo(function ExerciseListItem({
+  ex,
+  isSelected,
+  showBrand,
+  onToggle,
+}: {
+  ex: Exercise
+  isSelected: boolean
+  showBrand: boolean
+  onToggle: (ex: Exercise) => void
+}) {
+  return (
+    <button
+      onClick={() => onToggle(ex)}
+      className={`w-full flex items-center gap-3 px-4 py-3.5 border-b border-we-border transition-colors text-left ${isSelected ? 'bg-accent/10' : 'hover:bg-bg-tertiary active:bg-bg-tertiary'}`}
+    >
+      <div className={`w-5 h-5 rounded-[6px] flex items-center justify-center flex-shrink-0 border-2 transition-all ${isSelected ? 'bg-accent border-accent' : 'border-we-border'}`}>
+        {isSelected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="var(--bg-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+      </div>
+      <div className="flex-1 min-w-0">
+        <span className="text-sm text-text-primary block truncate">{ex.name}</span>
+        {showBrand && ex.brand && (
+          <span className="text-[10px] text-accent">{ex.brand}</span>
+        )}
+      </div>
+      <span className="text-xs text-text-muted shrink-0">{ex.equipment}</span>
+    </button>
+  )
+})
 
 const MOTIVATIONAL_MESSAGES = [
   { emoji: '🔥', msg: '수고했어요!', sub: '오늘도 최선을 다했습니다!' },
@@ -40,6 +71,8 @@ export default function WorkoutNewPage() {
   } = useWorkoutSession()
 
   const [exercises, setExercises] = useState<Exercise[]>([])
+  // 입력 즉시 반영 (포커스 안정) / 쿼리는 디바운스 후 DB 호출
+  const [inputValue, setInputValue] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
   const [finishing, setFinishing] = useState(false)
@@ -67,6 +100,12 @@ export default function WorkoutNewPage() {
   const [customAdding, setCustomAdding] = useState(false)
 
   const isSetup = isActive && !isTimerRunning
+
+  // inputValue → searchQuery 디바운스 (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchQuery(inputValue), 300)
+    return () => clearTimeout(timer)
+  }, [inputValue])
 
   // 운동 종목 검색
   useEffect(() => {
@@ -129,13 +168,21 @@ export default function WorkoutNewPage() {
 
   const handleStart = async () => { await startWorkout() }
 
-  const toggleSelectExercise = (ex: Exercise) => {
+  const toggleSelectExercise = useCallback((ex: Exercise) => {
     setSelectedExercises(prev =>
       prev.some(e => e.id === ex.id)
         ? prev.filter(e => e.id !== ex.id)
         : [...prev, ex]
     )
-  }
+  }, [])
+
+  // 근육 그룹별 그룹핑 캐시 (exercises 변경 시에만 재계산)
+  const groupedExercises = useMemo(() =>
+    MUSCLE_GROUPS
+      .map(group => ({ group, items: exercises.filter(e => e.muscle_group === group) }))
+      .filter(g => g.items.length > 0),
+    [exercises]
+  )
 
   const handleAddSelected = async () => {
     for (const ex of selectedExercises) {
@@ -146,6 +193,7 @@ export default function WorkoutNewPage() {
       }
     }
     setShowSearch(false)
+    setInputValue('')
     setSearchQuery('')
     setShowCustomForm(false)
     setSelectedExercises([])
@@ -169,6 +217,7 @@ export default function WorkoutNewPage() {
       if (error) throw error
       if (data) await addExercise(data.id, data.name, data.muscle_group)
       setShowSearch(false)
+      setInputValue('')
       setSearchQuery('')
       setShowCustomForm(false)
       setCustomName('')
@@ -340,7 +389,7 @@ export default function WorkoutNewPage() {
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/70 z-50 flex flex-col justify-end"
-            onClick={e => { if (e.target === e.currentTarget) { setShowSearch(false); setShowCustomForm(false); setSelectedExercises([]) } }}
+            onClick={e => { if (e.target === e.currentTarget) { setShowSearch(false); setInputValue(''); setSearchQuery(''); setShowCustomForm(false); setSelectedExercises([]) } }}
           >
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
@@ -360,7 +409,7 @@ export default function WorkoutNewPage() {
                     <p className="text-xs text-accent">{selectedExercises.length}개 선택됨</p>
                   )}
                 </div>
-                <button onClick={() => { setShowSearch(false); setShowCustomForm(false); setSelectedExercises([]) }} className="text-text-muted p-1">
+                <button onClick={() => { setShowSearch(false); setInputValue(''); setSearchQuery(''); setShowCustomForm(false); setSelectedExercises([]) }} className="text-text-muted p-1">
                   <X size={20} />
                 </button>
               </div>
@@ -372,13 +421,13 @@ export default function WorkoutNewPage() {
                   <input
                     type="text"
                     placeholder="운동 이름 검색..."
-                    value={searchQuery}
-                    onChange={e => { setSearchQuery(e.target.value); setShowCustomForm(false) }}
+                    value={inputValue}
+                    onChange={e => { setInputValue(e.target.value); setShowCustomForm(false) }}
                     className="flex-1 bg-transparent py-3 text-sm text-text-primary outline-none placeholder:text-text-muted"
                     autoFocus
                   />
-                  {searchQuery && (
-                    <button onClick={() => setSearchQuery('')}>
+                  {inputValue && (
+                    <button onClick={() => { setInputValue(''); setSearchQuery('') }}>
                       <X size={14} className="text-text-muted" />
                     </button>
                   )}
@@ -386,7 +435,7 @@ export default function WorkoutNewPage() {
               </div>
 
               {/* 카테고리 탭 (검색 중엔 숨김) */}
-              {!searchQuery && (
+              {!inputValue && (
                 <div className="flex mx-4 mb-2 bg-bg-tertiary rounded-[10px] p-0.5">
                   {(['free', 'machine'] as const).map(tab => (
                     <button
@@ -405,7 +454,7 @@ export default function WorkoutNewPage() {
               )}
 
               {/* 머신 브랜드 선택 (머신 탭, 검색 중 아닐 때) */}
-              {!searchQuery && categoryTab === 'machine' && (
+              {!inputValue && categoryTab === 'machine' && (
                 <div className="px-4 pb-2">
                   <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
                     {MACHINE_BRANDS.map(brand => (
@@ -427,62 +476,47 @@ export default function WorkoutNewPage() {
 
               {/* 목록 */}
               <div className="overflow-y-auto flex-1 pb-2">
-                {searchQuery && exercises.length === 0 && !showCustomForm && (
+                {/* 검색 결과 없음 — inputValue 기준(즉시 반응)으로 표시 */}
+                {inputValue && exercises.length === 0 && !showCustomForm && (
                   <div className="px-4 py-6 text-center">
-                    <p className="text-sm text-text-muted mb-3">"{searchQuery}" 검색 결과가 없어요</p>
+                    <p className="text-sm text-text-muted mb-3">"{inputValue}" 검색 결과가 없어요</p>
                     <button
-                      onClick={() => { setCustomName(searchQuery); setShowCustomForm(true) }}
+                      onClick={() => { setCustomName(inputValue); setShowCustomForm(true) }}
                       className="bg-accent text-bg-primary font-bold px-5 py-2.5 rounded-[10px] text-sm active:scale-95 transition-transform"
                     >
-                      + "{searchQuery}" 직접 추가하기
+                      + "{inputValue}" 직접 추가하기
                     </button>
                   </div>
                 )}
 
                 {/* 머신 탭: 브랜드 정보 표시 */}
-                {!searchQuery && categoryTab === 'machine' && exercises.length > 0 && (
+                {!inputValue && categoryTab === 'machine' && exercises.length > 0 && (
                   <p className="px-4 py-1.5 text-[10px] text-text-muted">
                     {selectedBrand} · {exercises.length}개 기구
                   </p>
                 )}
 
-                {/* 운동 목록 (부위별 그룹) */}
-                {MUSCLE_GROUPS.map(group => {
-                  const groupExercises = exercises.filter(e => e.muscle_group === group)
-                  if (!groupExercises.length) return null
-                  return (
-                    <div key={group}>
-                      <p className="px-4 py-2 text-xs font-semibold text-text-muted bg-bg-tertiary sticky top-0">
-                        {group} ({groupExercises.length})
-                      </p>
-                      {groupExercises.map(ex => {
-                        const isSelected = selectedExercises.some(e => e.id === ex.id)
-                        return (
-                          <button
-                            key={ex.id}
-                            onClick={() => toggleSelectExercise(ex)}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 border-b border-we-border transition-colors text-left ${isSelected ? 'bg-accent/10' : 'hover:bg-bg-tertiary active:bg-bg-tertiary'}`}
-                          >
-                            <div className={`w-5 h-5 rounded-[6px] flex items-center justify-center flex-shrink-0 border-2 transition-all ${isSelected ? 'bg-accent border-accent' : 'border-we-border'}`}>
-                              {isSelected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="var(--bg-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <span className="text-sm text-text-primary block truncate">{ex.name}</span>
-                              {searchQuery && ex.brand && (
-                                <span className="text-[10px] text-accent">{ex.brand}</span>
-                              )}
-                            </div>
-                            <span className="text-xs text-text-muted shrink-0">{ex.equipment}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  )
-                })}
+                {/* 운동 목록 — useMemo 캐시된 groupedExercises + React.memo 아이템 */}
+                {groupedExercises.map(({ group, items }) => (
+                  <div key={group}>
+                    <p className="px-4 py-2 text-xs font-semibold text-text-muted bg-bg-tertiary sticky top-0">
+                      {group} ({items.length})
+                    </p>
+                    {items.map(ex => (
+                      <ExerciseListItem
+                        key={ex.id}
+                        ex={ex}
+                        isSelected={selectedExercises.some(e => e.id === ex.id)}
+                        showBrand={!!inputValue}
+                        onToggle={toggleSelectExercise}
+                      />
+                    ))}
+                  </div>
+                ))}
 
                 {!showCustomForm && (
                   <button
-                    onClick={() => { setCustomName(searchQuery); setShowCustomForm(true) }}
+                    onClick={() => { setCustomName(inputValue); setShowCustomForm(true) }}
                     className="w-full flex items-center justify-center gap-2 px-4 py-4 text-sm text-text-muted hover:text-accent transition-colors border-t border-we-border mt-2"
                   >
                     <Plus size={15} />
